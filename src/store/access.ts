@@ -143,9 +143,6 @@ const DEFAULT_ACCESS_STATE = {
   visionModels: "",
   title: "",
   subTitle: "",
-
-  // tts config
-  edgeTTSVoiceName: "zh-CN-YunxiNeural",
 };
 
 export const useAccessStore = createPersistStore(
@@ -160,11 +157,6 @@ export const useAccessStore = createPersistStore(
     getVisionModels() {
       this.fetch();
       return get().visionModels;
-    },
-    edgeVoiceName() {
-      this.fetch();
-
-      return get().edgeTTSVoiceName;
     },
 
     isValidOpenAI() {

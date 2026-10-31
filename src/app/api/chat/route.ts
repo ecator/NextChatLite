@@ -62,6 +62,7 @@ export type ChatApiPayload = z.infer<typeof chatApiPayloadSchema>;
 export function normalizeBaseUrl(url?: string): string | undefined {
   if (!url || url.trim() === "") return undefined;
   const trimmed = url.trim();
+  if (trimmed.startsWith("/api/")) return undefined;
   try {
     const parsed = new URL(trimmed);
     if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {

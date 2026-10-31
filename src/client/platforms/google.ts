@@ -1,12 +1,5 @@
 import { ApiPath, Google } from "@/constant";
-import {
-  ChatOptions,
-  getHeaders,
-  LLMApi,
-  LLMModel,
-  LLMUsage,
-  SpeechOptions,
-} from "../api";
+import { ChatOptions, getHeaders, LLMApi, LLMModel, LLMUsage } from "../api";
 import {
   useAccessStore,
   useAppConfig,
@@ -83,9 +76,6 @@ export class GeminiProApi implements LLMApi {
       res?.error?.message ||
       ""
     );
-  }
-  speech(options: SpeechOptions): Promise<ArrayBuffer> {
-    throw new Error("Method not implemented.");
   }
 
   async chat(options: ChatOptions): Promise<void> {

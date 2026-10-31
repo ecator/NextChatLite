@@ -14,13 +14,7 @@ import {
   usePluginStore,
 } from "@/store";
 import { preProcessImageContent, streamWithThink } from "@/utils/chat";
-import {
-  ChatOptions,
-  getHeaders,
-  LLMApi,
-  LLMModel,
-  SpeechOptions,
-} from "../api";
+import { ChatOptions, getHeaders, LLMApi, LLMModel } from "../api";
 import { getClientConfig } from "@/config/client";
 import {
   getMessageTextContent,
@@ -75,10 +69,6 @@ export class SiliconflowApi implements LLMApi {
 
   extractMessage(res: any) {
     return res.choices?.at(0)?.message?.content ?? "";
-  }
-
-  speech(options: SpeechOptions): Promise<ArrayBuffer> {
-    throw new Error("Method not implemented.");
   }
 
   async chat(options: ChatOptions) {
