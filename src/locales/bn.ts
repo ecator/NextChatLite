@@ -193,44 +193,6 @@ const bn: PartialLocaleType = {
       SubTitle: "চ্যাট কনটেন্টের ভিত্তিতে উপযুক্ত শিরোনাম তৈরি করুন",
     },
     Sync: {
-      CloudState: "ক্লাউড ডেটা",
-      NotSyncYet: "এখনো সিঙ্ক করা হয়নি",
-      Success: "সিঙ্ক সফল",
-      Fail: "সিঙ্ক ব্যর্থ",
-
-      Config: {
-        Modal: {
-          Title: "ক্লাউড সিঙ্ক কনফিগার করুন",
-          Check: "পরীক্ষা করুন",
-        },
-        SyncType: {
-          Title: "সিঙ্ক টাইপ",
-          SubTitle: "পছন্দসই সিঙ্ক সার্ভার নির্বাচন করুন",
-        },
-        Proxy: {
-          Title: "প্রক্সি সক্রিয় করুন",
-          SubTitle:
-            "ব্রাউজারে সিঙ্ক করার সময়, ক্রস-অরিজিন সীমাবদ্ধতা এড়াতে প্রক্সি সক্রিয় করতে হবে",
-        },
-        ProxyUrl: {
-          Title: "প্রক্সি ঠিকানা",
-          SubTitle:
-            "এটি শুধুমাত্র প্রকল্পের সাথে সরবরাহিত ক্রস-অরিজিন প্রক্সির জন্য প্রযোজ্য",
-        },
-
-        WebDav: {
-          Endpoint: "WebDAV ঠিকানা",
-          UserName: "ব্যবহারকারীর নাম",
-          Password: "পাসওয়ার্ড",
-        },
-
-        UpStash: {
-          Endpoint: "UpStash Redis REST URL",
-          UserName: "ব্যাকআপ নাম",
-          Password: "UpStash Redis REST টোকেন",
-        },
-      },
-
       LocalState: "স্থানীয় ডেটা",
       Overview: (overview: any) => {
         return `${overview.chat} বার চ্যাট, ${overview.message} বার্তা, ${overview.prompt} প্রম্পট, ${overview.mask} মাস্ক`;
