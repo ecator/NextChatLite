@@ -18,7 +18,7 @@
 
 ## Overview
 
-**NextChatLite** is a modernized, chat-centric web client engineered for speed, privacy, and extensive model provider flexibility. It features dynamic model catalog integration via [models.dev](https://models.dev), deep support for Gemini 3 thinking/reasoning signatures, OpenAPI plugin execution, and a responsive web UI localized into 20 languages.
+**NextChatLite** is a modernized, chat-centric web client engineered for speed, privacy, and extensive model provider flexibility, derived from [ChatGPTNextWeb/NextChat](https://github.com/ChatGPTNextWeb/NextChat). It features dynamic model catalog integration via [models.dev](https://models.dev), deep support for Gemini 3 thinking/reasoning signatures, OpenAPI plugin execution, and a responsive web UI localized into 20 languages.
 
 ## Key Features
 
@@ -153,6 +153,12 @@ docker run -d -p 3000:3000 -e OPENAI_API_KEY=your_key nextchat-lite
 ├── Dockerfile          # Multi-stage production container definition
 └── package.json        # Dependencies and pnpm scripts
 ```
+
+---
+
+## Acknowledgement
+
+NextChatLite is derived from and based on [ChatGPTNextWeb/NextChat](https://github.com/ChatGPTNextWeb/NextChat). Special thanks to the original authors and contributors for their wonderful foundation.
 
 ---
 
