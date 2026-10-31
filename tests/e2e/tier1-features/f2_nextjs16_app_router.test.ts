@@ -24,8 +24,8 @@ describe("Feature F2: Next.js 16+ & React 19 App Router Modernization", () => {
   });
 
   it("F2-3: verifies App Router root layout and page structure exist", () => {
-    assert.ok(fileExists("app/layout.tsx"), "app/layout.tsx must exist for App Router");
-    assert.ok(fileExists("app/page.tsx"), "app/page.tsx must exist for App Router root page");
+    assert.ok(fileExists("src/app/layout.tsx"), "app/layout.tsx must exist for App Router");
+    assert.ok(fileExists("src/app/page.tsx"), "app/page.tsx must exist for App Router root page");
   });
 
   it("F2-4: verifies next.config.mjs configuration is present and modern", () => {
@@ -36,7 +36,7 @@ describe("Feature F2: Next.js 16+ & React 19 App Router Modernization", () => {
 
   it("F2-5: verifies server-rendered API routes structure for chat and config", () => {
     assert.ok(
-      fileExists("app/api/chat/route.ts") || fileExists("app/api/config/route.ts") || fileExists("app/api/common.ts"),
+      fileExists("src/app/api/chat/route.ts") || fileExists("src/app/api/config/route.ts") || fileExists("src/app/api/common.ts"),
       "App Router API routes or route handlers must be present"
     );
   });

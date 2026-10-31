@@ -6,14 +6,14 @@ import {
   sanitizeError,
   createLanguageModel,
   ChatApiPayload,
-} from "../../../app/api/chat/route";
+} from "../../../src/app/api/chat/route";
 import {
   convertOpenApiSpecToAiTools,
   convertOpenApiToAiTools,
   clampToolResultSize,
   handleToolExecutionError,
   sanitizeToolArguments,
-} from "../../../app/api/chat/tools";
+} from "../../../src/app/api/chat/tools";
 
 describe("Milestone 4 Challenger Empirical Stress Suite", () => {
   // =========================================================================

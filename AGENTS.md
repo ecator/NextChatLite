@@ -14,17 +14,23 @@ NextChatLite is a modern, web-only AI chat application engineered with:
 - **Plugin System**: OpenAPI 3.x dynamic tool calling executed in multi-step AI SDK streams.
 - **Package Manager**: `pnpm` exclusively.
 
+This is NOT the Next.js you know, this version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+
 ---
 
 ## 2. Directory Layout & Boundaries
 
 ```
-app/
-├── api/
-│   ├── chat/route.ts           # Unified Vercel AI SDK streaming endpoint
-│   ├── config/route.ts         # Server environment flags & feature gating
-│   ├── proxy/route.ts          # OpenAPI CORS proxy for browser tool calling
-│   └── webdav/[...path]/       # WebDAV synchronization endpoint
+src/
+├── app/
+│   ├── api/
+│   │   ├── chat/route.ts       # Unified Vercel AI SDK streaming endpoint
+│   │   ├── config/route.ts     # Server environment flags & feature gating
+│   │   ├── proxy/route.ts      # OpenAPI CORS proxy for browser tool calling
+│   │   └── webdav/[...path]/   # WebDAV synchronization endpoint
+│   ├── layout.tsx              # Root layout
+│   └── page.tsx                # Home page component
 ├── client/                     # Client API helpers & platform bridges
 ├── components/
 │   ├── chat/                   # Chat UI, message rendering, ThinkingBlock, ModelSelector
@@ -89,12 +95,3 @@ Always use `pnpm` commands:
 2. **Minimal Change Principle**: Modify only what is strictly required for the assigned task.
 3. **Verification**: Always execute `pnpm build` and tests before concluding any task.
 
-<!-- BEGIN:nextjs-agent-rules -->
-
-# This is NOT the Next.js you know
-
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
-
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
-
-<!-- END:nextjs-agent-rules -->

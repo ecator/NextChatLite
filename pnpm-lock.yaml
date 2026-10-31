@@ -116,9 +116,6 @@ importers:
       remark-math:
         specifier: ^6.0.0
         version: 6.0.0(supports-color@8.1.1)
-      rt-client:
-        specifier: https://github.com/Azure-Samples/aoai-realtime-audio-sdk/releases/download/js/v0.5.0/rt-client-0.5.0.tgz
-        version: https://github.com/Azure-Samples/aoai-realtime-audio-sdk/releases/download/js/v0.5.0/rt-client-0.5.0.tgz
       sass:
         specifier: ^1.59.2
         version: 1.103.1
@@ -4781,10 +4778,6 @@ packages:
 
   robust-predicates@3.0.3:
     resolution: {integrity: sha512-NS3levdsRIUOmiJ8FZWCP7LG3QpJyrs/TE0Zpf1yvZu8cAJJ6QMW92H1c7kWpdIHo8RvmLxN/o2JXTKHp74lUA==}
-
-  rt-client@https://github.com/Azure-Samples/aoai-realtime-audio-sdk/releases/download/js/v0.5.0/rt-client-0.5.0.tgz:
-    resolution: {integrity: sha512-UznSFgzhUP0CgIAw5Cszn4+skseLYrYDCLrQ9g6noHOsZH0dgFSwRtMcniM+qyNFqgcbEXmBlZJwBOm2u9dHvQ==, tarball: https://github.com/Azure-Samples/aoai-realtime-audio-sdk/releases/download/js/v0.5.0/rt-client-0.5.0.tgz}
-    version: 0.5.0
 
   run-parallel@1.2.0:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}
@@ -10983,13 +10976,6 @@ snapshots:
       glob: 7.2.3
 
   robust-predicates@3.0.3: {}
-
-  rt-client@https://github.com/Azure-Samples/aoai-realtime-audio-sdk/releases/download/js/v0.5.0/rt-client-0.5.0.tgz:
-    dependencies:
-      ws: 8.21.3
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
 
   run-parallel@1.2.0:
     dependencies:

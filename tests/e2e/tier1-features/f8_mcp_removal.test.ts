@@ -23,14 +23,14 @@ describe("Feature F8: Model Context Protocol (MCP) Stripping", () => {
 
   it("F8-3: verifies absence of MCP Market UI components (mcp-market.tsx)", () => {
     assert.strictEqual(
-      fileExists("app/components/mcp-market.tsx"),
+      fileExists("src/components/mcp-market.tsx"),
       false,
-      "app/components/mcp-market.tsx must be deleted"
+      "src/components/mcp-market.tsx must be deleted"
     );
     assert.strictEqual(
-      fileExists("app/components/mcp-market.module.scss"),
+      fileExists("src/components/mcp-market.module.scss"),
       false,
-      "app/components/mcp-market.module.scss must be deleted"
+      "src/components/mcp-market.module.scss must be deleted"
     );
   });
 
@@ -48,8 +48,8 @@ describe("Feature F8: Model Context Protocol (MCP) Stripping", () => {
   });
 
   it("F8-5: verifies prompt and plugin system operates purely on OpenAPI plugins without MCP", () => {
-    if (fileExists("app/store/plugin.ts")) {
-      const pluginStoreContent = readProjectFile("app/store/plugin.ts");
+    if (fileExists("src/store/plugin.ts")) {
+      const pluginStoreContent = readProjectFile("src/store/plugin.ts");
       assert.doesNotMatch(
         pluginStoreContent,
         /from "@modelcontextprotocol|MCPClient|mcpServer/i,

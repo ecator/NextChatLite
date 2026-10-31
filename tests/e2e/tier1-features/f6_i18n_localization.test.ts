@@ -11,15 +11,15 @@ describe("Feature F6: UI i18n Localization Retention (20 Languages)", () => {
   it("F6-1: verifies all 20 required language locale files exist in app/locales/", () => {
     for (const loc of EXPECTED_LOCALES) {
       assert.ok(
-        fileExists(`app/locales/${loc}.ts`),
-        `Locale file app/locales/${loc}.ts must exist`
+        fileExists(`src/locales/${loc}.ts`),
+        `Locale file src/locales/${loc}.ts must exist`
       );
     }
   });
 
   it("F6-2: verifies app/locales/index.ts exports all 20 locale objects", () => {
-    assert.ok(fileExists("app/locales/index.ts"), "app/locales/index.ts must exist");
-    const indexContent = readProjectFile("app/locales/index.ts");
+    assert.ok(fileExists("src/locales/index.ts"), "src/locales/index.ts must exist");
+    const indexContent = readProjectFile("src/locales/index.ts");
     for (const loc of EXPECTED_LOCALES) {
       assert.ok(
         indexContent.includes(loc),
@@ -29,15 +29,15 @@ describe("Feature F6: UI i18n Localization Retention (20 Languages)", () => {
   });
 
   it("F6-3: verifies English locale contains standard Chat and Settings sections", () => {
-    const enContent = readProjectFile("app/locales/en.ts");
+    const enContent = readProjectFile("src/locales/en.ts");
     assert.match(enContent, /Chat:/, "en.ts must define Chat translations");
     assert.match(enContent, /Settings:/, "en.ts must define Settings translations");
     assert.match(enContent, /Context:/, "en.ts must define Context translations");
   });
 
   it("F6-4: verifies Chinese (cn.ts) and Japanese (jp.ts) retain full translation dictionaries", () => {
-    const cnContent = readProjectFile("app/locales/cn.ts");
-    const jpContent = readProjectFile("app/locales/jp.ts");
+    const cnContent = readProjectFile("src/locales/cn.ts");
+    const jpContent = readProjectFile("src/locales/jp.ts");
     assert.ok(cnContent.length > 5000, "cn.ts translation dictionary should be intact");
     assert.ok(jpContent.length > 5000, "jp.ts translation dictionary should be intact");
   });

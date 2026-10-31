@@ -5,7 +5,7 @@ import path from "node:path";
 import {
   formatThinkingDuration,
   extractPlainText,
-} from "../../../app/utils/thinking";
+} from "../../../src/utils/thinking";
 import {
   parseDataStreamResponse,
   accumulateStreamState,
@@ -20,7 +20,7 @@ describe("Milestone 5 Empirical Challenger Deep Verification & Stress Suite", ()
     it("1.1 enforces max-height 480px and overflow-y auto for large reasoning blocks", () => {
       const scssPath = path.resolve(
         process.cwd(),
-        "app/components/chat/thinking-block.module.scss",
+        "src/components/chat/thinking-block.module.scss",
       );
       assert.ok(fs.existsSync(scssPath), "SCSS file must exist");
       const scssContent = fs.readFileSync(scssPath, "utf-8");
@@ -46,7 +46,7 @@ describe("Milestone 5 Empirical Challenger Deep Verification & Stress Suite", ()
     it("1.2 enforces chevron rotation transition on collapse toggle", () => {
       const scssPath = path.resolve(
         process.cwd(),
-        "app/components/chat/thinking-block.module.scss",
+        "src/components/chat/thinking-block.module.scss",
       );
       const scssContent = fs.readFileSync(scssPath, "utf-8");
 
@@ -68,7 +68,7 @@ describe("Milestone 5 Empirical Challenger Deep Verification & Stress Suite", ()
     it("2.1 verifies ThinkingBlock component integration in chat.tsx", () => {
       const chatTsxPath = path.resolve(
         process.cwd(),
-        "app/components/chat.tsx",
+        "src/components/chat.tsx",
       );
       assert.ok(fs.existsSync(chatTsxPath), "chat.tsx must exist");
       const chatContent = fs.readFileSync(chatTsxPath, "utf-8");
@@ -94,7 +94,7 @@ describe("Milestone 5 Empirical Challenger Deep Verification & Stress Suite", ()
     it("2.2 verifies duplicate loading dots suppression while thoughts stream", () => {
       const chatTsxPath = path.resolve(
         process.cwd(),
-        "app/components/chat.tsx",
+        "src/components/chat.tsx",
       );
       const chatContent = fs.readFileSync(chatTsxPath, "utf-8");
 

@@ -40,7 +40,7 @@ describe("Feature F1: pnpm Package Manager & Lockfile Specification", () => {
   it("F1-4: verifies mask and build scripts invoke pnpm tsx cleanly", () => {
     const pkg = readJsonFile("package.json");
     assert.ok(pkg.scripts.mask, "mask script must exist");
-    assert.match(pkg.scripts.mask, /tsx\s+app\/masks\/build\.ts/, "mask script must invoke mask builder");
+    assert.match(pkg.scripts.mask, /tsx\s+(app|src)\/masks\/build\.ts/, "mask script must invoke mask builder");
     assert.ok(pkg.scripts.build, "build script must exist");
     assert.doesNotMatch(pkg.scripts.build, /yarn/, "build script must not invoke yarn");
   });

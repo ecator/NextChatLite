@@ -10,24 +10,24 @@ describe("Milestone 2 Empirical Challenger Deep Verification & Stress Suite", ()
   it("1. Zero SD / Stability AI components, stores, routes, or settings UI", () => {
     // Check directory and file deletions
     assert.strictEqual(
-      fs.existsSync(path.join(rootDir, "app/components/sd")),
+      fs.existsSync(path.join(rootDir, "src/components/sd")),
       false,
-      "app/components/sd must not exist"
+      "src/components/sd must not exist"
     );
     assert.strictEqual(
-      fs.existsSync(path.join(rootDir, "app/store/sd.ts")),
+      fs.existsSync(path.join(rootDir, "src/store/sd.ts")),
       false,
-      "app/store/sd.ts must not exist"
+      "src/store/sd.ts must not exist"
     );
     assert.strictEqual(
-      fs.existsSync(path.join(rootDir, "app/api/stability.ts")),
+      fs.existsSync(path.join(rootDir, "src/app/api/stability.ts")),
       false,
-      "app/api/stability.ts must not exist"
+      "src/app/api/stability.ts must not exist"
     );
 
     // Check settings.tsx has no Stability config components
     const settingsContent = fs.readFileSync(
-      path.join(rootDir, "app/components/settings.tsx"),
+      path.join(rootDir, "src/components/settings.tsx"),
       "utf-8"
     );
     assert.ok(
@@ -41,7 +41,7 @@ describe("Milestone 2 Empirical Challenger Deep Verification & Stress Suite", ()
 
     // Check sidebar has no SD navigation
     const sidebarContent = fs.readFileSync(
-      path.join(rootDir, "app/components/sidebar.tsx"),
+      path.join(rootDir, "src/components/sidebar.tsx"),
       "utf-8"
     );
     assert.ok(
@@ -58,9 +58,9 @@ describe("Milestone 2 Empirical Challenger Deep Verification & Stress Suite", ()
       "app/mcp directory must not exist"
     );
     assert.strictEqual(
-      fs.existsSync(path.join(rootDir, "app/components/mcp-market.tsx")),
+      fs.existsSync(path.join(rootDir, "src/components/mcp-market.tsx")),
       false,
-      "app/components/mcp-market.tsx must not exist"
+      "src/components/mcp-market.tsx must not exist"
     );
 
     // Check package.json
@@ -76,7 +76,7 @@ describe("Milestone 2 Empirical Challenger Deep Verification & Stress Suite", ()
 
     // Check chat.ts for MCP stubs or templates
     const chatStoreContent = fs.readFileSync(
-      path.join(rootDir, "app/store/chat.ts"),
+      path.join(rootDir, "src/store/chat.ts"),
       "utf-8"
     );
     assert.ok(
@@ -102,7 +102,7 @@ describe("Milestone 2 Empirical Challenger Deep Verification & Stress Suite", ()
 
     // Check chat.tsx for MCP action button
     const chatViewContent = fs.readFileSync(
-      path.join(rootDir, "app/components/chat.tsx"),
+      path.join(rootDir, "src/components/chat.tsx"),
       "utf-8"
     );
     assert.ok(
@@ -113,7 +113,7 @@ describe("Milestone 2 Empirical Challenger Deep Verification & Stress Suite", ()
 
   it("3. Zero DALL-E special-case selector branches in chat UI and store", () => {
     const chatViewContent = fs.readFileSync(
-      path.join(rootDir, "app/components/chat.tsx"),
+      path.join(rootDir, "src/components/chat.tsx"),
       "utf-8"
     );
     assert.ok(
@@ -130,7 +130,7 @@ describe("Milestone 2 Empirical Challenger Deep Verification & Stress Suite", ()
     );
 
     const chatStoreContent = fs.readFileSync(
-      path.join(rootDir, "app/store/chat.ts"),
+      path.join(rootDir, "src/store/chat.ts"),
       "utf-8"
     );
     assert.ok(
@@ -141,7 +141,7 @@ describe("Milestone 2 Empirical Challenger Deep Verification & Stress Suite", ()
 
   it("4. OpenAPI Plugin store operates cleanly without MCP dependencies", () => {
     const pluginStoreContent = fs.readFileSync(
-      path.join(rootDir, "app/store/plugin.ts"),
+      path.join(rootDir, "src/store/plugin.ts"),
       "utf-8"
     );
     assert.ok(

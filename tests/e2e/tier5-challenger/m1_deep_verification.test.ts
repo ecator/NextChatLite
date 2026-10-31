@@ -6,7 +6,7 @@ import { execSync } from "node:child_process";
 
 describe("Milestone 1 Empirical Challenger Deep Verification", () => {
   const rootDir = path.resolve(__dirname, "../../..");
-  const localesDir = path.join(rootDir, "app/locales");
+  const localesDir = path.join(rootDir, "src/locales");
 
   const requiredLocales = [
     "ar", "bn", "cn", "cs", "da", "de", "en", "es", "fr", "id",
@@ -96,7 +96,7 @@ describe("Milestone 1 Empirical Challenger Deep Verification", () => {
       }
     }
 
-    scanDir(path.join(rootDir, "app"));
+    scanDir(path.join(rootDir, "src"));
   });
 
   it("6. Zero commercial SaaS active endpoints or tracking exist across app components and stores", () => {
@@ -128,7 +128,7 @@ describe("Milestone 1 Empirical Challenger Deep Verification", () => {
       }
     }
 
-    scanDir(path.join(rootDir, "app"));
+    scanDir(path.join(rootDir, "src"));
   });
 
   it("7. AGENTS.md satisfies all project architectural requirements", () => {

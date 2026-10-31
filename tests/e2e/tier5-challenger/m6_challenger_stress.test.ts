@@ -6,19 +6,19 @@ import {
   sanitizeError,
   createLanguageModel,
   ChatApiPayload,
-} from "../../../app/api/chat/route";
+} from "../../../src/app/api/chat/route";
 import {
   convertOpenApiToAiTools,
   clampToolResultSize,
-} from "../../../app/api/chat/tools";
+} from "../../../src/app/api/chat/tools";
 import {
   parseModelMetadataSafely,
   parseModelsDevCatalog,
-} from "../../../app/store/models";
+} from "../../../src/store/models";
 import {
   formatThinkingDuration,
   extractPlainText,
-} from "../../../app/utils/thinking";
+} from "../../../src/utils/thinking";
 import {
   readProjectFile,
   readJsonFile,
@@ -50,25 +50,25 @@ describe("Milestone 6 Empirical Challenger Stress & Regression Suite", () => {
       assert.ok(pkg.dependencies.react, "react dependency must exist");
       assert.ok(pkg.dependencies.zustand, "zustand dependency must exist");
 
-      assert.ok(directoryExists("app"), "app/ directory must exist");
-      assert.ok(fileExists("app/page.tsx"), "app/page.tsx must exist");
-      assert.ok(fileExists("app/layout.tsx"), "app/layout.tsx must exist");
+      assert.ok(directoryExists("src/app"), "app/ directory must exist");
+      assert.ok(fileExists("src/app/page.tsx"), "app/page.tsx must exist");
+      assert.ok(fileExists("src/app/layout.tsx"), "app/layout.tsx must exist");
     });
 
     it("F3: verifies non-web platform artifacts are completely stripped", () => {
       assert.ok(!directoryExists("src-tauri"), "src-tauri/ must not exist");
       assert.ok(!fileExists(".github/workflows/desktop.yml"), "desktop CI must not exist");
-      assert.ok(!fileExists("app/utils/stream.ts"), "desktop stream.ts must not exist");
+      assert.ok(!fileExists("src/utils/stream.ts"), "desktop stream.ts must not exist");
 
       const pkg = readJsonFile("package.json");
       assert.ok(!pkg.dependencies?.["@tauri-apps/api"], "Tauri dependencies must not exist");
     });
 
     it("F4: verifies commercial and SaaS artifacts are completely removed", () => {
-      const constantContent = readProjectFile("app/constant.ts");
+      const constantContent = readProjectFile("src/constant.ts");
       assert.ok(!constantContent.includes("goSaas"), "goSaas must be removed");
       assert.ok(!constantContent.includes("saasStart"), "saasStart must be removed");
-      assert.ok(!fileExists("app/components/saas.tsx"), "saas component must not exist");
+      assert.ok(!fileExists("src/components/saas.tsx"), "saas component must not exist");
     });
 
     it("F5: verifies root AGENTS.md and clean English documentation", () => {
@@ -84,35 +84,35 @@ describe("Milestone 6 Empirical Challenger Stress & Regression Suite", () => {
       ];
       for (const loc of expectedLocales) {
         assert.ok(
-          fileExists(`app/locales/${loc}.ts`),
-          `Localization dictionary app/locales/${loc}.ts must exist`,
+          fileExists(`src/locales/${loc}.ts`),
+          `Localization dictionary src/locales/${loc}.ts must exist`,
         );
       }
     });
 
     it("F7: verifies standalone image generation (Stable Diffusion) is removed", () => {
-      assert.ok(!fileExists("app/components/sd.tsx"), "sd.tsx must not exist");
-      assert.ok(!fileExists("app/store/sd.ts"), "sd store must not exist");
-      assert.ok(!directoryExists("app/api/sd"), "app/api/sd route must not exist");
+      assert.ok(!fileExists("src/components/sd.tsx"), "sd.tsx must not exist");
+      assert.ok(!fileExists("src/store/sd.ts"), "sd store must not exist");
+      assert.ok(!directoryExists("src/app/api/sd"), "src/app/api/sd route must not exist");
     });
 
     it("F8: verifies MCP (Model Context Protocol) is removed", () => {
       assert.ok(!directoryExists("app/mcp"), "app/mcp/ must not exist");
-      assert.ok(!fileExists("app/store/mcp.ts"), "app/store/mcp.ts must not exist");
-      assert.ok(!fileExists("app/components/mcp-market.tsx"), "mcp-market must not exist");
+      assert.ok(!fileExists("src/store/mcp.ts"), "src/store/mcp.ts must not exist");
+      assert.ok(!fileExists("src/components/mcp-market.tsx"), "mcp-market must not exist");
 
       const pkg = readJsonFile("package.json");
       assert.ok(!pkg.dependencies?.["@modelcontextprotocol/sdk"], "MCP SDK must not be in dependencies");
     });
 
     it("F9: verifies clean chat core and session store", () => {
-      assert.ok(fileExists("app/store/chat.ts"), "app/store/chat.ts must exist");
-      assert.ok(fileExists("app/components/chat.tsx"), "app/components/chat.tsx must exist");
-      assert.ok(fileExists("app/masks/build.ts"), "Mask build script must exist");
+      assert.ok(fileExists("src/store/chat.ts"), "src/store/chat.ts must exist");
+      assert.ok(fileExists("src/components/chat.tsx"), "src/components/chat.tsx must exist");
+      assert.ok(fileExists("src/masks/build.ts"), "Mask build script must exist");
     });
 
     it("F10: verifies models.dev dynamic metadata integration and fallback", () => {
-      assert.ok(fileExists("app/store/models.ts"), "app/store/models.ts must exist");
+      assert.ok(fileExists("src/store/models.ts"), "src/store/models.ts must exist");
       const catalog = parseModelsDevCatalog(snapshot);
       assert.ok(Object.keys(catalog).length > 0, "Snapshot catalog must contain models");
     });
@@ -130,8 +130,8 @@ describe("Milestone 6 Empirical Challenger Stress & Regression Suite", () => {
     });
 
     it("F12: verifies Vercel AI SDK streaming route", () => {
-      assert.ok(fileExists("app/api/chat/route.ts"), "app/api/chat/route.ts must exist");
-      const routeCode = readProjectFile("app/api/chat/route.ts");
+      assert.ok(fileExists("src/app/api/chat/route.ts"), "src/app/api/chat/route.ts must exist");
+      const routeCode = readProjectFile("src/app/api/chat/route.ts");
       assert.ok(routeCode.includes("streamText"), "route.ts must use streamText");
       assert.ok(routeCode.includes("toDataStreamResponse"), "route.ts must use toDataStreamResponse");
     });
@@ -146,7 +146,7 @@ describe("Milestone 6 Empirical Challenger Stress & Regression Suite", () => {
     });
 
     it("F14: verifies OpenAPI plugin tool calling bridge", () => {
-      assert.ok(fileExists("app/api/chat/tools.ts"), "app/api/chat/tools.ts must exist");
+      assert.ok(fileExists("src/app/api/chat/tools.ts"), "src/app/api/chat/tools.ts must exist");
       const tools = convertOpenApiToAiTools([], []);
       assert.deepStrictEqual(tools, {}, "Empty plugin list yields empty tools record");
     });

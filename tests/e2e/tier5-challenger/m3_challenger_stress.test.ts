@@ -5,7 +5,7 @@ import {
   parseModelsDevCatalog,
   useModelStore,
   ModelMetadata,
-} from "../../../app/store/models";
+} from "../../../src/store/models";
 import {
   ParameterValidator,
   validateTemperature,
@@ -17,7 +17,7 @@ import {
   isImageUploadAllowed,
   isReasoningConfigEnabled,
   searchModels,
-} from "../../../app/utils/model-limits";
+} from "../../../src/utils/model-limits";
 
 describe("Milestone 3 Challenger Empirical Stress Suite", () => {
   // =========================================================================

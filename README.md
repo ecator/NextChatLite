@@ -68,6 +68,16 @@ pnpm build
 pnpm start
 ```
 
+### 5. Run Tests
+
+```bash
+# Run unit tests (Jest)
+pnpm test:ci
+
+# Run end-to-end and scenario tests
+pnpm test:e2e
+```
+
 ---
 
 ## Environment Variables
@@ -101,16 +111,24 @@ docker run -d -p 3000:3000 -e OPENAI_API_KEY=your_key nextchat-lite
 
 ```
 .
-├── app/
-│   ├── api/            # App Router route handlers (AI SDK, proxy, webdav)
+├── src/
+│   ├── app/            # Next.js App Router (pages, layouts, and API route handlers)
+│   │   ├── api/        # AI SDK, proxy, webdav endpoints
+│   │   ├── layout.tsx  # Root HTML layout and providers
+│   │   └── page.tsx    # App root entry
 │   ├── client/         # Client API utilities and platform bridges
 │   ├── components/     # React UI components (chat, settings, thinking blocks)
 │   ├── config/         # Client and server configuration loaders
+│   ├── icons/          # SVG icons
+│   ├── lib/            # Specialized libraries and helpers
 │   ├── locales/        # 20 runtime UI localization dictionaries
 │   ├── masks/          # Prompt templates and mask definitions
 │   ├── store/          # Zustand stores (chat, models, plugins, access)
+│   ├── styles/         # Global SCSS styles and themes
 │   └── utils/          # Formatting, storage, and helper utilities
-├── tests/              # E2E and unit test suites
+├── tests/              # Unified test suite
+│   ├── unit/           # Unit test suite (Jest)
+│   └── e2e/            # E2E, scenario, and boundary test suite (node:test)
 ├── AGENTS.md           # Agent conventions and technical architecture guide
 ├── Dockerfile          # Multi-stage production container definition
 └── package.json        # Dependencies and pnpm scripts

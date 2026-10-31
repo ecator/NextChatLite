@@ -19,8 +19,8 @@ describe("Tier 4 Scenario 6: Clean Installation & Repository Platform Health Flo
     assert.strictEqual(pkg.devDependencies?.["@tauri-apps/cli"], undefined);
 
     // 3. Check no Stable Diffusion artifacts remain
-    assert.strictEqual(directoryExists("app/components/sd"), false);
-    assert.strictEqual(fileExists("app/store/sd.ts"), false);
+    assert.strictEqual(directoryExists("src/components/sd"), false);
+    assert.strictEqual(fileExists("src/store/sd.ts"), false);
 
     // 4. Check no Model Context Protocol artifacts remain
     assert.strictEqual(directoryExists("app/mcp"), false);
@@ -34,7 +34,7 @@ describe("Tier 4 Scenario 6: Clean Installation & Repository Platform Health Flo
     // 6. Check all 20 runtime locales are intact
     const expectedLocales = ["ar", "bn", "cn", "cs", "da", "de", "en", "es", "fr", "id", "it", "jp", "ko", "no", "pt", "ru", "sk", "tr", "tw", "vi"];
     for (const loc of expectedLocales) {
-      assert.ok(fileExists(`app/locales/${loc}.ts`));
+      assert.ok(fileExists(`src/locales/${loc}.ts`));
     }
   });
 });

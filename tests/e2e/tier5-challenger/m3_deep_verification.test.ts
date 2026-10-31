@@ -6,7 +6,7 @@ import {
   parseModelMetadataSafely,
   parseModelsDevCatalog,
   useModelStore,
-} from "../../../app/store/models";
+} from "../../../src/store/models";
 import {
   ParameterValidator,
   validateTemperature,
@@ -18,7 +18,7 @@ import {
   isImageUploadAllowed,
   isReasoningConfigEnabled,
   searchModels,
-} from "../../../app/utils/model-limits";
+} from "../../../src/utils/model-limits";
 
 describe("Milestone 3 Empirical Challenger Deep Verification & Stress Suite", () => {
   const rootDir = process.cwd();
@@ -385,7 +385,7 @@ describe("Milestone 3 Empirical Challenger Deep Verification & Stress Suite", ()
     it("4.3 ModelSelector component exists and integrates store capabilities", () => {
       const modelSelectorPath = path.join(
         rootDir,
-        "app/components/chat/model-selector.tsx",
+        "src/components/chat/model-selector.tsx",
       );
       assert.ok(fs.existsSync(modelSelectorPath), "model-selector.tsx must exist");
       const content = fs.readFileSync(modelSelectorPath, "utf-8");
@@ -397,7 +397,7 @@ describe("Milestone 3 Empirical Challenger Deep Verification & Stress Suite", ()
     });
 
     it("4.4 Chat component dynamically gates image upload action using vision checks", () => {
-      const chatComponentPath = path.join(rootDir, "app/components/chat.tsx");
+      const chatComponentPath = path.join(rootDir, "src/components/chat.tsx");
       assert.ok(fs.existsSync(chatComponentPath), "chat.tsx must exist");
       const content = fs.readFileSync(chatComponentPath, "utf-8");
       assert.ok(content.includes("isVisionModel(currentModel)"), "chat.tsx must check isVisionModel");

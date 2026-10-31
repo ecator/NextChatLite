@@ -6,14 +6,14 @@ import {
   sanitizeError,
   createLanguageModel,
   ChatApiPayload,
-} from "../../../app/api/chat/route";
+} from "../../../src/app/api/chat/route";
 import {
   convertOpenApiSpecToAiTools,
   convertOpenApiToAiTools,
   clampToolResultSize,
   handleToolExecutionError,
   sanitizeToolArguments,
-} from "../../../app/api/chat/tools";
+} from "../../../src/app/api/chat/tools";
 import { readProjectFile } from "../fixtures/test_helpers";
 
 describe("Milestone 6 Empirical Adversarial Stress & Hardening Test Suite", () => {
@@ -308,7 +308,7 @@ describe("Milestone 6 Empirical Adversarial Stress & Hardening Test Suite", () =
   // =========================================================================
   describe("3. Multi-Step Tool Limits, Giant Payloads & Schema Robustness", () => {
     it("3.1 verifies maxSteps: 5 is configured in /api/chat/route.ts to prevent runaway recursion", () => {
-      const routeContent = readProjectFile("app/api/chat/route.ts");
+      const routeContent = readProjectFile("src/app/api/chat/route.ts");
       assert.ok(
         routeContent.includes("maxSteps: 5"),
         "route.ts must configure maxSteps: 5 for multi-step tool recursion limits",

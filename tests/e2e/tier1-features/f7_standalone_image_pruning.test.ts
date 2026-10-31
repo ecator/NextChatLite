@@ -5,31 +5,31 @@ import { directoryExists, fileExists, readProjectFile } from "../fixtures/test_h
 describe("Feature F7: Standalone Image Generation Pruning (Stable Diffusion & DALL-E)", () => {
   it("F7-1: verifies complete absence of app/components/sd/ directory", () => {
     assert.strictEqual(
-      directoryExists("app/components/sd"),
+      directoryExists("src/components/sd"),
       false,
-      "app/components/sd directory must be deleted"
+      "src/components/sd directory must be deleted"
     );
   });
 
   it("F7-2: verifies complete absence of app/store/sd.ts store file", () => {
     assert.strictEqual(
-      fileExists("app/store/sd.ts"),
+      fileExists("src/store/sd.ts"),
       false,
-      "app/store/sd.ts must be deleted"
+      "src/store/sd.ts must be deleted"
     );
   });
 
   it("F7-3: verifies complete absence of Stability AI route (app/api/stability.ts)", () => {
     assert.strictEqual(
-      fileExists("app/api/stability.ts"),
+      fileExists("src/app/api/stability.ts"),
       false,
-      "app/api/stability.ts must be deleted"
+      "src/app/api/stability.ts must be deleted"
     );
   });
 
   it("F7-4: verifies sidebar does not render Stable Diffusion navigation icon/tab", () => {
-    if (fileExists("app/components/sidebar.tsx")) {
-      const sidebarContent = readProjectFile("app/components/sidebar.tsx");
+    if (fileExists("src/components/sidebar.tsx")) {
+      const sidebarContent = readProjectFile("src/components/sidebar.tsx");
       assert.doesNotMatch(
         sidebarContent,
         /Path\.Sd|Path\.StableDiffusion|useSdStore/i,
@@ -39,8 +39,8 @@ describe("Feature F7: Standalone Image Generation Pruning (Stable Diffusion & DA
   });
 
   it("F7-5: verifies chat view does not contain standalone DALL-E generator button", () => {
-    if (fileExists("app/components/chat.tsx")) {
-      const chatContent = readProjectFile("app/components/chat.tsx");
+    if (fileExists("src/components/chat.tsx")) {
+      const chatContent = readProjectFile("src/components/chat.tsx");
       assert.doesNotMatch(
         chatContent,
         /dall-e-3-generator|generateImageModal/i,

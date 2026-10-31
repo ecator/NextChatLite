@@ -3,12 +3,12 @@ import assert from "node:assert/strict";
 import {
   formatThinkingDuration,
   extractPlainText,
-} from "../../../app/utils/thinking";
+} from "../../../src/utils/thinking";
 import {
   chatApiPayloadSchema,
   createLanguageModel,
   ChatApiPayload,
-} from "../../../app/api/chat/route";
+} from "../../../src/app/api/chat/route";
 import {
   parseDataStreamResponse,
   accumulateStreamState,

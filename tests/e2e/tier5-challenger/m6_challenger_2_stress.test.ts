@@ -3,17 +3,17 @@ import assert from "node:assert/strict";
 import {
   formatThinkingDuration,
   extractPlainText,
-} from "../../../app/utils/thinking";
+} from "../../../src/utils/thinking";
 import {
   chatApiPayloadSchema,
   createLanguageModel,
-} from "../../../app/api/chat/route";
+} from "../../../src/app/api/chat/route";
 import {
   parseModelMetadataSafely,
   parseModelsDevCatalog,
   useModelStore,
   ModelMetadata,
-} from "../../../app/store/models";
+} from "../../../src/store/models";
 import {
   validateTemperature,
   validateTemperatureValue,
@@ -24,7 +24,7 @@ import {
   isImageUploadAllowed,
   isReasoningConfigEnabled,
   searchModels,
-} from "../../../app/utils/model-limits";
+} from "../../../src/utils/model-limits";
 import {
   parseDataStreamResponse,
   accumulateStreamState,
