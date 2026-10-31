@@ -193,43 +193,6 @@ const jp: PartialLocaleType = {
       SubTitle: "チャット内容に基づいて適切なタイトルを生成",
     },
     Sync: {
-      CloudState: "クラウドデータ",
-      NotSyncYet: "まだ同期されていません",
-      Success: "同期に成功しました",
-      Fail: "同期に失敗しました",
-
-      Config: {
-        Modal: {
-          Title: "クラウド同期の設定",
-          Check: "可用性を確認",
-        },
-        SyncType: {
-          Title: "同期タイプ",
-          SubTitle: "好きな同期サーバーを選択",
-        },
-        Proxy: {
-          Title: "プロキシを有効化",
-          SubTitle:
-            "ブラウザで同期する場合、クロスオリジン制限を避けるためにプロキシを有効にする必要があります",
-        },
-        ProxyUrl: {
-          Title: "プロキシURL",
-          SubTitle: "このプロジェクトに組み込まれたクロスオリジンプロキシ専用",
-        },
-
-        WebDav: {
-          Endpoint: "WebDAV エンドポイント",
-          UserName: "ユーザー名",
-          Password: "パスワード",
-        },
-
-        UpStash: {
-          Endpoint: "UpStash Redis REST URL",
-          UserName: "バックアップ名",
-          Password: "UpStash Redis REST トークン",
-        },
-      },
-
       LocalState: "ローカルデータ",
       Overview: (overview: any) => {
         return `${overview.chat} 回の対話、${overview.message} 件のメッセージ、${overview.prompt} 件のプロンプト、${overview.mask} 件のマスク`;

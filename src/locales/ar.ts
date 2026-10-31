@@ -192,42 +192,6 @@ const ar: PartialLocaleType = {
       SubTitle: "توليد عنوان مناسب بناءً على محتوى الدردشة",
     },
     Sync: {
-      CloudState: "بيانات السحابة",
-      NotSyncYet: "لم يتم التزامن بعد",
-      Success: "تم التزامن بنجاح",
-      Fail: "فشل التزامن",
-
-      Config: {
-        Modal: {
-          Title: "تكوين التزامن السحابي",
-          Check: "التحقق من التوفر",
-        },
-        SyncType: {
-          Title: "نوع التزامن",
-          SubTitle: "اختر خادم التزامن المفضل",
-        },
-        Proxy: {
-          Title: "تفعيل الوكيل",
-          SubTitle: "يجب تفعيل الوكيل عند التزامن عبر المتصفح لتجنب قيود CORS",
-        },
-        ProxyUrl: {
-          Title: "عنوان الوكيل",
-          SubTitle: "ينطبق فقط على الوكيل المتاح في هذا المشروع",
-        },
-
-        WebDav: {
-          Endpoint: "عنوان WebDAV",
-          UserName: "اسم المستخدم",
-          Password: "كلمة المرور",
-        },
-
-        UpStash: {
-          Endpoint: "رابط UpStash Redis REST",
-          UserName: "اسم النسخ الاحتياطي",
-          Password: "رمز UpStash Redis REST",
-        },
-      },
-
       LocalState: "بيانات محلية",
       Overview: (overview: any) => {
         return `${overview.chat} دردشة، ${overview.message} رسالة، ${overview.prompt} إشعار، ${overview.mask} قناع`;

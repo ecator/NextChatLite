@@ -198,43 +198,6 @@ const de: PartialLocaleType = {
         "Basierend auf dem Chat-Inhalt einen passenden Titel generieren",
     },
     Sync: {
-      CloudState: "Cloud-Daten",
-      NotSyncYet: "Noch nicht synchronisiert",
-      Success: "Synchronisation erfolgreich",
-      Fail: "Synchronisation fehlgeschlagen",
-
-      Config: {
-        Modal: {
-          Title: "Cloud-Synchronisation konfigurieren",
-          Check: "Verfügbarkeit überprüfen",
-        },
-        SyncType: {
-          Title: "Synchronisationstyp",
-          SubTitle: "Wählen Sie den bevorzugten Synchronisationsserver aus",
-        },
-        Proxy: {
-          Title: "Proxy aktivieren",
-          SubTitle:
-            "Beim Synchronisieren im Browser muss ein Proxy aktiviert werden, um Cross-Origin-Beschränkungen zu vermeiden",
-        },
-        ProxyUrl: {
-          Title: "Proxy-Adresse",
-          SubTitle: "Nur für projektinterne Cross-Origin-Proxy",
-        },
-
-        WebDav: {
-          Endpoint: "WebDAV-Adresse",
-          UserName: "Benutzername",
-          Password: "Passwort",
-        },
-
-        UpStash: {
-          Endpoint: "UpStash Redis REST-Url",
-          UserName: "Sicherungsname",
-          Password: "UpStash Redis REST-Token",
-        },
-      },
-
       LocalState: "Lokale Daten",
       Overview: (overview: any) => {
         return `${overview.chat} Chats, ${overview.message} Nachrichten, ${overview.prompt} Eingabeaufforderungen, ${overview.mask} Masken`;

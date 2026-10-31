@@ -200,42 +200,6 @@ const tw = {
       SubTitle: "根據對話內容產生合適的標題",
     },
     Sync: {
-      CloudState: "雲端資料",
-      NotSyncYet: "還沒有進行過同步",
-      Success: "同步成功",
-      Fail: "同步失敗",
-
-      Config: {
-        Modal: {
-          Title: "設定雲端同步",
-          Check: "檢查可用性",
-        },
-        SyncType: {
-          Title: "同步類型",
-          SubTitle: "選擇偏好的同步伺服器",
-        },
-        Proxy: {
-          Title: "啟用代理伺服器",
-          SubTitle: "在瀏覽器中同步時，啟用代理伺服器以避免跨域限制",
-        },
-        ProxyUrl: {
-          Title: "代理伺服器位置",
-          SubTitle: "僅適用於本專案內建的跨域代理",
-        },
-
-        WebDav: {
-          Endpoint: "WebDAV 位置",
-          UserName: "使用者名稱",
-          Password: "密碼",
-        },
-
-        UpStash: {
-          Endpoint: "UpStash Redis REST Url",
-          UserName: "備份名稱",
-          Password: "UpStash Redis REST Token",
-        },
-      },
-
       LocalState: "本機資料",
       Overview: (overview: any) => {
         return `${overview.chat} 次對話，${overview.message} 則訊息，${overview.prompt} 條提示詞，${overview.mask} 個角色範本`;

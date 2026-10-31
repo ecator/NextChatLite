@@ -193,43 +193,6 @@ const tr: PartialLocaleType = {
       SubTitle: "Sohbet içeriğine göre uygun başlık oluştur",
     },
     Sync: {
-      CloudState: "Bulut Verisi",
-      NotSyncYet: "Henüz senkronize edilmedi",
-      Success: "Senkronizasyon başarılı",
-      Fail: "Senkronizasyon başarısız",
-
-      Config: {
-        Modal: {
-          Title: "Bulut Senkronizasyonu Yapılandır",
-          Check: "Kullanılabilirliği kontrol et",
-        },
-        SyncType: {
-          Title: "Senkronizasyon Türü",
-          SubTitle: "Tercih ettiğiniz senkronizasyon sunucusunu seçin",
-        },
-        Proxy: {
-          Title: "Proxy'yi Etkinleştir",
-          SubTitle:
-            "Tarayıcıda senkronize ederken proxy'yi etkinleştirin, aksi takdirde çapraz kaynak kısıtlamalarıyla karşılaşabilirsiniz",
-        },
-        ProxyUrl: {
-          Title: "Proxy Adresi",
-          SubTitle: "Sadece bu projeye ait çapraz kaynak proxy için",
-        },
-
-        WebDav: {
-          Endpoint: "WebDAV Adresi",
-          UserName: "Kullanıcı Adı",
-          Password: "Şifre",
-        },
-
-        UpStash: {
-          Endpoint: "UpStash Redis REST Url",
-          UserName: "Yedekleme Adı",
-          Password: "UpStash Redis REST Token",
-        },
-      },
-
       LocalState: "Yerel Veri",
       Overview: (overview: any) => {
         return `${overview.chat} konuşma, ${overview.message} mesaj, ${overview.prompt} ipucu, ${overview.mask} maske`;

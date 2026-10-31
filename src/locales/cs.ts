@@ -193,43 +193,6 @@ const cs: PartialLocaleType = {
       SubTitle: "Generovat vhodný název na základě obsahu konverzace",
     },
     Sync: {
-      CloudState: "Data na cloudu",
-      NotSyncYet: "Ještě nebylo synchronizováno",
-      Success: "Synchronizace úspěšná",
-      Fail: "Synchronizace selhala",
-
-      Config: {
-        Modal: {
-          Title: "Nastavení cloudové synchronizace",
-          Check: "Zkontrolovat dostupnost",
-        },
-        SyncType: {
-          Title: "Typ synchronizace",
-          SubTitle: "Vyberte oblíbený synchronizační server",
-        },
-        Proxy: {
-          Title: "Povolit proxy",
-          SubTitle:
-            "Při synchronizaci v prohlížeči musí být proxy povolena, aby se předešlo problémům s CORS",
-        },
-        ProxyUrl: {
-          Title: "Adresa proxy",
-          SubTitle: "Pouze pro interní proxy",
-        },
-
-        WebDav: {
-          Endpoint: "WebDAV adresa",
-          UserName: "Uživatelské jméno",
-          Password: "Heslo",
-        },
-
-        UpStash: {
-          Endpoint: "UpStash Redis REST URL",
-          UserName: "Název zálohy",
-          Password: "UpStash Redis REST Token",
-        },
-      },
-
       LocalState: "Lokální data",
       Overview: (overview: any) => {
         return `${overview.chat} konverzací, ${overview.message} zpráv, ${overview.prompt} promptů, ${overview.mask} masek`;

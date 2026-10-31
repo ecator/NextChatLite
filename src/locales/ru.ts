@@ -195,43 +195,6 @@ const ru: PartialLocaleType = {
       SubTitle: "Создание подходящего заголовка на основе содержания беседы",
     },
     Sync: {
-      CloudState: "Облачные данные",
-      NotSyncYet: "Синхронизация еще не проводилась",
-      Success: "Синхронизация успешна",
-      Fail: "Не удалось синхронизировать",
-
-      Config: {
-        Modal: {
-          Title: "Настройки облачной синхронизации",
-          Check: "Проверить доступность",
-        },
-        SyncType: {
-          Title: "Тип синхронизации",
-          SubTitle: "Выберите предпочитаемый сервер синхронизации",
-        },
-        Proxy: {
-          Title: "Включить прокси",
-          SubTitle:
-            "При синхронизации в браузере необходимо включить прокси для предотвращения ограничений кросс-домена",
-        },
-        ProxyUrl: {
-          Title: "Адрес прокси",
-          SubTitle: "Только для встроенного прокси в проекте",
-        },
-
-        WebDav: {
-          Endpoint: "WebDAV адрес",
-          UserName: "Имя пользователя",
-          Password: "Пароль",
-        },
-
-        UpStash: {
-          Endpoint: "UpStash Redis REST Url",
-          UserName: "Имя резервной копии",
-          Password: "UpStash Redis REST Token",
-        },
-      },
-
       LocalState: "Локальные данные",
       Overview: (overview: any) => {
         return `${overview.chat} бесед, ${overview.message} сообщений, ${overview.prompt} подсказок, ${overview.mask} масок`;

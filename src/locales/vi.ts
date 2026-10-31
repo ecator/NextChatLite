@@ -193,43 +193,6 @@ const vi: PartialLocaleType = {
       SubTitle: "Tạo tiêu đề phù hợp dựa trên nội dung cuộc trò chuyện",
     },
     Sync: {
-      CloudState: "Dữ liệu đám mây",
-      NotSyncYet: "Chưa thực hiện đồng bộ",
-      Success: "Đồng bộ thành công",
-      Fail: "Đồng bộ thất bại",
-
-      Config: {
-        Modal: {
-          Title: "Cấu hình đồng bộ đám mây",
-          Check: "Kiểm tra khả dụng",
-        },
-        SyncType: {
-          Title: "Loại đồng bộ",
-          SubTitle: "Chọn máy chủ đồng bộ ưa thích",
-        },
-        Proxy: {
-          Title: "Kích hoạt proxy",
-          SubTitle:
-            "Khi đồng bộ qua trình duyệt, cần kích hoạt proxy để tránh hạn chế ngang miền",
-        },
-        ProxyUrl: {
-          Title: "Địa chỉ proxy",
-          SubTitle: "Chỉ áp dụng cho proxy ngang miền của dự án này",
-        },
-
-        WebDav: {
-          Endpoint: "Địa chỉ WebDAV",
-          UserName: "Tên người dùng",
-          Password: "Mật khẩu",
-        },
-
-        UpStash: {
-          Endpoint: "URL UpStash Redis REST",
-          UserName: "Tên sao lưu",
-          Password: "Token UpStash Redis REST",
-        },
-      },
-
       LocalState: "Dữ liệu cục bộ",
       Overview: (overview: any) => {
         return `${overview.chat} cuộc trò chuyện, ${overview.message} tin nhắn, ${overview.prompt} lệnh, ${overview.mask} mặt nạ`;

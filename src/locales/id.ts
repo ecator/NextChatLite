@@ -194,43 +194,6 @@ const id: PartialLocaleType = {
       SubTitle: "Membuat judul yang sesuai berdasarkan konten obrolan",
     },
     Sync: {
-      CloudState: "Data Cloud",
-      NotSyncYet: "Belum disinkronkan",
-      Success: "Sinkronisasi Berhasil",
-      Fail: "Sinkronisasi Gagal",
-
-      Config: {
-        Modal: {
-          Title: "Konfigurasi Sinkronisasi Cloud",
-          Check: "Periksa Ketersediaan",
-        },
-        SyncType: {
-          Title: "Jenis Sinkronisasi",
-          SubTitle: "Pilih server sinkronisasi favorit",
-        },
-        Proxy: {
-          Title: "Aktifkan Proxy",
-          SubTitle:
-            "Saat menyinkronkan di browser, proxy harus diaktifkan untuk menghindari pembatasan lintas domain",
-        },
-        ProxyUrl: {
-          Title: "Alamat Proxy",
-          SubTitle: "Hanya berlaku untuk proxy lintas domain bawaan proyek ini",
-        },
-
-        WebDav: {
-          Endpoint: "Alamat WebDAV",
-          UserName: "Nama Pengguna",
-          Password: "Kata Sandi",
-        },
-
-        UpStash: {
-          Endpoint: "Url REST Redis UpStash",
-          UserName: "Nama Cadangan",
-          Password: "Token REST Redis UpStash",
-        },
-      },
-
       LocalState: "Data Lokal",
       Overview: (overview: any) => {
         return `${overview.chat} percakapan, ${overview.message} pesan, ${overview.prompt} prompt, ${overview.mask} masker`;

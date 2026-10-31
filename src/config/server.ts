@@ -172,10 +172,6 @@ export const getServerSideConfig = () => {
   //   `[Server Config] using ${randomIndex + 1} of ${apiKeys.length} api key`,
   // );
 
-  const allowedWebDavEndpoints = (
-    process.env.WHITE_WEBDAV_ENDPOINTS ?? ""
-  ).split(",");
-
   return {
     openaiUrl: process.env.OPENAI_URL,
     apiKey: getApiKey(process.env.OPENAI_API_KEY),
@@ -268,6 +264,5 @@ export const getServerSideConfig = () => {
     customModels,
     defaultModel,
     visionModels,
-    allowedWebDavEndpoints,
   };
 };

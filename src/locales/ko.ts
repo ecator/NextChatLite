@@ -213,43 +213,6 @@ const ko: PartialLocaleType = {
       SubTitle: "대화 내용에 따라 적절한 제목 생성",
     },
     Sync: {
-      CloudState: "클라우드 데이터",
-      NotSyncYet: "아직 동기화되지 않았습니다.",
-      Success: "동기화 성공",
-      Fail: "동기화 실패",
-
-      Config: {
-        Modal: {
-          Title: "클라우드 동기화 구성",
-          Check: "사용 가능성 확인",
-        },
-        SyncType: {
-          Title: "동기화 유형",
-          SubTitle: "선호하는 동기화 서버 선택",
-        },
-        Proxy: {
-          Title: "프록시 사용",
-          SubTitle:
-            "브라우저에서 동기화할 때 프록시를 활성화하여 교차 출처 제한을 피해야 함",
-        },
-        ProxyUrl: {
-          Title: "프록시 주소",
-          SubTitle: "이 프로젝트에서 제공하는 CORS 프록시만 해당",
-        },
-
-        WebDav: {
-          Endpoint: "WebDAV 주소",
-          UserName: "사용자 이름",
-          Password: "비밀번호",
-        },
-
-        UpStash: {
-          Endpoint: "UpStash Redis REST URL",
-          UserName: "백업 이름",
-          Password: "UpStash Redis REST Token",
-        },
-      },
-
       LocalState: "로컬 데이터",
       Overview: (overview: any) => {
         return `${overview.chat} 회의 대화, ${overview.message} 개의 메시지, ${overview.prompt} 개의 프롬프트, ${overview.mask} 개의 마스크`;

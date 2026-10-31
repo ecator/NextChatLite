@@ -212,38 +212,6 @@ const da: PartialLocaleType = {
       SubTitle: "Foreslå en titel ud fra chatten",
     },
     Sync: {
-      CloudState: "Seneste opdatering",
-      NotSyncYet: "Endnu ikke synkroniseret",
-      Success: "Synkronisering lykkedes",
-      Fail: "Synkronisering mislykkedes",
-      Config: {
-        Modal: {
-          Title: "Indstil synk",
-          Check: "Tjek forbindelse",
-        },
-        SyncType: {
-          Title: "Synk-type",
-          SubTitle: "Vælg en synk-tjeneste",
-        },
-        Proxy: {
-          Title: "Aktivér proxy",
-          SubTitle: "Brug proxy for at undgå netværksproblemer",
-        },
-        ProxyUrl: {
-          Title: "Proxy-adresse",
-          SubTitle: "Bruges kun til projektets egen proxy",
-        },
-        WebDav: {
-          Endpoint: "WebDAV-adresse",
-          UserName: "Brugernavn",
-          Password: "Kodeord",
-        },
-        UpStash: {
-          Endpoint: "UpStash Redis REST URL",
-          UserName: "Backup-navn",
-          Password: "UpStash Redis REST Token",
-        },
-      },
       LocalState: "Lokale data",
       Overview: (overview: any) =>
         `${overview.chat} chats, ${overview.message} beskeder, ${overview.prompt} prompts, ${overview.mask} personaer`,

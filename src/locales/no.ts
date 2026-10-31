@@ -199,43 +199,6 @@ const no: PartialLocaleType = {
       SubTitle: "Generer en passende tittel basert på samtaleinnholdet",
     },
     Sync: {
-      CloudState: "Skydatasynkronisering",
-      NotSyncYet: "Har ikke blitt synkronisert ennå",
-      Success: "Synkronisering vellykket",
-      Fail: "Synkronisering mislyktes",
-
-      Config: {
-        Modal: {
-          Title: "Konfigurer sky-synkronisering",
-          Check: "Sjekk tilgjengelighet",
-        },
-        SyncType: {
-          Title: "Synkroniseringstype",
-          SubTitle: "Velg ønsket synkroniseringsserver",
-        },
-        Proxy: {
-          Title: "Aktiver proxy",
-          SubTitle:
-            "Når du synkroniserer i nettleseren, må proxy være aktivert for å unngå CORS-restriksjoner",
-        },
-        ProxyUrl: {
-          Title: "Proxy-URL",
-          SubTitle: "Kun for prosjektets innebygde CORS-proxy",
-        },
-
-        WebDav: {
-          Endpoint: "WebDAV-adresse",
-          UserName: "Brukernavn",
-          Password: "Passord",
-        },
-
-        UpStash: {
-          Endpoint: "UpStash Redis REST-URL",
-          UserName: "Sikkerhetskopinavn",
-          Password: "UpStash Redis REST-token",
-        },
-      },
-
       LocalState: "Lokal data",
       Overview: (overview: any) => {
         return `${overview.chat} samtaler, ${overview.message} meldinger, ${overview.prompt} oppfordringer, ${overview.mask} masker`;

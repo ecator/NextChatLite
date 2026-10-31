@@ -133,7 +133,7 @@ docker run -d -p 3000:3000 -e OPENAI_API_KEY=your_key nextchat-lite
 .
 ├── src/
 │   ├── app/            # Next.js App Router (pages, layouts, and API route handlers)
-│   │   ├── api/        # AI SDK, proxy, webdav endpoints
+│   │   ├── api/        # AI SDK and proxy endpoints
 │   │   ├── layout.tsx  # Root HTML layout and providers
 │   │   └── page.tsx    # App root entry
 │   ├── client/         # Client API utilities and platform bridges
