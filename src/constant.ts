@@ -1,5 +1,5 @@
-export const OWNER = "ChatGPTNextWeb";
-export const REPO = "ChatGPT-Next-Web";
+export const OWNER = "ecator";
+export const REPO = "NextChatLite";
 export const REPO_URL = `https://github.com/${OWNER}/${REPO}`;
 export const PLUGINS_REPO_URL = `https://github.com/${OWNER}/NextChat-Awesome-Plugins`;
 export const ISSUE_URL = `https://github.com/${OWNER}/${REPO}/issues`;
@@ -82,13 +82,13 @@ export enum FileName {
 }
 
 export enum StoreKey {
-  Chat = "chat-next-web-store",
-  Plugin = "chat-next-web-plugin",
+  Chat = "nextchat-lite-store",
+  Plugin = "nextchat-lite-plugin",
   Access = "access-control",
   Config = "app-config",
   Mask = "mask-store",
   Prompt = "prompt-store",
-  Update = "chat-update",
+  Update = "nextchat-lite-update",
   Sync = "sync",
   Models = "models-dev-store",
 }
@@ -103,7 +103,7 @@ export const ACCESS_CODE_PREFIX = "nk-";
 export const LAST_INPUT_KEY = "last-input";
 export const UNFINISHED_INPUT = (id: string) => "unfinished-input-" + id;
 
-export const STORAGE_KEY = "chatgpt-next-web";
+export const STORAGE_KEY = "nextchat-lite";
 
 export const REQUEST_TIMEOUT_MS = 60000;
 export const REQUEST_TIMEOUT_MS_FOR_THINKING = REQUEST_TIMEOUT_MS * 5;

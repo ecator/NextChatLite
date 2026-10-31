@@ -43,7 +43,7 @@
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/NextChatLite/NextChatLite.git
+git clone https://github.com/ecator/NextChatLite.git
 cd NextChatLite
 ```
 
@@ -84,15 +84,15 @@ pnpm test:e2e
 
 You can configure NextChatLite via environment variables in `.env.local` or container settings:
 
-| Variable | Description |
-|---|---|
-| `OPENAI_API_KEY` | Server-side OpenAI API key |
-| `BASE_URL` | Custom API base URL override |
-| `GOOGLE_API_KEY` | Server-side Google Gemini API key |
-| `ANTHROPIC_API_KEY` | Server-side Anthropic API key |
-| `CODE` | Access password for private deployments |
+| Variable            | Description                                |
+| ------------------- | ------------------------------------------ |
+| `OPENAI_API_KEY`    | Server-side OpenAI API key                 |
+| `BASE_URL`          | Custom API base URL override               |
+| `GOOGLE_API_KEY`    | Server-side Google Gemini API key          |
+| `ANTHROPIC_API_KEY` | Server-side Anthropic API key              |
+| `CODE`              | Access password for private deployments    |
 | `HIDE_USER_API_KEY` | Set to `1` to prevent client API key entry |
-| `DEFAULT_MODEL` | Default model for new conversations |
+| `DEFAULT_MODEL`     | Default model for new conversations        |
 
 ---
 
