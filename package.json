@@ -7,7 +7,7 @@
     "mask": "npx tsx src/masks/build.ts",
     "mask:watch": "npx watch \"pnpm mask\" src/masks",
     "dev": "concurrently -r \"pnpm run mask:watch\" \"next dev\"",
-    "build": "pnpm mask && cross-env BUILD_MODE=standalone next build",
+    "build": "pnpm mask && next build",
     "start": "next start",
     "lint": "eslint src tests",
     "prompts": "node ./scripts/fetch-prompts.mjs",
@@ -20,14 +20,12 @@
   "dependencies": {
     "@ai-sdk/anthropic": "^1.1.6",
     "@ai-sdk/google": "^1.1.10",
+    "@ai-sdk/google-vertex": "2.1.31",
     "@ai-sdk/openai": "^1.1.9",
     "@ai-sdk/react": "^1.1.9",
     "@hello-pangea/dnd": "^17.0.0",
-    "@next/third-parties": "^15.1.0",
     "@opencode-ai/models": "^0.0.8",
     "@svgr/webpack": "^8.1.0",
-    "@vercel/analytics": "^0.1.11",
-    "@vercel/speed-insights": "^1.0.2",
     "ai": "^4.1.45",
     "axios": "^1.7.5",
     "clsx": "^2.1.1",
@@ -62,6 +60,7 @@
     "zustand": "^5.0.3"
   },
   "devDependencies": {
+    "@jest/globals": "^30.5.2",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",

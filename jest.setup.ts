@@ -2,6 +2,34 @@
 import "@testing-library/jest-dom";
 import { jest } from "@jest/globals";
 
+if (typeof (global as any).TextDecoder === "undefined") {
+  const { TextDecoder, TextEncoder } = require("node:util");
+  (global as any).TextDecoder = TextDecoder;
+  (global as any).TextEncoder = TextEncoder;
+}
+
+if (typeof (global as any).TransformStream === "undefined") {
+  const {
+    TransformStream,
+    ReadableStream,
+    WritableStream,
+  } = require("node:stream/web");
+  (global as any).TransformStream = TransformStream;
+  (global as any).ReadableStream = ReadableStream;
+  (global as any).WritableStream = WritableStream;
+}
+
+if (typeof (global as any).Request === "undefined") {
+  (global as any).Request = class Request {
+    url: string;
+    constructor(input: any) {
+      this.url = typeof input === "string" ? input : input?.url || "";
+    }
+  };
+  (global as any).Response = class Response {};
+  (global as any).Headers = class Headers {};
+}
+
 global.fetch = jest.fn(() =>
   Promise.resolve({
     ok: true,

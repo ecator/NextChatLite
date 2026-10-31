@@ -1,22 +1,39 @@
-import { createPersistStore } from "../utils/store";
-import { StoreKey } from "../constant";
+import { create } from "zustand";
 import snapshot from "@opencode-ai/models/snapshot";
-import { Models } from "@opencode-ai/models";
+import defaultModelsJson from "../../public/models.json";
 
 export interface ModelMetadata {
   id: string;
   name: string;
   provider: string;
+  providerName?: string;
+  env?: string[];
+  npm?: string;
+  api?: string;
+  modalities?: {
+    input?: string[];
+    output?: string[];
+  };
+  tool_call?: boolean;
+  hasTools: boolean;
+  attachment?: boolean;
+  hasVision: boolean;
+  reasoning?: boolean;
+  hasReasoning: boolean;
+  reasoning_options?: any[];
+  reasoningType?: "level" | "budget";
   contextLimit: number;
   outputLimit: number;
-  hasVision: boolean;
-  hasReasoning: boolean;
-  reasoningType?: "level" | "budget";
-  hasTools: boolean;
   supportsTemperature?: boolean;
-  cost?: { input: number; output: number; cache_read?: number };
+  cost?: {
+    input: number;
+    output: number;
+    cache_read?: number;
+    [key: string]: any;
+  };
   description?: string;
   family?: string;
+  modelInfo?: any;
 }
 
 export function parseModelMetadataSafely(
@@ -36,11 +53,13 @@ export function parseModelMetadataSafely(
       id: rawId || "unknown-model",
       name: rawId || "unknown-model",
       provider: defaultProvider || extractedProvider || "custom",
+      providerName: defaultProvider || extractedProvider || "custom",
       contextLimit: 4096,
       outputLimit: 4096,
       hasVision: false,
       hasReasoning: false,
       hasTools: true,
+      tool_call: true,
       supportsTemperature: true,
     };
   }
@@ -61,6 +80,9 @@ export function parseModelMetadataSafely(
           : id.includes("/")
             ? id.split("/")[0]
             : "custom");
+
+  const providerName =
+    raw.providerName || raw.provider || defaultProvider || provider;
 
   // Determine Name
   const name =
@@ -94,7 +116,11 @@ export function parseModelMetadataSafely(
     hasVision = true;
   } else if (
     Array.isArray(raw.modalities?.input) &&
-    raw.modalities.input.includes("image")
+    raw.modalities.input.some((m: string) =>
+      ["image", "video", "audio", "pdf", "file"].includes(
+        String(m).toLowerCase(),
+      ),
+    )
   ) {
     hasVision = true;
   }
@@ -151,9 +177,13 @@ export function parseModelMetadataSafely(
 
   // Tool Calling Capability
   let hasTools = true;
+  let tool_call = true;
   if (typeof raw.hasTools === "boolean") {
     hasTools = raw.hasTools;
-  } else if (raw.tool_call !== undefined) {
+    tool_call = raw.hasTools;
+  }
+  if (raw.tool_call !== undefined) {
+    tool_call = Boolean(raw.tool_call);
     hasTools = Boolean(raw.tool_call);
   }
 
@@ -165,23 +195,34 @@ export function parseModelMetadataSafely(
     supportsTemperature = raw.temperature !== false;
   }
 
-  // Cost
-  const cost = raw.cost;
+  const env = Array.isArray(raw.env) ? raw.env : undefined;
+  const npm = typeof raw.npm === "string" ? raw.npm : undefined;
+  const api = typeof raw.api === "string" ? raw.api : undefined;
 
   return {
     id,
     name,
     provider,
+    providerName,
+    env,
+    npm,
+    api,
+    modalities: raw.modalities,
+    attachment: raw.attachment,
+    tool_call,
+    hasTools,
     contextLimit,
     outputLimit,
     hasVision,
     hasReasoning,
+    reasoning: raw.reasoning ?? hasReasoning,
+    reasoning_options: raw.reasoning_options,
     reasoningType,
-    hasTools,
     supportsTemperature,
-    cost,
+    cost: raw.cost,
     description: raw.description,
     family: raw.family,
+    modelInfo: raw,
   };
 }
 
@@ -190,6 +231,46 @@ export function parseModelsDevCatalog(
 ): Record<string, ModelMetadata> {
   const result: Record<string, ModelMetadata> = {};
   if (!rawPayload || typeof rawPayload !== "object") return result;
+
+  // Case 0: Array of providers (like public/models.json)
+  if (Array.isArray(rawPayload)) {
+    for (const providerObj of rawPayload) {
+      if (!providerObj || typeof providerObj !== "object") continue;
+      const providerId = providerObj.id || "custom";
+      const providerName = providerObj.name || providerId;
+      const providerEnv = Array.isArray(providerObj.env) ? providerObj.env : [];
+      const providerNpm = providerObj.npm;
+      const providerApi = providerObj.api;
+
+      if (providerObj.models && typeof providerObj.models === "object") {
+        for (const [modelKey, modelObj] of Object.entries<any>(
+          providerObj.models,
+        )) {
+          const fullKey = `${providerId}/${modelKey}`;
+          const parsed = parseModelMetadataSafely(
+            {
+              ...modelObj,
+              provider: providerId,
+              providerName,
+              env: modelObj.env || providerEnv,
+              npm: modelObj.npm || providerNpm,
+              api: modelObj.api || providerApi,
+            },
+            fullKey,
+            providerId,
+          );
+          result[fullKey] = parsed;
+          if (!result[modelKey]) {
+            result[modelKey] = parsed;
+          }
+          if (parsed.id && !result[parsed.id]) {
+            result[parsed.id] = parsed;
+          }
+        }
+      }
+    }
+    return result;
+  }
 
   // Case 1: has .models object
   if (
@@ -222,7 +303,14 @@ export function parseModelsDevCatalog(
         )) {
           const fullKey = `${providerId}/${modelId}`;
           const parsed = parseModelMetadataSafely(
-            modelObj,
+            {
+              ...modelObj,
+              provider: providerId,
+              providerName: providerObj.name || providerId,
+              env: modelObj.env || providerObj.env,
+              npm: modelObj.npm || providerObj.npm,
+              api: modelObj.api || providerObj.api,
+            },
             fullKey,
             providerId,
           );
@@ -248,7 +336,18 @@ export function parseModelsDevCatalog(
       hasProviderWithModels = true;
       for (const [modelId, modelObj] of Object.entries<any>(val.models)) {
         const fullKey = `${key}/${modelId}`;
-        const parsed = parseModelMetadataSafely(modelObj, fullKey, key);
+        const parsed = parseModelMetadataSafely(
+          {
+            ...modelObj,
+            provider: key,
+            providerName: val.name || key,
+            env: modelObj.env || val.env,
+            npm: modelObj.npm || val.npm,
+            api: modelObj.api || val.api,
+          },
+          fullKey,
+          key,
+        );
         result[fullKey] = parsed;
         if (!result[modelId]) {
           result[modelId] = parsed;
@@ -273,7 +372,10 @@ export function parseModelsDevCatalog(
   return result;
 }
 
-const initialCatalog = parseModelsDevCatalog(snapshot);
+const initialCatalog = {
+  ...parseModelsDevCatalog(snapshot),
+  ...parseModelsDevCatalog(defaultModelsJson),
+};
 
 export interface ModelStoreState {
   models: Record<string, ModelMetadata>;
@@ -282,216 +384,170 @@ export interface ModelStoreState {
   lastFetchedAt: number;
 }
 
-export const useModelStore = createPersistStore(
-  {
-    models: initialCatalog,
-    loading: false,
-    error: null as string | null,
-    lastFetchedAt: 0,
-  },
-  (set, get) => ({
-    getModel(modelId: string): ModelMetadata | undefined {
-      if (!modelId || typeof modelId !== "string") return undefined;
-      const state = get();
-      const models = state.models;
+export interface ModelStore extends ModelStoreState {
+  getModel: (modelId: string) => ModelMetadata | undefined;
+  getProviderModels: (provider: string) => ModelMetadata[];
+  getAllModels: () => ModelMetadata[];
+  isLoaded: () => boolean;
+  setModels: (models: Record<string, ModelMetadata>) => void;
+  fetchModels: (force?: boolean) => Promise<void>;
+  reset: () => void;
+}
 
-      // 1. Direct key match
-      if (models[modelId]) return models[modelId];
+export const useModelStore = create<ModelStore>((set, get) => ({
+  models: initialCatalog,
+  loading: false,
+  error: null as string | null,
+  lastFetchedAt: 0,
 
-      // 2. Direct key lowercase match
-      const lowerId = modelId.toLowerCase().trim();
-      if (models[lowerId]) return models[lowerId];
+  getModel(modelId: string): ModelMetadata | undefined {
+    if (!modelId || typeof modelId !== "string") return undefined;
+    const state = get();
+    const models = state.models;
 
-      // 3. Match by id or name property
-      const all = Object.values(models);
-      let found = all.find(
-        (m) =>
-          m.id === modelId ||
-          m.id.toLowerCase() === lowerId ||
-          m.name === modelId ||
-          m.name.toLowerCase() === lowerId,
-      );
-      if (found) return found;
+    // 1. Direct key match
+    if (models[modelId]) return models[modelId];
 
-      // 4. If modelId has slash (e.g. google/gemini-3-pro), try short id (gemini-3-pro)
-      if (modelId.includes("/")) {
-        const shortId = modelId.split("/")[1];
-        if (models[shortId]) return models[shortId];
-        found = all.find(
-          (m) =>
-            m.id === shortId || m.id.toLowerCase() === shortId.toLowerCase(),
-        );
-        if (found) return found;
-      }
+    // 2. Direct key lowercase match
+    const lowerId = modelId.toLowerCase().trim();
+    if (models[lowerId]) return models[lowerId];
 
-      // 5. If modelId does not have slash (e.g. gemini-3-pro), try matching suffix
+    // 3. Match by id or name property
+    const all = Object.values(models);
+    let found = all.find(
+      (m) =>
+        m.id === modelId ||
+        m.id.toLowerCase() === lowerId ||
+        m.name === modelId ||
+        m.name.toLowerCase() === lowerId,
+    );
+    if (found) return found;
+
+    // 4. If modelId has slash (e.g. google/gemini-3-pro), try short id (gemini-3-pro)
+    if (modelId.includes("/")) {
+      const shortId = modelId.split("/")[1];
+      if (models[shortId]) return models[shortId];
       found = all.find(
-        (m) =>
-          m.id.toLowerCase().endsWith("/" + lowerId) ||
-          m.name.toLowerCase().endsWith("/" + lowerId),
+        (m) => m.id === shortId || m.id.toLowerCase() === shortId.toLowerCase(),
       );
       if (found) return found;
+    }
 
-      return undefined;
-    },
+    // 5. If modelId does not have slash (e.g. gemini-3-pro), try matching suffix
+    found = all.find(
+      (m) =>
+        m.id.toLowerCase().endsWith("/" + lowerId) ||
+        m.name.toLowerCase().endsWith("/" + lowerId),
+    );
+    if (found) return found;
 
-    getProviderModels(provider: string): ModelMetadata[] {
-      if (!provider || typeof provider !== "string") return [];
-      const state = get();
-      const lowerProvider = provider.toLowerCase().trim();
-      const all = Object.values(state.models);
+    return undefined;
+  },
 
-      const seenIds = new Set<string>();
-      const results: ModelMetadata[] = [];
+  getProviderModels(provider: string): ModelMetadata[] {
+    if (!provider || typeof provider !== "string") return [];
+    const state = get();
+    const lowerProvider = provider.toLowerCase().trim();
+    const all = Object.values(state.models);
 
-      for (const model of all) {
-        const modelProvider = (model.provider || "").toLowerCase().trim();
-        if (
-          modelProvider === lowerProvider ||
-          model.id.toLowerCase().startsWith(lowerProvider + "/")
-        ) {
-          const uniqueKey = `${model.provider}/${model.id}`;
-          if (!seenIds.has(uniqueKey) && !seenIds.has(model.id)) {
-            seenIds.add(uniqueKey);
-            seenIds.add(model.id);
-            results.push(model);
-          }
-        }
-      }
+    const seenIds = new Set<string>();
+    const results: ModelMetadata[] = [];
 
-      return results;
-    },
-
-    getAllModels(): ModelMetadata[] {
-      const state = get();
-      const all = Object.values(state.models);
-      const seen = new Set<string>();
-      const results: ModelMetadata[] = [];
-
-      for (const model of all) {
-        const key = `${model.provider}/${model.id}`;
-        if (!seen.has(key)) {
-          seen.add(key);
+    for (const model of all) {
+      const modelProvider = (model.provider || "").toLowerCase().trim();
+      if (
+        modelProvider === lowerProvider ||
+        model.id.toLowerCase().startsWith(lowerProvider + "/")
+      ) {
+        const uniqueKey = `${model.provider}/${model.id}`;
+        if (!seenIds.has(uniqueKey) && !seenIds.has(model.id)) {
+          seenIds.add(uniqueKey);
+          seenIds.add(model.id);
           results.push(model);
         }
       }
+    }
 
-      return results;
-    },
-
-    isLoaded(): boolean {
-      const state = get();
-      return Object.keys(state.models).length > 0 && !state.loading;
-    },
-
-    setModels(models: Record<string, ModelMetadata>) {
-      set({ models });
-    },
-
-    async fetchModels(force = false) {
-      const state = get();
-      const now = Date.now();
-      if (
-        !force &&
-        Object.keys(state.models).length > 0 &&
-        now - state.lastFetchedAt < 3600 * 1000
-      ) {
-        return;
-      }
-
-      set({ loading: true, error: null });
-
-      try {
-        let rawCatalog: any = null;
-
-        // Strategy 1: @opencode-ai/models client
-        try {
-          if (
-            typeof Models !== "undefined" &&
-            typeof Models.make === "function"
-          ) {
-            const client = Models.make();
-            if (typeof client.catalog === "function") {
-              rawCatalog = await client.catalog();
-            }
-          }
-        } catch (e) {
-          console.warn(
-            "[ModelStore] Failed to fetch via @opencode-ai/models client:",
-            e,
-          );
-        }
-
-        // Strategy 2: Direct fetch from https://models.dev/api.json
-        if (!rawCatalog) {
-          try {
-            const controller =
-              typeof AbortController !== "undefined"
-                ? new AbortController()
-                : null;
-            const timer = controller
-              ? setTimeout(() => controller.abort(), 5000)
-              : null;
-            const res = await fetch("https://models.dev/api.json", {
-              signal: controller ? controller.signal : undefined,
-              headers: { Accept: "application/json" },
-            });
-            if (timer) clearTimeout(timer);
-            if (res.ok) {
-              rawCatalog = await res.json();
-            }
-          } catch (e) {
-            console.warn(
-              "[ModelStore] Failed to fetch from models.dev api.json:",
-              e,
-            );
-          }
-        }
-
-        // Strategy 3: Bundled snapshot fallback
-        if (!rawCatalog) {
-          console.info(
-            "[ModelStore] Using bundled @opencode-ai/models/snapshot fallback",
-          );
-          rawCatalog = snapshot;
-        }
-
-        const parsed = parseModelsDevCatalog(rawCatalog);
-        if (Object.keys(parsed).length > 0) {
-          set({
-            models: parsed,
-            loading: false,
-            error: null,
-            lastFetchedAt: Date.now(),
-          });
-        } else {
-          throw new Error("Parsed models catalog is empty");
-        }
-      } catch (err: any) {
-        console.error("[ModelStore] Failed to load models catalog:", err);
-        const fallbackParsed = parseModelsDevCatalog(snapshot);
-        set({
-          models:
-            Object.keys(fallbackParsed).length > 0
-              ? fallbackParsed
-              : get().models,
-          loading: false,
-          error: err?.message || "Failed to load models catalog",
-        });
-      }
-    },
-
-    reset() {
-      set({
-        models: initialCatalog,
-        loading: false,
-        error: null,
-        lastFetchedAt: 0,
-      });
-    },
-  }),
-  {
-    name: StoreKey.Models,
-    version: 1.0,
+    return results;
   },
-);
+
+  getAllModels(): ModelMetadata[] {
+    const state = get();
+    const all = Object.values(state.models);
+    const seen = new Set<string>();
+    const results: ModelMetadata[] = [];
+
+    for (const model of all) {
+      const key = `${model.provider}/${model.id}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        results.push(model);
+      }
+    }
+
+    return results;
+  },
+
+  isLoaded(): boolean {
+    const state = get();
+    return Object.keys(state.models).length > 0 && !state.loading;
+  },
+
+  setModels(models: Record<string, ModelMetadata>) {
+    set({ models });
+  },
+
+  async fetchModels(_force = true) {
+    const state = get();
+    if (state.loading) {
+      return;
+    }
+
+    set({ loading: true, error: null });
+
+    try {
+      const res = await fetch(`/models.json?t=${Date.now()}`, {
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
+        },
+      });
+      if (!res.ok) {
+        throw new Error(`Failed to load /models.json: HTTP ${res.status}`);
+      }
+      const rawCatalog = await res.json();
+      const parsed = parseModelsDevCatalog(rawCatalog);
+      if (Object.keys(parsed).length > 0) {
+        set({
+          models: parsed,
+          loading: false,
+          error: null,
+          lastFetchedAt: Date.now(),
+        });
+      } else {
+        throw new Error("Parsed models catalog is empty");
+      }
+    } catch (err: any) {
+      console.error("[ModelStore] Failed to load /models.json:", err);
+      const fallbackParsed = parseModelsDevCatalog(defaultModelsJson);
+      set({
+        models:
+          Object.keys(fallbackParsed).length > 0
+            ? fallbackParsed
+            : get().models,
+        loading: false,
+        error: err?.message || "Failed to load models catalog",
+      });
+    }
+  },
+
+  reset() {
+    set({
+      models: initialCatalog,
+      loading: false,
+      error: null,
+      lastFetchedAt: 0,
+    });
+  },
+}));

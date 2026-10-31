@@ -133,14 +133,7 @@ const DEFAULT_ACCESS_STATE = {
   ai302ApiKey: "",
 
   // server config
-  needCode: true,
-  hideUserApiKey: false,
-  hideBalanceQuery: false,
-  disableGPT4: false,
-  disableFastLink: false,
-  customModels: "",
   defaultModel: "",
-  visionModels: "",
   title: "",
   subTitle: "",
 };
@@ -150,13 +143,7 @@ export const useAccessStore = createPersistStore(
 
   (set, get) => ({
     enabledAccessControl() {
-      this.fetch();
-
-      return get().needCode;
-    },
-    getVisionModels() {
-      this.fetch();
-      return get().visionModels;
+      return false;
     },
 
     isValidOpenAI() {
@@ -256,27 +243,7 @@ export const useAccessStore = createPersistStore(
     },
 
     isAuthorized() {
-      this.fetch();
-
-      // has token or has code or disabled access control
-      return (
-        this.isValidOpenAI() ||
-        this.isValidAzure() ||
-        this.isValidGoogle() ||
-        this.isValidAnthropic() ||
-        this.isValidBaidu() ||
-        this.isValidByteDance() ||
-        this.isValidAlibaba() ||
-        this.isValidTencent() ||
-        this.isValidMoonshot() ||
-        this.isValidIflytek() ||
-        this.isValidDeepSeek() ||
-        this.isValidXAI() ||
-        this.isValidChatGLM() ||
-        this.isValidSiliconFlow() ||
-        !this.enabledAccessControl() ||
-        (this.enabledAccessControl() && ensure(get(), ["accessCode"]))
-      );
+      return true;
     },
     fetch() {
       if (fetchState > 0 || getClientConfig()?.buildMode === "export") return;

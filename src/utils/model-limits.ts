@@ -68,7 +68,18 @@ export class ParameterValidator {
     catalog?: Record<string, any> | ModelMetadata[] | any,
   ): boolean {
     const match = ParameterValidator.findModel(modelId, catalog);
-    return match ? Boolean(match.hasVision) : false;
+    if (!match) return false;
+    if (
+      Array.isArray(match.modalities?.input) &&
+      match.modalities.input.some((m: string) =>
+        ["image", "video", "audio", "pdf", "file"].includes(
+          String(m).toLowerCase(),
+        ),
+      )
+    ) {
+      return true;
+    }
+    return Boolean(match.hasVision || match.attachment);
   }
 
   static isReasoningConfigEnabled(

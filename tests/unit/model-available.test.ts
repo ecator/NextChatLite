@@ -25,12 +25,6 @@ describe("isModelNotavailableInServer", () => {
     expect(result).toBe(true);
   });
 
-  test("should respect DISABLE_GPT4 setting", () => {
-    process.env.DISABLE_GPT4 = "1";
-    const result = isModelNotavailableInServer("", "gpt-4", "OpenAI");
-    expect(result).toBe(true);
-  });
-
   test("should handle empty provider names", () => {
     const result = isModelNotavailableInServer("-all,gpt-4", "gpt-4", "");
     expect(result).toBe(true);

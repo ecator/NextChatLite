@@ -25,9 +25,9 @@
 - **Next.js 16 & React 19**: App Router architecture with server rendering, edge runtime routes, and optimized client state.
 - **Vercel AI SDK Core**: Unified multi-provider chat streaming across OpenAI, Google Gemini, Anthropic, and custom endpoints.
 - **Gemini 3 Thinking Signatures**: First-class support for reasoning process streams, thinking budget controls, and collapsible reasoning UI blocks.
-- **Dynamic Model Catalog**: Live model specifications and multimodal capability discovery powered by [models.dev](https://models.dev) via `@opencode-ai/models`.
+- **Model Catalog**: Model specifications, SDK packages, and multimodal capability discovery configured via `public/models.json`.
 - **OpenAPI Plugin Execution**: Dynamic OpenAPI 3.x tool calling integrated directly into the chat streaming lifecycle.
-- **Privacy-First & Local Storage**: All chat history and API keys stay securely inside your browser or your private deployment.
+- **Privacy-First**: API keys are securely resolved server-side from environment variables without exposing custom keys to the browser.
 - **Global Localization**: 20 end-user UI translations (English, Simplified Chinese, Traditional Chinese, Japanese, Korean, Spanish, French, German, and more).
 - **Fast Package Management**: 100% migrated to `pnpm` with zero desktop runtime bloat.
 
@@ -86,33 +86,23 @@ You can configure NextChatLite via environment variables in `.env.local` or cont
 
 | Variable                | Description                                                                |
 | ----------------------- | -------------------------------------------------------------------------- |
-| `OPENAI_API_KEY`        | Server-side OpenAI API key                                                 |
-| `OPENAI_URL`            | Custom OpenAI API base URL override                                        |
-| `GOOGLE_API_KEY`        | Server-side Google Gemini API key                                          |
-| `GOOGLE_URL`            | Custom Google Gemini API base URL override                                 |
-| `ANTHROPIC_API_KEY`     | Server-side Anthropic API key                                              |
-| `ANTHROPIC_URL`         | Custom Anthropic API base URL override                                     |
-| `CUSTOM_MODELS`         | Control custom model availability and providers                            |
-| `CODE`                  | Access password for private deployments                                    |
-| `HIDE_USER_API_KEY`     | Set to `1` to prevent client API key entry                                 |
-| `DEFAULT_MODEL`         | Default model for new conversations                                        |
+| `GOOGLE_API_KEY`        | Server-side Google Gemini API key (or as defined in `public/models.json`)  |
+| `OPENAI_API_KEY`        | Server-side OpenAI API key (or as defined in `public/models.json`)         |
+| `ANTHROPIC_API_KEY`     | Server-side Anthropic API key (or as defined in `public/models.json`)      |
+| `DEEPSEEK_API_KEY`      | Server-side DeepSeek API key (or as defined in `public/models.json`)       |
+| `PROXY_URL`             | Outbound network proxy for server-side requests                            |
+| `DEFAULT_MODEL`         | Default model for new conversations in `provider/model` format             |
 | `NEXTCHATLITE_TITLE`    | Custom title for sidebar header and document.title (default: NextChatLite) |
 | `NEXTCHATLITE_SUBTITLE` | Custom subtitle for sidebar header (default: Build your own AI assistant.) |
 
-### Custom Models (`CUSTOM_MODELS`)
+### Model Configuration (`public/models.json`)
 
-Configure model availability and provider routing with a comma-separated list:
+All models, providers, and capabilities are configured centrally in [`public/models.json`](./public/models.json). Each provider defines:
 
-- **Add / Enable**: `+model` or `model` (e.g. `+gpt-4o`, `my-model`)
-- **Hide / Disable**: `-model` (e.g. `-gpt-3.5-turbo`, or `-all` to disable all default models)
-- **Specify Provider**: `model@provider` (e.g. `claude-3-5-sonnet@anthropic`, `gemini-1.5-pro@google`, `deepseek-chat@deepseek`)
-- **Custom Display Name**: `model=displayName` (e.g. `qwen-turbo=Qwen Turbo` or `custom-model@openai=My Model`)
-
-**Example:**
-
-```bash
-CUSTOM_MODELS="-all,+gpt-4o,+claude-3-5-sonnet@anthropic,+deepseek-chat@deepseek=DeepSeek V3"
-```
+- `env`: Environment variable names read by the server in real-time to obtain the API key.
+- `npm`: SDK package used (e.g. `@ai-sdk/google`, `@ai-sdk/openai-compatible`, `@ai-sdk/anthropic`, `@ai-sdk/google-vertex`).
+- `api`: Optional base URL for the provider endpoint.
+- `models`: Model specifications including `tool_call`, `modalities` (e.g. image/pdf input capabilities), token limits, and reasoning options.
 
 ---
 

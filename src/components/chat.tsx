@@ -55,6 +55,7 @@ import {
   useChatStore,
   usePluginStore,
 } from "../store";
+import { useModelStore } from "../store/models";
 
 import {
   autoGrowTextArea,
@@ -509,12 +510,14 @@ export function ChatActions(props: {
     }
   }, [allModels]);
   const currentModelName = useMemo(() => {
+    const meta = useModelStore.getState().getModel(currentModel);
+    if (meta?.name) return meta.name;
     const model = models.find(
       (m) =>
         m.name == currentModel &&
         m?.provider?.providerName == currentProviderName,
     );
-    return model?.displayName ?? "";
+    return model?.displayName ?? currentModel;
   }, [models, currentModel, currentProviderName]);
   const [showModelSelector, setShowModelSelector] = useState(false);
   const [showPluginSelector, setShowPluginSelector] = useState(false);
@@ -532,7 +535,9 @@ export function ChatActions(props: {
 
     // if current model is not available
     // switch to first available model
-    const isUnavailableModel = !models.some((m) => m.name === currentModel);
+    const isUnavailableModel =
+      !models.some((m) => m.name === currentModel) &&
+      !useModelStore.getState().getModel(currentModel);
     if (isUnavailableModel && models.length > 0) {
       // show next model to default model if exist
       let nextModel = models.find((model) => model.isDefault) || models[0];
@@ -1259,47 +1264,6 @@ function InnerChat() {
     fill: setUserInput,
     submit: (text) => {
       doSubmit(text);
-    },
-    code: (text) => {
-      if (accessStore.disableFastLink) return;
-      console.log("[Command] got code from url: ", text);
-      showConfirm(Locale.URLCommand.Code + `code = ${text}`).then((res) => {
-        if (res) {
-          accessStore.update((access) => (access.accessCode = text));
-        }
-      });
-    },
-    settings: (text) => {
-      if (accessStore.disableFastLink) return;
-
-      try {
-        const payload = JSON.parse(text) as {
-          key?: string;
-          url?: string;
-        };
-
-        console.log("[Command] got settings from url: ", payload);
-
-        if (payload.key || payload.url) {
-          showConfirm(
-            Locale.URLCommand.Settings +
-              `\n${JSON.stringify(payload, null, 4)}`,
-          ).then((res) => {
-            if (!res) return;
-            if (payload.key) {
-              accessStore.update(
-                (access) => (access.openaiApiKey = payload.key!),
-              );
-            }
-            if (payload.url) {
-              accessStore.update((access) => (access.openaiUrl = payload.url!));
-            }
-            accessStore.update((access) => (access.useCustomConfig = true));
-          });
-        }
-      } catch {
-        console.error("[Command] failed to get settings from url: ", text);
-      }
     },
   });
 

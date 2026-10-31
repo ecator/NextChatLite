@@ -8,7 +8,6 @@ import {
   ServiceProvider,
 } from "./constant";
 import { VISION_MODEL_REGEXES, EXCLUDE_VISION_MODEL_REGEXES } from "./constant";
-import { useAccessStore } from "./store/access";
 import { useModelStore } from "./store/models";
 
 export function trimTopic(topic: string) {
@@ -253,16 +252,26 @@ export function isVisionModel(model: string) {
 
   try {
     const meta = useModelStore.getState().getModel(model);
-    if (meta && typeof meta.hasVision === "boolean") {
-      return meta.hasVision;
+    if (meta) {
+      if (
+        Array.isArray(meta.modalities?.input) &&
+        meta.modalities.input.some((m) =>
+          ["image", "video", "audio", "pdf", "file"].includes(
+            String(m).toLowerCase(),
+          ),
+        )
+      ) {
+        return true;
+      }
+      if (typeof meta.hasVision === "boolean") {
+        return meta.hasVision;
+      }
+      if (meta.attachment !== undefined) {
+        return Boolean(meta.attachment);
+      }
     }
   } catch {}
 
-  const visionModels = useAccessStore.getState().visionModels;
-  const envVisionModels = visionModels?.split(",").map((m) => m.trim());
-  if (envVisionModels?.includes(model)) {
-    return true;
-  }
   return VISION_MODEL_REGEXES.some((regex) => regex.test(model));
 }
 
@@ -308,6 +317,20 @@ export function getTimeoutMSByModel(model: string) {
 }
 
 export function showPlugins(provider: ServiceProvider, model: string) {
+  if (model) {
+    try {
+      const meta = useModelStore.getState().getModel(model);
+      if (meta) {
+        if (typeof meta.tool_call === "boolean") {
+          return meta.tool_call;
+        }
+        if (typeof meta.hasTools === "boolean") {
+          return meta.hasTools;
+        }
+      }
+    } catch {}
+  }
+
   if (
     provider == ServiceProvider.OpenAI ||
     provider == ServiceProvider.Azure ||

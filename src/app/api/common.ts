@@ -69,8 +69,10 @@ export async function requestOpenai(req: NextRequest) {
       let realDeployName = "";
       serverConfig.customModels
         .split(",")
-        .filter((v) => !!v && !v.startsWith("-") && v.includes(modelName))
-        .forEach((m) => {
+        .filter(
+          (v: string) => !!v && !v.startsWith("-") && v.includes(modelName),
+        )
+        .forEach((m: string) => {
           const [fullName, displayName] = m.split("=");
           const [_, providerName] = getModelProvider(fullName);
           if (providerName === "azure" && !displayName) {

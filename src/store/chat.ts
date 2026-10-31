@@ -25,6 +25,7 @@ import { useAccessStore } from "./access";
 import { collectModelsWithDefaultModel } from "../utils/model";
 import { createEmptyMask, Mask } from "./mask";
 import { usePluginStore } from "./plugin";
+import { useModelStore } from "./models";
 
 import { processDataStream } from "ai";
 
@@ -38,21 +39,6 @@ function getProviderName(providerName?: string): string {
   return providerName || "custom";
 }
 function getCustomConfig(providerName?: string) {
-  const accessStore = useAccessStore.getState();
-  if (!accessStore.useCustomConfig) {
-    return undefined;
-  }
-  const customApiKey = accessStore.getApiKeyByProvider(providerName)?.trim();
-  const rawBaseUrl = accessStore.getBaseUrlByProvider(providerName)?.trim();
-  const customBaseUrl =
-    rawBaseUrl && !rawBaseUrl.startsWith("/api/") ? rawBaseUrl : undefined;
-
-  if (customApiKey || customBaseUrl) {
-    return {
-      apiKey: customApiKey || undefined,
-      baseUrl: customBaseUrl || undefined,
-    };
-  }
   return undefined;
 }
 
@@ -145,7 +131,7 @@ function getSummarizeModel(
     const accessStore = useAccessStore.getState();
     const allModel = collectModelsWithDefaultModel(
       configStore.models,
-      [configStore.customModels, accessStore.customModels].join(","),
+      configStore.customModels,
       accessStore.defaultModel,
     );
     const summarizeModel = allModel.find(
@@ -469,17 +455,38 @@ export const useChatStore = createPersistStore(
           return { role: m.role, content: String(m.content) };
         });
 
-        const customConfig = getCustomConfig(modelConfig.providerName);
-
         const pluginStore = usePluginStore.getState();
         const activePlugins = (session.mask.plugin || [])
           .map((id) => pluginStore.get(id))
           .filter(Boolean);
 
+        const modelMeta = useModelStore.getState().getModel(modelConfig.model);
+
         const payload: any = {
           messages: mappedMessages,
           model: modelConfig.model,
-          provider: getProviderName(modelConfig.providerName),
+          provider:
+            modelMeta?.provider || getProviderName(modelConfig.providerName),
+          env: modelMeta?.env,
+          npm: modelMeta?.npm,
+          api: modelMeta?.api,
+          modelInfo: modelMeta
+            ? {
+                id: modelMeta.id,
+                name: modelMeta.name,
+                provider: modelMeta.provider,
+                family: modelMeta.family,
+                description: modelMeta.description,
+                tool_call: modelMeta.tool_call,
+                modalities: modelMeta.modalities,
+                limit: {
+                  context: modelMeta.contextLimit,
+                  output: modelMeta.outputLimit,
+                },
+                reasoning: modelMeta.hasReasoning,
+                reasoning_options: modelMeta.reasoning_options,
+              }
+            : undefined,
           modelConfig: {
             temperature: modelConfig.temperature,
             top_p: modelConfig.top_p,
@@ -489,7 +496,6 @@ export const useChatStore = createPersistStore(
               thinkingBudget: modelConfig.thinkingBudget,
             },
           },
-          customConfig,
           pluginIds: session.mask.plugin,
           plugins: activePlugins,
         };
@@ -856,14 +862,18 @@ export const useChatStore = createPersistStore(
               }),
             );
 
+          const topicMeta = useModelStore.getState().getModel(model);
           const topicPayload: any = {
             messages: topicMessages.map((m) => ({
               role: m.role,
               content: m.content,
             })),
             model,
-            provider: getProviderName(providerName),
-            customConfig,
+            provider: topicMeta?.provider || getProviderName(providerName),
+            env: topicMeta?.env,
+            npm: topicMeta?.npm,
+            api: topicMeta?.api,
+            modelInfo: topicMeta,
           };
 
           fetch("/api/chat", {
@@ -936,15 +946,19 @@ export const useChatStore = createPersistStore(
             }),
           );
 
+          const memoryMeta = useModelStore.getState().getModel(model);
           const memoryPayload: any = {
             messages: memoryMessages.map((m) => ({
               role: m.role,
               content: m.content,
             })),
             model,
-            provider: getProviderName(providerName),
+            provider: memoryMeta?.provider || getProviderName(providerName),
+            env: memoryMeta?.env,
+            npm: memoryMeta?.npm,
+            api: memoryMeta?.api,
+            modelInfo: memoryMeta,
             modelConfig: modelcfg,
-            customConfig,
           };
 
           fetch("/api/chat", {

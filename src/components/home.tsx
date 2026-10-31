@@ -28,6 +28,7 @@ import { AuthPage } from "./auth";
 import { getClientConfig } from "../config/client";
 import { type ClientApi, getClientApi } from "../client/api";
 import { useAccessStore } from "../store";
+import { useModelStore } from "../store/models";
 import clsx from "clsx";
 
 export function Loading(props: { noLogo?: boolean }) {
@@ -158,6 +159,7 @@ function Screen() {
 
   useEffect(() => {
     loadAsyncGoogleFont();
+    useModelStore.getState().fetchModels();
   }, []);
 
   if (isArtifact) {
@@ -227,6 +229,7 @@ export function Home() {
     document.title = clientConfig?.title || "NextChatLite";
     console.log("[Config] got config from build time", clientConfig);
     useAccessStore.getState().fetch();
+    useModelStore.getState().fetchModels();
   }, []);
 
   if (!useHasHydrated()) {

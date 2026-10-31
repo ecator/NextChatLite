@@ -172,14 +172,10 @@ export class ChatGPTApi implements LLMApi {
         // find model, and get displayName as deployName
         const { models: configModels, customModels: configCustomModels } =
           useAppConfig.getState();
-        const {
-          defaultModel,
-          customModels: accessCustomModels,
-          useCustomConfig,
-        } = useAccessStore.getState();
+        const { defaultModel, useCustomConfig } = useAccessStore.getState();
         const models = collectModelsWithDefaultModel(
           configModels,
-          [configCustomModels, accessCustomModels].join(","),
+          configCustomModels,
           defaultModel,
         );
         const model = models.find(

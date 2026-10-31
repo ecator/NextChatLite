@@ -1,29 +1,60 @@
-import { getServerSideConfig } from "@/config/server";
+import { getServerSideConfig, getDefaultModel } from "@/config/server";
 import { getBuildConfig } from "@/config/build";
 
-describe("getServerSideConfig - OPENAI_URL", () => {
+describe("getServerSideConfig - DEFAULT_MODEL", () => {
   const originalEnv = process.env;
 
   beforeEach(() => {
     process.env = { ...originalEnv };
-    delete process.env.OPENAI_URL;
-    delete (process.env as any).BASE_URL;
+    delete process.env.DEFAULT_MODEL;
   });
 
   afterAll(() => {
     process.env = originalEnv;
   });
 
-  test("uses OPENAI_URL when defined", () => {
-    process.env.OPENAI_URL = "https://custom-openai.example.com";
+  test("defaults to first model in models.json (google/gemini-3.5-flash) when DEFAULT_MODEL is empty or unset", () => {
     const config = getServerSideConfig();
-    expect(config.openaiUrl).toBe("https://custom-openai.example.com");
+    expect(config.defaultModel).toBe("google/gemini-3.5-flash");
+    expect(getDefaultModel()).toBe("google/gemini-3.5-flash");
   });
 
-  test("does not read BASE_URL", () => {
-    (process.env as any).BASE_URL = "https://legacy-base.example.com";
+  test("preserves provider/model format when DEFAULT_MODEL already includes provider", () => {
+    process.env.DEFAULT_MODEL = "openai/gpt-5.1";
     const config = getServerSideConfig();
-    expect(config.openaiUrl).toBeUndefined();
+    expect(config.defaultModel).toBe("openai/gpt-5.1");
+
+    process.env.DEFAULT_MODEL = "google/gemini-2.5-flash";
+    expect(getDefaultModel()).toBe("google/gemini-2.5-flash");
+  });
+
+  test("resolves provider from models.json when DEFAULT_MODEL is specified without provider", () => {
+    process.env.DEFAULT_MODEL = "gpt-5-mini";
+    const config = getServerSideConfig();
+    expect(config.defaultModel).toBe("openai/gpt-5-mini");
+
+    process.env.DEFAULT_MODEL = "gemini-3.5-flash";
+    expect(getDefaultModel()).toBe("google/gemini-3.5-flash");
+  });
+
+  test("formats unknown models into provider/model using first provider as fallback", () => {
+    process.env.DEFAULT_MODEL = "my-custom-model";
+    const config = getServerSideConfig();
+    expect(config.defaultModel).toBe("google/my-custom-model");
+  });
+
+  test("contains only active server configuration without deprecated backwards-compatibility fields", () => {
+    const config = getServerSideConfig();
+    expect(config).toHaveProperty("title");
+    expect(config).toHaveProperty("subTitle");
+    expect(config).toHaveProperty("defaultModel");
+    expect((config as any).gaId).toBeUndefined();
+    expect((config as any).gtmId).toBeUndefined();
+    expect((config as any).isVercel).toBeUndefined();
+    expect((config as any).needCode).toBeUndefined();
+    expect((config as any).codes).toBeUndefined();
+    expect((config as any).customModels).toBeUndefined();
+    expect((config as any).visionModels).toBeUndefined();
   });
 });
 

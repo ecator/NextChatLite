@@ -13,6 +13,10 @@ declare module "*.scss" {
 declare module "*.svg";
 
 declare global {
+  interface Window {
+    _SW_ENABLED?: boolean;
+    clipboardData?: any;
+  }
   namespace JSX {
     type Element = ReactJSX.Element;
     type IntrinsicElements = ReactJSX.IntrinsicElements;

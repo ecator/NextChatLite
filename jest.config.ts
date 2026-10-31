@@ -20,7 +20,7 @@ export default async () => {
   return {
     ...jestConfig,
     transformIgnorePatterns: [
-      "/node_modules/(?!(\\.pnpm|nanoid|lodash-es|@ai-sdk|ai|react-markdown|@opencode-ai))",
+      "/node_modules/(?!(\\.pnpm|nanoid|lodash-es|@ai-sdk|ai|react-markdown|@opencode-ai|@workflow))",
     ],
   };
 };

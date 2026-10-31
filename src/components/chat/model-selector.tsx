@@ -38,10 +38,8 @@ export function ModelSelector(props: {
   const [selectedProvider, setSelectedProvider] = useState<string>("all");
 
   useEffect(() => {
-    if (!modelStore.isLoaded()) {
-      modelStore.fetchModels();
-    }
-  }, [modelStore]);
+    useModelStore.getState().fetchModels();
+  }, []);
 
   const allModels = useMemo(() => {
     return modelStore.getAllModels();
