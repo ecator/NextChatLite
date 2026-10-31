@@ -47,8 +47,6 @@ const cn = {
       FullScreen: "全屏",
       RefreshTitle: "刷新标题",
       RefreshToast: "已发送刷新标题请求",
-      Speech: "朗读",
-      StopSpeech: "停止",
     },
     Commands: {
       new: "新建聊天",
@@ -566,26 +564,6 @@ const cn = {
     FrequencyPenalty: {
       Title: "频率惩罚度 (frequency_penalty)",
       SubTitle: "值越大，越有可能降低重复字词",
-    },
-    TTS: {
-      Enable: {
-        Title: "启用文本转语音",
-        SubTitle: "启用文本生成语音服务",
-      },
-      Autoplay: {
-        Title: "启用自动朗读",
-        SubTitle: "自动生成语音并播放，需先开启文本转语音开关",
-      },
-      Model: "模型",
-      Engine: "转换引擎",
-      Voice: {
-        Title: "声音",
-        SubTitle: "生成语音时使用的声音",
-      },
-      Speed: {
-        Title: "速度",
-        SubTitle: "生成语音的速度",
-      },
     },
     Realtime: {
       Enable: {

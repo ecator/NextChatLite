@@ -46,8 +46,6 @@ const da: PartialLocaleType = {
       FullScreen: "Fuld skærm",
       RefreshTitle: "Opdatér titel",
       RefreshToast: "Anmodning om ny titel sendt",
-      Speech: "Afspil",
-      StopSpeech: "Stop",
     },
     Commands: {
       new: "Ny chat",
@@ -545,26 +543,6 @@ const da: PartialLocaleType = {
     FrequencyPenalty: {
       Title: "Gentagelsesstraf",
       SubTitle: "Jo højere tal, jo mindre gentagelse",
-    },
-    TTS: {
-      Enable: {
-        Title: "Tænd for oplæsning (TTS)",
-        SubTitle: "Slå tekst-til-tale til",
-      },
-      Autoplay: {
-        Title: "Automatisk oplæsning",
-        SubTitle: "Laver lyd automatisk, hvis TTS er slået til",
-      },
-      Model: "Model",
-      Voice: {
-        Title: "Stemme",
-        SubTitle: "Hvilken stemme der bruges til lyd",
-      },
-      Speed: {
-        Title: "Hastighed",
-        SubTitle: "Hvor hurtigt der oplæses",
-      },
-      Engine: "TTS-motor",
     },
     Realtime: {
       Enable: {

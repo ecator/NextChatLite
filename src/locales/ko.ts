@@ -48,8 +48,6 @@ const ko: PartialLocaleType = {
       FullScreen: "전체 화면",
       RefreshTitle: "제목 새로고침",
       RefreshToast: "제목 새로고침 요청이 전송되었습니다",
-      Speech: "재생",
-      StopSpeech: "정지",
     },
     Commands: {
       new: "새 채팅",
@@ -569,27 +567,6 @@ const ko: PartialLocaleType = {
     FrequencyPenalty: {
       Title: "빈도 벌점 (frequency_penalty)",
       SubTitle: "값이 클수록 중복 단어 감소 가능성 높음",
-    },
-    TTS: {
-      Enable: {
-        Title: "TTS 활성화",
-        SubTitle: "TTS 서비스 활성화",
-      },
-      Autoplay: {
-        Title: "자동 재생 활성화",
-        SubTitle:
-          "자동으로 음성을 생성하고 재생, 먼저 TTS 스위치를 활성화해야 함",
-      },
-      Model: "모델",
-      Voice: {
-        Title: "음성",
-        SubTitle: "음성을 생성할 때 사용할 음성",
-      },
-      Speed: {
-        Title: "속도",
-        SubTitle: "생성된 음성의 속도",
-      },
-      Engine: "TTS Engine",
     },
     Realtime: {
       Enable: {
