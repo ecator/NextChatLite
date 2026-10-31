@@ -47,6 +47,3 @@ dev
 
 masks.json
 
-# agents
-.agents/
-skills-lock.json
