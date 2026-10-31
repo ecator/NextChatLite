@@ -1,5 +1,4 @@
 import { LLMModel } from "../client/api";
-import { DalleQuality, DalleStyle, ModelSize } from "../typing";
 import { getClientConfig } from "../config/client";
 import {
   DEFAULT_INPUT_TEMPLATE,
@@ -78,9 +77,9 @@ export const DEFAULT_CONFIG = {
     compressProviderName: "",
     enableInjectSystemPrompts: true,
     template: config?.template ?? DEFAULT_INPUT_TEMPLATE,
-    size: "1024x1024" as ModelSize,
-    quality: "standard" as DalleQuality,
-    style: "vivid" as DalleStyle,
+    thinkingLevel: undefined as
+      "minimal" | "low" | "medium" | "high" | undefined,
+    thinkingBudget: undefined as number | undefined,
   },
 
   ttsConfig: {
@@ -245,7 +244,7 @@ export const useAppConfig = createPersistStore(
         state.modelConfig.template =
           state.modelConfig.template !== DEFAULT_INPUT_TEMPLATE
             ? state.modelConfig.template
-            : config?.template ?? DEFAULT_INPUT_TEMPLATE;
+            : (config?.template ?? DEFAULT_INPUT_TEMPLATE);
       }
 
       if (version < 4.1) {

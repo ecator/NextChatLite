@@ -22,7 +22,7 @@ import {
   getTimeoutMSByModel,
 } from "@/app/utils";
 import { RequestPayload } from "./openai";
-import { fetch } from "@/app/utils/stream";
+import { fetch } from "@/app/utils";
 import { preProcessImageContent } from "@/app/utils/chat";
 
 interface BasePayload {
@@ -90,7 +90,7 @@ export class ChatGLMApi implements LLMApi {
         return {
           model: modelConfig.model,
           prompt,
-          size: options.config.size,
+          size: (options.config as any)?.size,
         } as ImageGenerationPayload;
       default:
         return {

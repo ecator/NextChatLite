@@ -8,7 +8,6 @@ import { handle as baiduHandler } from "../../baidu";
 import { handle as bytedanceHandler } from "../../bytedance";
 import { handle as alibabaHandler } from "../../alibaba";
 import { handle as moonshotHandler } from "../../moonshot";
-import { handle as stabilityHandler } from "../../stability";
 import { handle as iflytekHandler } from "../../iflytek";
 import { handle as deepseekHandler } from "../../deepseek";
 import { handle as siliconflowHandler } from "../../siliconflow";
@@ -19,8 +18,9 @@ import { handle as ai302Handler } from "../../302ai";
 
 async function handle(
   req: NextRequest,
-  { params }: { params: { provider: string; path: string[] } },
+  props: { params: Promise<{ provider: string; path: string[] }> },
 ) {
+  const params = await props.params;
   const apiPath = `/api/${params.provider}`;
   console.log(`[${params.provider} Route] params `, params);
   switch (apiPath) {
@@ -39,8 +39,6 @@ async function handle(
     // case ApiPath.Tencent: using "/api/tencent"
     case ApiPath.Moonshot:
       return moonshotHandler(req, { params });
-    case ApiPath.Stability:
-      return stabilityHandler(req, { params });
     case ApiPath.Iflytek:
       return iflytekHandler(req, { params });
     case ApiPath.DeepSeek:

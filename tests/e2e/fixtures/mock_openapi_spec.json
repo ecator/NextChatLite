@@ -1,0 +1,63 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Weather Information API",
+    "description": "API for fetching real-time weather information and forecasts",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.weather-example.com/v1"
+    }
+  ],
+  "paths": {
+    "/weather/current": {
+      "get": {
+        "operationId": "getCurrentWeather",
+        "summary": "Get current weather for a city",
+        "parameters": [
+          {
+            "name": "location",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "City name, e.g. San Francisco, Tokyo"
+          },
+          {
+            "name": "unit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["celsius", "fahrenheit"],
+              "default": "celsius"
+            },
+            "description": "Temperature unit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful weather lookup",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "city": { "type": "string" },
+                    "temperature": { "type": "number" },
+                    "condition": { "type": "string" },
+                    "humidity": { "type": "number" },
+                    "windSpeed": { "type": "number" }
+                  },
+                  "required": ["city", "temperature", "condition"]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

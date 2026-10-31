@@ -1,18 +1,10 @@
-import { getClientConfig } from "../config/client";
 import { SubmitKey } from "../store/config";
-import { SAAS_CHAT_UTM_URL } from "@/app/constant";
 import { PartialLocaleType } from "./index";
 
-const isApp = !!getClientConfig()?.isApp;
 const da: PartialLocaleType = {
   WIP: "Der kommer snart mere...",
   Error: {
-    Unauthorized: isApp
-      ? `Hov, der skete en fejl. Sådan kan du komme videre:
-       \\ 1️⃣ Er du ny her? [Tryk for at starte nu 🚀](${SAAS_CHAT_UTM_URL})
-       \\ 2️⃣ Vil du bruge dine egne OpenAI-nøgler? [Tryk her](/#/settings) for at ændre indstillinger ⚙️`
-      : `Hov, der skete en fejl. Lad os løse det:
-       \\ 1️⃣ Er du ny her? [Tryk for at starte nu 🚀](${SAAS_CHAT_UTM_URL})
+    Unauthorized: `Hov, der skete en fejl. Lad os løse det:
        \\ 2️⃣ Bruger du en privat opsætning? [Tryk her](/#/auth) for at taste din nøgle 🔑
        \\ 3️⃣ Vil du bruge dine egne OpenAI-nøgler? [Tryk her](/#/settings) for at ændre indstillinger ⚙️
        `,

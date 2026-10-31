@@ -5,12 +5,8 @@ import {
 } from "@/app/constant";
 import { MultimodalContent, RequestMessage } from "@/app/client/api";
 import Locale from "@/app/locales";
-import {
-  EventStreamContentType,
-  fetchEventSource,
-} from "@fortaine/fetch-event-source";
+import { EventStreamContentType, fetchEventSource } from "./sse";
 import { prettyObject } from "./format";
-import { fetch as tauriFetch } from "./stream";
 
 export function compressImage(file: Blob, maxSize: number): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -317,7 +313,6 @@ export function stream(
       REQUEST_TIMEOUT_MS,
     );
     fetchEventSource(chatPath, {
-      fetch: tauriFetch as any,
       ...chatPayload,
       async onopen(res) {
         clearTimeout(requestTimeoutId);
@@ -543,7 +538,6 @@ export function streamWithThink(
       REQUEST_TIMEOUT_MS,
     );
     fetchEventSource(chatPath, {
-      fetch: tauriFetch as any,
       ...chatPayload,
       async onopen(res) {
         clearTimeout(requestTimeoutId);

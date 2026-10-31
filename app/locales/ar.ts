@@ -1,18 +1,10 @@
 import { SubmitKey } from "../store/config";
 import type { PartialLocaleType } from "./index";
-import { getClientConfig } from "../config/client";
-import { SAAS_CHAT_UTM_URL } from "@/app/constant";
-const isApp = !!getClientConfig()?.isApp;
 
 const ar: PartialLocaleType = {
   WIP: "قريبًا...",
   Error: {
-    Unauthorized: isApp
-      ? `😆 واجهت المحادثة بعض المشكلات، لا داعي للقلق:
-    \\ 1️⃣ إذا كنت ترغب في تجربة دون إعداد، [انقر هنا لبدء المحادثة فورًا 🚀](${SAAS_CHAT_UTM_URL})
-    \\ 2️⃣ إذا كنت تريد استخدام موارد OpenAI الخاصة بك، انقر [هنا](/#/settings) لتعديل الإعدادات ⚙️`
-      : `😆 واجهت المحادثة بعض المشكلات، لا داعي للقلق:
-    \ 1️⃣ إذا كنت ترغب في تجربة دون إعداد، [انقر هنا لبدء المحادثة فورًا 🚀](${SAAS_CHAT_UTM_URL})
+    Unauthorized: `😆 واجهت المحادثة بعض المشكلات، لا داعي للقلق:
     \ 2️⃣ إذا كنت تستخدم إصدار النشر الخاص، انقر [هنا](/#/auth) لإدخال مفتاح الوصول 🔑
     \ 3️⃣ إذا كنت تريد استخدام موارد OpenAI الخاصة بك، انقر [هنا](/#/settings) لتعديل الإعدادات ⚙️
  `,

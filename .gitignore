@@ -47,5 +47,6 @@ dev
 
 masks.json
 
-# mcp config
-app/mcp/mcp_config.json
+# agents
+.agents/
+skills-lock.json

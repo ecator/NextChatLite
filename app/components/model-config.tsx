@@ -1,5 +1,7 @@
 import { ServiceProvider } from "@/app/constant";
 import { ModalConfigValidator, ModelConfig } from "../store";
+import { useModelStore } from "../store/models";
+import { ParameterValidator } from "../utils/model-limits";
 
 import Locale from "../locales";
 import { InputRange } from "./input-range";
@@ -14,12 +16,19 @@ export function ModelConfigList(props: {
   updateConfig: (updater: (config: ModelConfig) => void) => void;
 }) {
   const allModels = useAllModels();
+  const modelStore = useModelStore();
+  const currentModelMeta = modelStore.getModel(props.modelConfig.model);
+
   const groupModels = groupBy(
     allModels.filter((v) => v.available),
     "provider.providerName",
   );
   const value = `${props.modelConfig.model}@${props.modelConfig?.providerName}`;
   const compressModelValue = `${props.modelConfig.compressModel}@${props.modelConfig?.compressProviderName}`;
+
+  const maxOutputLimit = currentModelMeta?.outputLimit || 512000;
+  const maxContextLimit = currentModelMeta?.contextLimit || 128000;
+  const supportsTemp = currentModelMeta?.supportsTemperature !== false;
 
   return (
     <>
@@ -32,43 +41,64 @@ export function ModelConfigList(props: {
             const [model, providerName] = getModelProvider(
               e.currentTarget.value,
             );
+            const targetMeta = modelStore.getModel(model);
             props.updateConfig((config) => {
               config.model = ModalConfigValidator.model(model);
               config.providerName = providerName as ServiceProvider;
+              if (
+                targetMeta?.outputLimit &&
+                config.max_tokens > targetMeta.outputLimit
+              ) {
+                config.max_tokens = targetMeta.outputLimit;
+              }
             });
           }}
         >
           {Object.keys(groupModels).map((providerName, index) => (
             <optgroup label={providerName} key={index}>
-              {groupModels[providerName].map((v, i) => (
-                <option value={`${v.name}@${v.provider?.providerName}`} key={i}>
-                  {v.displayName}
-                </option>
-              ))}
+              {groupModels[providerName].map((v, i) => {
+                const meta = modelStore.getModel(v.name);
+                const badges = [];
+                if (meta?.hasVision) badges.push("👁️");
+                if (meta?.hasReasoning) badges.push("🧠");
+                const badgeStr =
+                  badges.length > 0 ? ` [${badges.join("")}]` : "";
+                return (
+                  <option
+                    value={`${v.name}@${v.provider?.providerName}`}
+                    key={i}
+                  >
+                    {v.displayName}
+                    {badgeStr}
+                  </option>
+                );
+              })}
             </optgroup>
           ))}
         </Select>
       </ListItem>
-      <ListItem
-        title={Locale.Settings.Temperature.Title}
-        subTitle={Locale.Settings.Temperature.SubTitle}
-      >
-        <InputRange
-          aria={Locale.Settings.Temperature.Title}
-          value={props.modelConfig.temperature?.toFixed(1)}
-          min="0"
-          max="1" // lets limit it to 0-1
-          step="0.1"
-          onChange={(e) => {
-            props.updateConfig(
-              (config) =>
-                (config.temperature = ModalConfigValidator.temperature(
-                  e.currentTarget.valueAsNumber,
-                )),
-            );
-          }}
-        ></InputRange>
-      </ListItem>
+      {supportsTemp && (
+        <ListItem
+          title={Locale.Settings.Temperature.Title}
+          subTitle={Locale.Settings.Temperature.SubTitle}
+        >
+          <InputRange
+            aria={Locale.Settings.Temperature.Title}
+            value={props.modelConfig.temperature?.toFixed(1)}
+            min="0"
+            max="1" // lets limit it to 0-1
+            step="0.1"
+            onChange={(e) => {
+              props.updateConfig(
+                (config) =>
+                  (config.temperature = ModalConfigValidator.temperature(
+                    e.currentTarget.valueAsNumber,
+                  )),
+              );
+            }}
+          ></InputRange>
+        </ListItem>
+      )}
       <ListItem
         title={Locale.Settings.TopP.Title}
         subTitle={Locale.Settings.TopP.SubTitle}
@@ -91,24 +121,70 @@ export function ModelConfigList(props: {
       </ListItem>
       <ListItem
         title={Locale.Settings.MaxTokens.Title}
-        subTitle={Locale.Settings.MaxTokens.SubTitle}
+        subTitle={`${Locale.Settings.MaxTokens.SubTitle} (Max: ${maxOutputLimit})`}
       >
         <input
           aria-label={Locale.Settings.MaxTokens.Title}
           type="number"
           min={1024}
-          max={512000}
+          max={maxOutputLimit}
           value={props.modelConfig.max_tokens}
-          onChange={(e) =>
-            props.updateConfig(
-              (config) =>
-                (config.max_tokens = ModalConfigValidator.max_tokens(
-                  e.currentTarget.valueAsNumber,
-                )),
-            )
-          }
+          onChange={(e) => {
+            const val = e.currentTarget.valueAsNumber;
+            const clamped = ParameterValidator.validateMaxTokens(
+              val,
+              maxOutputLimit,
+            );
+            props.updateConfig((config) => (config.max_tokens = clamped));
+          }}
         ></input>
       </ListItem>
+
+      {currentModelMeta?.hasReasoning &&
+        (currentModelMeta.reasoningType === "budget" ? (
+          <ListItem
+            title="Thinking Budget"
+            subTitle="Max token budget allocated for reasoning (0 = default/auto)"
+          >
+            <input
+              aria-label="Thinking Budget"
+              type="number"
+              min={0}
+              max={65536}
+              value={props.modelConfig.thinkingBudget ?? 0}
+              onChange={(e) => {
+                const val = e.currentTarget.valueAsNumber;
+                props.updateConfig((config) => {
+                  config.thinkingBudget =
+                    isNaN(val) || val <= 0 ? undefined : Math.min(val, 65536);
+                });
+              }}
+            />
+          </ListItem>
+        ) : (
+          <ListItem
+            title="Thinking Level"
+            subTitle="Reasoning intensity level for thinking-capable models"
+          >
+            <Select
+              aria-label="Thinking Level"
+              value={props.modelConfig.thinkingLevel ?? "default"}
+              onChange={(e) => {
+                const val = e.currentTarget.value;
+                props.updateConfig((config) => {
+                  config.thinkingLevel =
+                    val === "default" ? undefined : (val as any);
+                });
+              }}
+            >
+              <option value="default">Default / Auto</option>
+              <option value="minimal">Minimal</option>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </Select>
+          </ListItem>
+        ))}
 
       {props.modelConfig?.providerName == ServiceProvider.Google ? null : (
         <>
@@ -212,19 +288,21 @@ export function ModelConfigList(props: {
 
       <ListItem
         title={Locale.Settings.CompressThreshold.Title}
-        subTitle={Locale.Settings.CompressThreshold.SubTitle}
+        subTitle={`${Locale.Settings.CompressThreshold.SubTitle} (Max: ${Math.min(maxContextLimit, 1000000)})`}
       >
         <input
           aria-label={Locale.Settings.CompressThreshold.Title}
           type="number"
           min={500}
-          max={4000}
+          max={Math.min(maxContextLimit, 1000000)}
           value={props.modelConfig.compressMessageLengthThreshold}
           onChange={(e) =>
             props.updateConfig(
               (config) =>
-                (config.compressMessageLengthThreshold =
-                  e.currentTarget.valueAsNumber),
+                (config.compressMessageLengthThreshold = Math.min(
+                  e.currentTarget.valueAsNumber,
+                  maxContextLimit,
+                )),
             )
           }
         ></input>

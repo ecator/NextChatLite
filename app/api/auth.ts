@@ -4,7 +4,7 @@ import md5 from "spark-md5";
 import { ACCESS_CODE_PREFIX, ModelProvider } from "../constant";
 
 function getIP(req: NextRequest) {
-  let ip = req.ip ?? req.headers.get("x-real-ip");
+  let ip = req.headers.get("x-real-ip");
   const forwardedFor = req.headers.get("x-forwarded-for");
 
   if (!ip && forwardedFor) {
@@ -67,9 +67,6 @@ export function auth(req: NextRequest, modelProvider: ModelProvider) {
     let systemApiKey: string | undefined;
 
     switch (modelProvider) {
-      case ModelProvider.Stability:
-        systemApiKey = serverConfig.stabilityApiKey;
-        break;
       case ModelProvider.GeminiPro:
         systemApiKey = serverConfig.googleApiKey;
         break;

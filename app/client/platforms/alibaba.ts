@@ -27,7 +27,7 @@ import {
   getTimeoutMSByModel,
   isVisionModel,
 } from "@/app/utils";
-import { fetch } from "@/app/utils/stream";
+import { fetch } from "@/app/utils";
 
 export interface OpenAIListModelResponse {
   object: string;
@@ -110,8 +110,8 @@ export class QwenApi implements LLMApi {
         visionModel
           ? await preProcessImageContentForAlibabaDashScope(v.content)
           : v.role === "assistant"
-          ? getMessageTextContentWithoutThinking(v)
-          : getMessageTextContent(v)
+            ? getMessageTextContentWithoutThinking(v)
+            : getMessageTextContent(v)
       ) as any;
 
       messages.push({ role: v.role, content });

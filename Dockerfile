@@ -1,29 +1,28 @@
-FROM node:18-alpine AS base
+FROM node:20-alpine AS base
+
+# Install pnpm
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
 
 FROM base AS deps
-
 RUN apk add --no-cache libc6-compat
-
 WORKDIR /app
 
-COPY package.json yarn.lock ./
-
-RUN yarn config set registry 'https://registry.npmmirror.com/'
-RUN yarn install
+COPY package.json pnpm-lock.yaml* ./
+RUN pnpm install
 
 FROM base AS builder
-
 RUN apk update && apk add --no-cache git
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
 
 ENV OPENAI_API_KEY=""
 ENV GOOGLE_API_KEY=""
 ENV CODE=""
 
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-
-RUN yarn build
+RUN pnpm build
 
 FROM base AS runner
 WORKDIR /app
@@ -34,20 +33,18 @@ ENV PROXY_URL=""
 ENV OPENAI_API_KEY=""
 ENV GOOGLE_API_KEY=""
 ENV CODE=""
-ENV ENABLE_MCP=""
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/.next/server ./.next/server
 
-RUN mkdir -p /app/app/mcp && chmod 777 /app/app/mcp
-COPY --from=builder /app/app/mcp/mcp_config.default.json /app/app/mcp/mcp_config.json
-
 EXPOSE 3000
 
 CMD if [ -n "$PROXY_URL" ]; then \
-    export HOSTNAME="0.0.0.0"; \
     protocol=$(echo $PROXY_URL | cut -d: -f1); \
     host=$(echo $PROXY_URL | cut -d/ -f3 | cut -d: -f1); \
     port=$(echo $PROXY_URL | cut -d: -f3); \
@@ -61,7 +58,6 @@ CMD if [ -n "$PROXY_URL" ]; then \
     echo "localnet ::1/128" >> $conf; \
     echo "[ProxyList]" >> $conf; \
     echo "$protocol $host $port" >> $conf; \
-    cat /etc/proxychains.conf; \
     proxychains -f $conf node server.js; \
     else \
     node server.js; \

@@ -12,14 +12,11 @@ import {
   SpeechOptions,
 } from "../api";
 import Locale from "../../locales";
-import {
-  EventStreamContentType,
-  fetchEventSource,
-} from "@fortaine/fetch-event-source";
+import { EventStreamContentType, fetchEventSource } from "@/app/utils/sse";
 import { prettyObject } from "@/app/utils/format";
 import { getClientConfig } from "@/app/config/client";
 import { getMessageTextContent, getTimeoutMSByModel } from "@/app/utils";
-import { fetch } from "@/app/utils/stream";
+import { fetch } from "@/app/utils";
 
 export interface OpenAIListModelResponse {
   object: string;

@@ -9,8 +9,6 @@ export const FETCH_COMMIT_URL = `https://api.github.com/repos/${OWNER}/${REPO}/c
 export const FETCH_TAG_URL = `https://api.github.com/repos/${OWNER}/${REPO}/tags?per_page=1`;
 export const RUNTIME_CONFIG_DOM = "danger-runtime-config";
 
-export const STABILITY_BASE_URL = "https://api.stability.ai";
-
 export const OPENAI_BASE_URL = "https://api.openai.com";
 export const ANTHROPIC_BASE_URL = "https://api.anthropic.com";
 
@@ -49,11 +47,8 @@ export enum Path {
   Masks = "/masks",
   Plugins = "/plugins",
   Auth = "/auth",
-  Sd = "/sd",
-  SdNew = "/sd-new",
   Artifacts = "/artifacts",
   SearchChat = "/search-chat",
-  McpMarket = "/mcp-market",
 }
 
 export enum ApiPath {
@@ -68,7 +63,6 @@ export enum ApiPath {
   Tencent = "/api/tencent",
   Moonshot = "/api/moonshot",
   Iflytek = "/api/iflytek",
-  Stability = "/api/stability",
   Artifacts = "/api/artifacts",
   XAI = "/api/xai",
   ChatGLM = "/api/chatglm",
@@ -96,8 +90,7 @@ export enum StoreKey {
   Prompt = "prompt-store",
   Update = "chat-update",
   Sync = "sync",
-  SdList = "sd-list",
-  Mcp = "mcp-store",
+  Models = "models-dev-store",
 }
 
 export const DEFAULT_SIDEBAR_WIDTH = 300;
@@ -127,7 +120,6 @@ export enum ServiceProvider {
   Alibaba = "Alibaba",
   Tencent = "Tencent",
   Moonshot = "Moonshot",
-  Stability = "Stability",
   Iflytek = "Iflytek",
   XAI = "XAI",
   ChatGLM = "ChatGLM",
@@ -146,7 +138,6 @@ export enum GoogleSafetySettingsThreshold {
 }
 
 export enum ModelProvider {
-  Stability = "Stability",
   GPT = "GPT",
   GeminiPro = "GeminiPro",
   Claude = "Claude",
@@ -162,11 +153,6 @@ export enum ModelProvider {
   SiliconFlow = "SiliconFlow",
   "302.AI" = "302.AI",
 }
-
-export const Stability = {
-  GeneratePath: "v2beta/stable-image/generate",
-  ExampleEndpoint: "https://api.stability.ai",
-};
 
 export const Anthropic = {
   ChatPath: "v1/messages",
@@ -296,130 +282,6 @@ Latex inline: \\(x^2\\)
 Latex block: $$e=mc^2$$
 `;
 
-export const MCP_TOOLS_TEMPLATE = `
-[clientId]
-{{ clientId }}
-[tools]
-{{ tools }}
-`;
-
-export const MCP_SYSTEM_TEMPLATE = `
-You are an AI assistant with access to system tools. Your role is to help users by combining natural language understanding with tool operations when needed.
-
-1. AVAILABLE TOOLS:
-{{ MCP_TOOLS }}
-
-2. WHEN TO USE TOOLS:
-   - ALWAYS USE TOOLS when they can help answer user questions
-   - DO NOT just describe what you could do - TAKE ACTION immediately
-   - If you're not sure whether to use a tool, USE IT
-   - Common triggers for tool use:
-     * Questions about files or directories
-     * Requests to check, list, or manipulate system resources
-     * Any query that can be answered with available tools
-
-3. HOW TO USE TOOLS:
-   A. Tool Call Format:
-      - Use markdown code blocks with format: \`\`\`json:mcp:{clientId}\`\`\`
-      - Always include:
-        * method: "tools/call"（Only this method is supported）
-        * params: 
-          - name: must match an available primitive name
-          - arguments: required parameters for the primitive
-
-   B. Response Format:
-      - Tool responses will come as user messages
-      - Format: \`\`\`json:mcp-response:{clientId}\`\`\`
-      - Wait for response before making another tool call
-
-   C. Important Rules:
-      - Only use tools/call method
-      - Only ONE tool call per message
-      - ALWAYS TAKE ACTION instead of just describing what you could do
-      - Include the correct clientId in code block language tag
-      - Verify arguments match the primitive's requirements
-
-4. INTERACTION FLOW:
-   A. When user makes a request:
-      - IMMEDIATELY use appropriate tool if available
-      - DO NOT ask if user wants you to use the tool
-      - DO NOT just describe what you could do
-   B. After receiving tool response:
-      - Explain results clearly
-      - Take next appropriate action if needed
-   C. If tools fail:
-      - Explain the error
-      - Try alternative approach immediately
-
-5. EXAMPLE INTERACTION:
-
-  good example:
-
-   \`\`\`json:mcp:filesystem
-   {
-     "method": "tools/call",
-     "params": {
-       "name": "list_allowed_directories",
-       "arguments": {}
-     }
-   }
-   \`\`\`"
-
-
-  \`\`\`json:mcp-response:filesystem
-  {
-  "method": "tools/call",
-  "params": {
-    "name": "write_file",
-    "arguments": {
-      "path": "/Users/river/dev/nextchat/test/joke.txt",
-      "content": "为什么数学书总是感到忧伤？因为它有太多的问题。"
-    }
-  }
-  }
-\`\`\`
-
-   follwing is the wrong! mcp json example:
-
-   \`\`\`json:mcp:filesystem
-   {
-      "method": "write_file",
-      "params": {
-        "path": "NextChat_Information.txt",
-        "content": "1"
-    }
-   }
-   \`\`\`
-
-   This is wrong because the method is not tools/call.
-   
-   \`\`\`{
-  "method": "search_repositories",
-  "params": {
-    "query": "2oeee"
-  }
-}
-   \`\`\`
-
-   This is wrong because the method is not tools/call.!!!!!!!!!!!
-
-   the right format is:
-   \`\`\`json:mcp:filesystem
-   {
-     "method": "tools/call",
-     "params": {
-       "name": "search_repositories",
-       "arguments": {
-         "query": "2oeee"
-       }
-     }
-   }
-   \`\`\`
-   
-   please follow the format strictly ONLY use tools/call method!!!!!!!!!!!
-   
-`;
-
 export const SUMMARIZE_MODEL = "gpt-4o-mini";
 export const GEMINI_SUMMARIZE_MODEL = "gemini-pro";
 export const DEEPSEEK_SUMMARIZE_MODEL = "deepseek-chat";
@@ -493,7 +355,7 @@ export const VISION_MODEL_REGEXES = [
   /o3/,
   /o4-mini/,
   /grok-4/i,
-  /gpt-5/
+  /gpt-5/,
 ];
 
 export const EXCLUDE_VISION_MODEL_REGEXES = [/claude-3-5-haiku-20241022/];
@@ -561,7 +423,7 @@ const googleModels = [
   "gemini-2.0-pro-exp",
   "gemini-2.0-pro-exp-02-05",
   "gemini-2.5-pro-preview-06-05",
-  "gemini-2.5-pro"
+  "gemini-2.5-pro",
 ];
 
 const anthropicModels = [
@@ -928,6 +790,3 @@ export const internalAllowedWebDavEndpoints = [
 ];
 
 export const DEFAULT_GA_ID = "G-89WN60ZK2E";
-
-export const SAAS_CHAT_URL = "https://nextchat.club";
-export const SAAS_CHAT_UTM_URL = "https://nextchat.club?utm=github";

@@ -11,7 +11,6 @@ import {
   ALIBABA_BASE_URL,
   TENCENT_BASE_URL,
   MOONSHOT_BASE_URL,
-  STABILITY_BASE_URL,
   IFLYTEK_BASE_URL,
   DEEPSEEK_BASE_URL,
   XAI_BASE_URL,
@@ -45,8 +44,6 @@ const DEFAULT_ALIBABA_URL = isApp ? ALIBABA_BASE_URL : ApiPath.Alibaba;
 const DEFAULT_TENCENT_URL = isApp ? TENCENT_BASE_URL : ApiPath.Tencent;
 
 const DEFAULT_MOONSHOT_URL = isApp ? MOONSHOT_BASE_URL : ApiPath.Moonshot;
-
-const DEFAULT_STABILITY_URL = isApp ? STABILITY_BASE_URL : ApiPath.Stability;
 
 const DEFAULT_IFLYTEK_URL = isApp ? IFLYTEK_BASE_URL : ApiPath.Iflytek;
 
@@ -104,10 +101,6 @@ const DEFAULT_ACCESS_STATE = {
   // moonshot
   moonshotUrl: DEFAULT_MOONSHOT_URL,
   moonshotApiKey: "",
-
-  //stability
-  stabilityUrl: DEFAULT_STABILITY_URL,
-  stabilityApiKey: "",
 
   // tencent
   tencentUrl: DEFAULT_TENCENT_URL,
@@ -224,6 +217,48 @@ export const useAccessStore = createPersistStore(
 
     isValidSiliconFlow() {
       return ensure(get(), ["siliconflowApiKey"]);
+    },
+
+    getApiKeyByProvider(provider?: string): string {
+      const p = (provider || "").toLowerCase();
+      const state = get();
+      if (p.includes("google") || p.includes("gemini"))
+        return state.googleApiKey;
+      if (p.includes("anthropic") || p.includes("claude"))
+        return state.anthropicApiKey;
+      if (p.includes("azure")) return state.azureApiKey;
+      if (p.includes("deepseek")) return state.deepseekApiKey;
+      if (p.includes("moonshot")) return state.moonshotApiKey;
+      if (p.includes("siliconflow")) return state.siliconflowApiKey;
+      if (p.includes("xai")) return state.xaiApiKey;
+      if (p.includes("chatglm") || p.includes("glm"))
+        return state.chatglmApiKey;
+      if (p.includes("302")) return state.ai302ApiKey;
+      if (p.includes("alibaba")) return state.alibabaApiKey;
+      if (p.includes("bytedance")) return state.bytedanceApiKey;
+      if (p.includes("baidu")) return state.baiduApiKey;
+      if (p.includes("iflytek")) return state.iflytekApiKey;
+      return state.openaiApiKey;
+    },
+
+    getBaseUrlByProvider(provider?: string): string {
+      const p = (provider || "").toLowerCase();
+      const state = get();
+      if (p.includes("google") || p.includes("gemini")) return state.googleUrl;
+      if (p.includes("anthropic") || p.includes("claude"))
+        return state.anthropicUrl;
+      if (p.includes("azure")) return state.azureUrl;
+      if (p.includes("deepseek")) return state.deepseekUrl;
+      if (p.includes("moonshot")) return state.moonshotUrl;
+      if (p.includes("siliconflow")) return state.siliconflowUrl;
+      if (p.includes("xai")) return state.xaiUrl;
+      if (p.includes("chatglm") || p.includes("glm")) return state.chatglmUrl;
+      if (p.includes("302")) return state.ai302Url;
+      if (p.includes("alibaba")) return state.alibabaUrl;
+      if (p.includes("bytedance")) return state.bytedanceUrl;
+      if (p.includes("baidu")) return state.baiduUrl;
+      if (p.includes("iflytek")) return state.iflytekUrl;
+      return state.openaiUrl;
     },
 
     isAuthorized() {

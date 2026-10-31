@@ -1,6 +1,46 @@
 import { StateStorage } from "zustand/middleware";
 import { get, set, del, clear } from "idb-keyval";
-import { safeLocalStorage } from "@/app/utils";
+
+function safeLocalStorage(): {
+  getItem: (key: string) => string | null;
+  setItem: (key: string, value: string) => void;
+  removeItem: (key: string) => void;
+  clear: () => void;
+} {
+  let storage: Storage | null = null;
+  try {
+    if (typeof window !== "undefined" && window.localStorage) {
+      storage = window.localStorage;
+    }
+  } catch (e) {
+    storage = null;
+  }
+
+  return {
+    getItem(key: string): string | null {
+      try {
+        return storage ? storage.getItem(key) : null;
+      } catch {
+        return null;
+      }
+    },
+    setItem(key: string, value: string): void {
+      try {
+        if (storage) storage.setItem(key, value);
+      } catch {}
+    },
+    removeItem(key: string): void {
+      try {
+        if (storage) storage.removeItem(key);
+      } catch {}
+    },
+    clear(): void {
+      try {
+        if (storage) storage.clear();
+      } catch {}
+    },
+  };
+}
 
 const localStorage = safeLocalStorage();
 

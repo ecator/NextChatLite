@@ -1,18 +1,8 @@
-import {
-  getMessageTextContent,
-  isDalle3,
-  safeLocalStorage,
-  trimTopic,
-} from "../utils";
+import { getMessageTextContent, safeLocalStorage, trimTopic } from "../utils";
 
 import { indexedDBStorage } from "@/app/utils/indexedDB-storage";
 import { nanoid } from "nanoid";
-import type {
-  ClientApi,
-  MultimodalContent,
-  RequestMessage,
-} from "../client/api";
-import { getClientApi } from "../client/api";
+import type { MultimodalContent, RequestMessage } from "../client/api";
 import { ChatControllerPool } from "../client/controller";
 import { showToast } from "../components/ui-lib";
 import {
@@ -22,8 +12,6 @@ import {
   GEMINI_SUMMARIZE_MODEL,
   DEEPSEEK_SUMMARIZE_MODEL,
   KnowledgeCutOffDate,
-  MCP_SYSTEM_TEMPLATE,
-  MCP_TOOLS_TEMPLATE,
   ServiceProvider,
   StoreKey,
   SUMMARIZE_MODEL,
@@ -36,10 +24,19 @@ import { ModelConfig, ModelType, useAppConfig } from "./config";
 import { useAccessStore } from "./access";
 import { collectModelsWithDefaultModel } from "../utils/model";
 import { createEmptyMask, Mask } from "./mask";
-import { executeMcpAction, getAllTools, isMcpEnabled } from "../mcp/actions";
-import { extractMcpJson, isMcpJson } from "../mcp/utils";
+import { usePluginStore } from "./plugin";
+
+import { processDataStream } from "ai";
 
 const localStorage = safeLocalStorage();
+
+function getProviderName(providerName?: string): string {
+  const p = (providerName || "").toLowerCase();
+  if (p.includes("google") || p.includes("gemini")) return "google";
+  if (p.includes("anthropic") || p.includes("claude")) return "anthropic";
+  if (p === "openai") return "openai";
+  return providerName || "custom";
+}
 
 export type ChatMessageTool = {
   id: string;
@@ -62,7 +59,8 @@ export type ChatMessage = RequestMessage & {
   model?: ModelType;
   tools?: ChatMessageTool[];
   audio_url?: string;
-  isMcpResponse?: boolean;
+  reasoning?: string;
+  reasoningDuration?: number;
 };
 
 export function createMessage(override: Partial<ChatMessage>): ChatMessage {
@@ -200,27 +198,6 @@ function fillTemplateWith(input: string, modelConfig: ModelConfig) {
   });
 
   return output;
-}
-
-async function getMcpSystemPrompt(): Promise<string> {
-  const tools = await getAllTools();
-
-  let toolsStr = "";
-
-  tools.forEach((i) => {
-    // error client has no tools
-    if (!i.tools) return;
-
-    toolsStr += MCP_TOOLS_TEMPLATE.replace(
-      "{{ clientId }}",
-      i.clientId,
-    ).replace(
-      "{{ tools }}",
-      i.tools.tools.map((p: object) => JSON.stringify(p, null, 2)).join("\n"),
-    );
-  });
-
-  return MCP_SYSTEM_TEMPLATE.replace("{{ MCP_TOOLS }}", toolsStr);
 }
 
 const DEFAULT_CHAT_STATE = {
@@ -399,25 +376,19 @@ export const useChatStore = createPersistStore(
 
         get().updateStat(message, targetSession);
 
-        get().checkMcpJson(message);
-
         get().summarizeSession(false, targetSession);
       },
 
-      async onUserInput(
-        content: string,
-        attachImages?: string[],
-        isMcpResponse?: boolean,
-      ) {
+      async onUserInput(content: string, attachImages?: string[]) {
         const session = get().currentSession();
         const modelConfig = session.mask.modelConfig;
 
-        // MCP Response no need to fill template
-        let mContent: string | MultimodalContent[] = isMcpResponse
-          ? content
-          : fillTemplateWith(content, modelConfig);
+        let mContent: string | MultimodalContent[] = fillTemplateWith(
+          content,
+          modelConfig,
+        );
 
-        if (!isMcpResponse && attachImages && attachImages.length > 0) {
+        if (attachImages && attachImages.length > 0) {
           mContent = [
             ...(content ? [{ type: "text" as const, text: content }] : []),
             ...attachImages.map((url) => ({
@@ -430,7 +401,6 @@ export const useChatStore = createPersistStore(
         let userMessage: ChatMessage = createMessage({
           role: "user",
           content: mContent,
-          isMcpResponse,
         });
 
         const botMessage: ChatMessage = createMessage({
@@ -456,56 +426,206 @@ export const useChatStore = createPersistStore(
           ]);
         });
 
-        const api: ClientApi = getClientApi(modelConfig.providerName);
-        // make request
-        api.llm.chat({
-          messages: sendMessages,
-          config: { ...modelConfig, stream: true },
-          onUpdate(message) {
-            botMessage.streaming = true;
-            if (message) {
-              botMessage.content = message;
-            }
-            get().updateTargetSession(session, (session) => {
-              session.messages = session.messages.concat();
-            });
-          },
-          async onFinish(message) {
-            botMessage.streaming = false;
-            if (message) {
-              botMessage.content = message;
-              botMessage.date = new Date().toLocaleString();
-              get().onNewMessage(botMessage, session);
-            }
-            ChatControllerPool.remove(session.id, botMessage.id);
-          },
-          onBeforeTool(tool: ChatMessageTool) {
-            (botMessage.tools = botMessage?.tools || []).push(tool);
-            get().updateTargetSession(session, (session) => {
-              session.messages = session.messages.concat();
-            });
-          },
-          onAfterTool(tool: ChatMessageTool) {
-            botMessage?.tools?.forEach((t, i, tools) => {
-              if (tool.id == t.id) {
-                tools[i] = { ...tool };
+        const mappedMessages = sendMessages.map((m) => {
+          if (typeof m.content === "string") {
+            return { role: m.role, content: m.content };
+          }
+          if (Array.isArray(m.content)) {
+            return {
+              role: m.role,
+              content: m.content.map((part: any) => {
+                if (typeof part === "string")
+                  return { type: "text" as const, text: part };
+                if (part.type === "text")
+                  return { type: "text" as const, text: part.text || "" };
+                if (part.type === "image" || part.type === "image_url") {
+                  return {
+                    type: "image" as const,
+                    image: part.image || part.image_url?.url || "",
+                  };
+                }
+                return { type: "text" as const, text: JSON.stringify(part) };
+              }),
+            };
+          }
+          return { role: m.role, content: String(m.content) };
+        });
+
+        const accessStore = useAccessStore.getState();
+        const customApiKey = accessStore.getApiKeyByProvider(
+          modelConfig.providerName,
+        );
+        const customBaseUrl = accessStore.getBaseUrlByProvider(
+          modelConfig.providerName,
+        );
+        const customConfig =
+          accessStore.useCustomConfig || customApiKey || customBaseUrl
+            ? {
+                apiKey: customApiKey || undefined,
+                baseUrl: customBaseUrl || undefined,
               }
-            });
-            get().updateTargetSession(session, (session) => {
-              session.messages = session.messages.concat();
-            });
+            : undefined;
+
+        const pluginStore = usePluginStore.getState();
+        const activePlugins = (session.mask.plugin || [])
+          .map((id) => pluginStore.get(id))
+          .filter(Boolean);
+
+        const payload: any = {
+          messages: mappedMessages,
+          model: modelConfig.model,
+          provider: getProviderName(modelConfig.providerName),
+          modelConfig: {
+            temperature: modelConfig.temperature,
+            top_p: modelConfig.top_p,
+            max_tokens: modelConfig.max_tokens,
+            reasoningConfig: {
+              thinkingLevel: modelConfig.thinkingLevel,
+              thinkingBudget: modelConfig.thinkingBudget,
+            },
           },
-          onError(error) {
-            const isAborted = error.message?.includes?.("aborted");
-            botMessage.content +=
-              "\n\n" +
-              prettyObject({
-                error: true,
-                message: error.message,
-              });
+          customConfig,
+          pluginIds: session.mask.plugin,
+          plugins: activePlugins,
+        };
+
+        const controller = new AbortController();
+        ChatControllerPool.addController(
+          session.id,
+          botMessage.id ?? messageIndex,
+          controller,
+        );
+
+        (async () => {
+          try {
+            const res = await fetch("/api/chat", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+              signal: controller.signal,
+            });
+
+            if (!res.ok || !res.body) {
+              const errorText = await res.text();
+              let errorMsg = errorText;
+              try {
+                const errorJson = JSON.parse(errorText);
+                errorMsg = errorJson.message || errorJson.error || errorText;
+              } catch {}
+              throw new Error(errorMsg || `HTTP ${res.status}`);
+            }
+
+            let reasoningStartTime: number | undefined = undefined;
+
+            await processDataStream({
+              stream: res.body,
+              onTextPart: (textDelta) => {
+                botMessage.streaming = true;
+                botMessage.content += textDelta;
+                if (
+                  botMessage.reasoning &&
+                  botMessage.reasoningDuration === undefined &&
+                  reasoningStartTime !== undefined
+                ) {
+                  botMessage.reasoningDuration =
+                    Date.now() - reasoningStartTime;
+                }
+                get().updateTargetSession(session, (s) => {
+                  s.messages = s.messages.concat();
+                });
+              },
+              onReasoningPart: (reasoningDelta) => {
+                botMessage.streaming = true;
+                if (reasoningStartTime === undefined) {
+                  reasoningStartTime = Date.now();
+                }
+                botMessage.reasoning =
+                  (botMessage.reasoning || "") + reasoningDelta;
+                get().updateTargetSession(session, (s) => {
+                  s.messages = s.messages.concat();
+                });
+              },
+              onToolCallPart: (toolCall) => {
+                botMessage.streaming = true;
+                botMessage.tools = botMessage.tools || [];
+                botMessage.tools.push({
+                  id: toolCall.toolCallId,
+                  function: {
+                    name: toolCall.toolName,
+                    arguments:
+                      typeof toolCall.args === "string"
+                        ? toolCall.args
+                        : JSON.stringify(toolCall.args),
+                  },
+                });
+                get().updateTargetSession(session, (s) => {
+                  s.messages = s.messages.concat();
+                });
+              },
+              onToolResultPart: (toolResult) => {
+                botMessage.tools = botMessage.tools || [];
+                const tool = botMessage.tools.find(
+                  (t) => t.id === toolResult.toolCallId,
+                );
+                const resultStr =
+                  typeof toolResult.result === "string"
+                    ? toolResult.result
+                    : JSON.stringify(toolResult.result);
+                if (tool) {
+                  tool.content = resultStr;
+                  tool.isError = false;
+                } else {
+                  botMessage.tools.push({
+                    id: toolResult.toolCallId,
+                    content: resultStr,
+                    isError: false,
+                  });
+                }
+                get().updateTargetSession(session, (s) => {
+                  s.messages = s.messages.concat();
+                });
+              },
+              onErrorPart: (errorMsg) => {
+                botMessage.isError = true;
+                botMessage.content += `\n\n[Error]: ${errorMsg}`;
+                get().updateTargetSession(session, (s) => {
+                  s.messages = s.messages.concat();
+                });
+              },
+              onFinishMessagePart: () => {
+                botMessage.streaming = false;
+                if (
+                  botMessage.reasoning &&
+                  botMessage.reasoningDuration === undefined &&
+                  reasoningStartTime !== undefined
+                ) {
+                  botMessage.reasoningDuration =
+                    Date.now() - reasoningStartTime;
+                }
+                botMessage.date = new Date().toLocaleString();
+                get().onNewMessage(botMessage, session);
+                ChatControllerPool.remove(
+                  session.id,
+                  botMessage.id ?? messageIndex,
+                );
+              },
+            });
+          } catch (err: any) {
+            const isAborted =
+              err.name === "AbortError" ||
+              controller.signal.aborted ||
+              err.message?.includes?.("aborted");
             botMessage.streaming = false;
-            userMessage.isError = !isAborted;
-            botMessage.isError = !isAborted;
+            if (!isAborted) {
+              botMessage.isError = true;
+              userMessage.isError = true;
+              botMessage.content +=
+                "\n\n" +
+                prettyObject({
+                  error: true,
+                  message: err.message || String(err),
+                });
+            }
             get().updateTargetSession(session, (session) => {
               session.messages = session.messages.concat();
             });
@@ -514,17 +634,9 @@ export const useChatStore = createPersistStore(
               botMessage.id ?? messageIndex,
             );
 
-            console.error("[Chat] failed ", error);
-          },
-          onController(controller) {
-            // collect controller for stop/retry
-            ChatControllerPool.addController(
-              session.id,
-              botMessage.id ?? messageIndex,
-              controller,
-            );
-          },
-        });
+            console.error("[Chat] failed ", err);
+          }
+        })();
       },
 
       getMemoryPrompt() {
@@ -555,32 +667,21 @@ export const useChatStore = createPersistStore(
           (session.mask.modelConfig.model.startsWith("gpt-") ||
             session.mask.modelConfig.model.startsWith("chatgpt-"));
 
-        const mcpEnabled = await isMcpEnabled();
-        const mcpSystemPrompt = mcpEnabled ? await getMcpSystemPrompt() : "";
-
-        var systemPrompts: ChatMessage[] = [];
+        let systemPrompts: ChatMessage[] = [];
 
         if (shouldInjectSystemPrompts) {
           systemPrompts = [
             createMessage({
               role: "system",
-              content:
-                fillTemplateWith("", {
-                  ...modelConfig,
-                  template: DEFAULT_SYSTEM_TEMPLATE,
-                }) + mcpSystemPrompt,
-            }),
-          ];
-        } else if (mcpEnabled) {
-          systemPrompts = [
-            createMessage({
-              role: "system",
-              content: mcpSystemPrompt,
+              content: fillTemplateWith("", {
+                ...modelConfig,
+                template: DEFAULT_SYSTEM_TEMPLATE,
+              }),
             }),
           ];
         }
 
-        if (shouldInjectSystemPrompts || mcpEnabled) {
+        if (shouldInjectSystemPrompts) {
           console.log(
             "[Global System Prompt] ",
             systemPrompts.at(0)?.content ?? "empty",
@@ -665,10 +766,6 @@ export const useChatStore = createPersistStore(
         const config = useAppConfig.getState();
         const session = targetSession;
         const modelConfig = session.mask.modelConfig;
-        // skip summarize when using dalle3?
-        if (isDalle3(modelConfig.model)) {
-          return;
-        }
 
         // if not config compressModel, then using getSummarizeModel
         const [model, providerName] = modelConfig.compressModel
@@ -677,7 +774,16 @@ export const useChatStore = createPersistStore(
               session.mask.modelConfig.model,
               session.mask.modelConfig.providerName,
             );
-        const api: ClientApi = getClientApi(providerName as ServiceProvider);
+        const accessStore = useAccessStore.getState();
+        const customApiKey = accessStore.getApiKeyByProvider(providerName);
+        const customBaseUrl = accessStore.getBaseUrlByProvider(providerName);
+        const customConfig =
+          accessStore.useCustomConfig || customApiKey || customBaseUrl
+            ? {
+                apiKey: customApiKey || undefined,
+                baseUrl: customBaseUrl || undefined,
+              }
+            : undefined;
 
         // remove error messages if any
         const messages = session.messages;
@@ -705,25 +811,43 @@ export const useChatStore = createPersistStore(
                 content: Locale.Store.Prompt.Topic,
               }),
             );
-          api.llm.chat({
-            messages: topicMessages,
-            config: {
-              model,
-              stream: false,
-              providerName,
-            },
-            onFinish(message, responseRes) {
-              if (responseRes?.status === 200) {
-                get().updateTargetSession(
-                  session,
-                  (session) =>
-                    (session.topic =
-                      message.length > 0 ? trimTopic(message) : DEFAULT_TOPIC),
-                );
+
+          const topicPayload: any = {
+            messages: topicMessages.map((m) => ({
+              role: m.role,
+              content: m.content,
+            })),
+            model,
+            provider: getProviderName(providerName),
+            customConfig,
+          };
+
+          fetch("/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(topicPayload),
+          })
+            .then(async (res) => {
+              if (res.ok && res.body) {
+                let topicContent = "";
+                await processDataStream({
+                  stream: res.body,
+                  onTextPart: (delta) => {
+                    topicContent += delta;
+                  },
+                  onFinishMessagePart: () => {
+                    if (topicContent.length > 0) {
+                      get().updateTargetSession(session, (session) => {
+                        session.topic = trimTopic(topicContent);
+                      });
+                    }
+                  },
+                });
               }
-            },
-          });
+            })
+            .catch((err) => console.error("[Summarize topic error]", err));
         }
+
         const summarizeIndex = Math.max(
           session.lastSummarizeIndex,
           session.clearContextIndex ?? 0,
@@ -759,40 +883,50 @@ export const useChatStore = createPersistStore(
           historyMsgLength > modelConfig.compressMessageLengthThreshold &&
           modelConfig.sendMemory
         ) {
-          /** Destruct max_tokens while summarizing
-           * this param is just shit
-           **/
           const { max_tokens, ...modelcfg } = modelConfig;
-          api.llm.chat({
-            messages: toBeSummarizedMsgs.concat(
-              createMessage({
-                role: "system",
-                content: Locale.Store.Prompt.Summarize,
-                date: "",
-              }),
-            ),
-            config: {
-              ...modelcfg,
-              stream: true,
-              model,
-              providerName,
-            },
-            onUpdate(message) {
-              session.memoryPrompt = message;
-            },
-            onFinish(message, responseRes) {
-              if (responseRes?.status === 200) {
-                console.log("[Memory] ", message);
-                get().updateTargetSession(session, (session) => {
-                  session.lastSummarizeIndex = lastSummarizeIndex;
-                  session.memoryPrompt = message; // Update the memory prompt for stored it in local storage
+          const memoryMessages = toBeSummarizedMsgs.concat(
+            createMessage({
+              role: "system",
+              content: Locale.Store.Prompt.Summarize,
+              date: "",
+            }),
+          );
+
+          const memoryPayload: any = {
+            messages: memoryMessages.map((m) => ({
+              role: m.role,
+              content: m.content,
+            })),
+            model,
+            provider: getProviderName(providerName),
+            modelConfig: modelcfg,
+            customConfig,
+          };
+
+          fetch("/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(memoryPayload),
+          })
+            .then(async (res) => {
+              if (res.ok && res.body) {
+                let memoryContent = "";
+                await processDataStream({
+                  stream: res.body,
+                  onTextPart: (delta) => {
+                    memoryContent += delta;
+                    session.memoryPrompt = memoryContent;
+                  },
+                  onFinishMessagePart: () => {
+                    get().updateTargetSession(session, (session) => {
+                      session.lastSummarizeIndex = lastSummarizeIndex;
+                      session.memoryPrompt = memoryContent;
+                    });
+                  },
                 });
               }
-            },
-            onError(err) {
-              console.error("[Summarize] ", err);
-            },
-          });
+            })
+            .catch((err) => console.error("[Summarize memory error]", err));
         }
       },
 
@@ -821,38 +955,6 @@ export const useChatStore = createPersistStore(
         set({
           lastInput,
         });
-      },
-
-      /** check if the message contains MCP JSON and execute the MCP action */
-      checkMcpJson(message: ChatMessage) {
-        const mcpEnabled = isMcpEnabled();
-        if (!mcpEnabled) return;
-        const content = getMessageTextContent(message);
-        if (isMcpJson(content)) {
-          try {
-            const mcpRequest = extractMcpJson(content);
-            if (mcpRequest) {
-              console.debug("[MCP Request]", mcpRequest);
-
-              executeMcpAction(mcpRequest.clientId, mcpRequest.mcp)
-                .then((result) => {
-                  console.log("[MCP Response]", result);
-                  const mcpResponse =
-                    typeof result === "object"
-                      ? JSON.stringify(result)
-                      : String(result);
-                  get().onUserInput(
-                    `\`\`\`json:mcp-response:${mcpRequest.clientId}\n${mcpResponse}\n\`\`\``,
-                    [],
-                    true,
-                  );
-                })
-                .catch((error) => showToast("MCP execution failed", error));
-            }
-          } catch (error) {
-            console.error("[Check MCP JSON]", error);
-          }
-        }
       },
     };
 
