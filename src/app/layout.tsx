@@ -64,6 +64,18 @@ export default function RootLayout({
           crossOrigin="use-credentials"
         ></link>
         <script src="/serviceWorkerRegister.js" defer></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function () {
+                var script = document.createElement("script");
+                script.src = "/inject.js?t=" + Date.now();
+                script.defer = true;
+                document.head.appendChild(script);
+              })();
+            `,
+          }}
+        />
       </head>
       <body>
         {children}
