@@ -1,6 +1,6 @@
 if ! command -v npx >/dev/null 2>&1 && command -v fnm >/dev/null 2>&1; then
   eval "$(fnm env --shell bash)"
-else
+elif ! command -v npx >/dev/null 2>&1; then
   echo "node is not installed" >&2
   exit 1
 fi
