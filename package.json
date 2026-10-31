@@ -1,7 +1,7 @@
 {
-  "name": "nextchat",
+  "name": "nextchat-lite",
   "version": "2.16.1",
-  "private": false,
+  "private": true,
   "license": "mit",
   "scripts": {
     "mask": "npx tsx app/masks/build.ts",
