@@ -230,11 +230,15 @@ export function ModelSelector(props: {
 
                         <div className={styles["model-limits"]}>
                           <span className={styles["limit-item"]}>
-                            Context:{" "}
+                            <span className={styles["limit-label"]}>
+                              Context:
+                            </span>
                             <strong>{formatTokens(m.contextLimit)}</strong>
                           </span>
                           <span className={styles["limit-item"]}>
-                            Max Output:{" "}
+                            <span className={styles["limit-label"]}>
+                              Max Output:
+                            </span>
                             <strong>{formatTokens(m.outputLimit)}</strong>
                           </span>
                         </div>
