@@ -16,10 +16,12 @@ export const ChatControllerPool = {
     const key = this.key(sessionId, messageId);
     const controller = this.controllers[key];
     controller?.abort();
+    delete this.controllers[key];
   },
 
   stopAll() {
     Object.values(this.controllers).forEach((v) => v.abort());
+    this.controllers = {};
   },
 
   hasPending() {

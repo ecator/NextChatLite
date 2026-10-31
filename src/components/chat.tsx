@@ -475,8 +475,19 @@ export function ChatActions(props: {
   }
 
   // stop all responses
-  const couldStop = ChatControllerPool.hasPending();
-  const stopAll = () => ChatControllerPool.stopAll();
+  const couldStop =
+    ChatControllerPool.hasPending() &&
+    session.messages.some((m) => m.streaming && !m.isError);
+  const stopAll = () => {
+    ChatControllerPool.stopAll();
+    chatStore.updateTargetSession(session, (session) => {
+      session.messages.forEach((m) => {
+        if (m.streaming) {
+          m.streaming = false;
+        }
+      });
+    });
+  };
 
   // switch model
   const currentModel = session.mask.modelConfig.model;
@@ -983,6 +994,14 @@ function InnerChat() {
   // stop response
   const onUserStop = (messageId: string) => {
     ChatControllerPool.stop(session.id, messageId);
+    chatStore.updateTargetSession(session, (session) => {
+      const msg = session.messages.find(
+        (m, idx) => (m.id ?? idx) === messageId || m.id === messageId,
+      );
+      if (msg) {
+        msg.streaming = false;
+      }
+    });
   };
 
   useEffect(() => {
@@ -1583,7 +1602,8 @@ function InnerChat() {
                     i > 0 &&
                     !(message.preview || message.content.length === 0) &&
                     !isContext;
-                  const showTyping = message.preview || message.streaming;
+                  const showTyping =
+                    (message.preview || message.streaming) && !message.isError;
 
                   const shouldShowClearContextDivider =
                     i === clearContextIndex - 1;
@@ -1667,7 +1687,7 @@ function InnerChat() {
                             {showActions && (
                               <div className={styles["chat-message-actions"]}>
                                 <div className={styles["chat-input-actions"]}>
-                                  {message.streaming ? (
+                                  {message.streaming && !message.isError ? (
                                     <ChatAction
                                       text={Locale.Chat.Actions.Stop}
                                       icon={<StopIcon />}
@@ -1741,7 +1761,9 @@ function InnerChat() {
                             {message.reasoning && (
                               <ThinkingBlock
                                 reasoning={message.reasoning}
-                                streaming={message.streaming}
+                                streaming={
+                                  message.streaming && !message.isError
+                                }
                                 duration={message.reasoningDuration}
                               />
                             )}
@@ -1749,10 +1771,15 @@ function InnerChat() {
                               !message.reasoning ||
                               (message.preview && !message.reasoning)) && (
                               <Markdown
-                                key={message.streaming ? "loading" : "done"}
+                                key={
+                                  message.streaming && !message.isError
+                                    ? "loading"
+                                    : "done"
+                                }
                                 content={getMessageTextContent(message)}
                                 loading={
-                                  (message.preview || message.streaming) &&
+                                  (message.preview ||
+                                    (message.streaming && !message.isError)) &&
                                   message.content.length === 0 &&
                                   !message.reasoning &&
                                   !isUser

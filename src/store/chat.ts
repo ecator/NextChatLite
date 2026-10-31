@@ -502,6 +502,7 @@ export const useChatStore = createPersistStore(
         );
 
         (async () => {
+          let reasoningStartTime: number | undefined = undefined;
           try {
             const res = await fetch("/api/chat", {
               method: "POST",
@@ -519,8 +520,6 @@ export const useChatStore = createPersistStore(
               } catch {}
               throw new Error(errorMsg || `HTTP ${res.status}`);
             }
-
-            let reasoningStartTime: number | undefined = undefined;
 
             await processDataStream({
               stream: res.body,
@@ -591,8 +590,26 @@ export const useChatStore = createPersistStore(
                 });
               },
               onErrorPart: (errorMsg) => {
+                botMessage.streaming = false;
                 botMessage.isError = true;
-                botMessage.content += `\n\n[Error]: ${errorMsg}`;
+                userMessage.isError = true;
+                const errText = `[Error]: ${errorMsg}`;
+                botMessage.content = botMessage.content
+                  ? `${botMessage.content}\n\n${errText}`
+                  : errText;
+                if (
+                  botMessage.reasoning &&
+                  botMessage.reasoningDuration === undefined &&
+                  reasoningStartTime !== undefined
+                ) {
+                  botMessage.reasoningDuration =
+                    Date.now() - reasoningStartTime;
+                }
+                botMessage.date = new Date().toLocaleString();
+                ChatControllerPool.remove(
+                  session.id,
+                  botMessage.id ?? messageIndex,
+                );
                 get().updateTargetSession(session, (s) => {
                   s.messages = s.messages.concat();
                 });
@@ -608,13 +625,30 @@ export const useChatStore = createPersistStore(
                     Date.now() - reasoningStartTime;
                 }
                 botMessage.date = new Date().toLocaleString();
-                get().onNewMessage(botMessage, session);
                 ChatControllerPool.remove(
                   session.id,
                   botMessage.id ?? messageIndex,
                 );
+                get().onNewMessage(botMessage, session);
               },
             });
+
+            if (botMessage.streaming) {
+              botMessage.streaming = false;
+              if (
+                botMessage.reasoning &&
+                botMessage.reasoningDuration === undefined &&
+                reasoningStartTime !== undefined
+              ) {
+                botMessage.reasoningDuration = Date.now() - reasoningStartTime;
+              }
+              botMessage.date = botMessage.date || new Date().toLocaleString();
+              ChatControllerPool.remove(
+                session.id,
+                botMessage.id ?? messageIndex,
+              );
+              get().onNewMessage(botMessage, session);
+            }
           } catch (err: any) {
             const isAborted =
               err.name === "AbortError" ||
@@ -624,22 +658,36 @@ export const useChatStore = createPersistStore(
             if (!isAborted) {
               botMessage.isError = true;
               userMessage.isError = true;
-              botMessage.content +=
-                "\n\n" +
-                prettyObject({
-                  error: true,
-                  message: err.message || String(err),
-                });
+              const errText = prettyObject({
+                error: true,
+                message: err.message || String(err),
+              });
+              botMessage.content = botMessage.content
+                ? `${botMessage.content}\n\n${errText}`
+                : errText;
             }
-            get().updateTargetSession(session, (session) => {
-              session.messages = session.messages.concat();
-            });
+            if (
+              botMessage.reasoning &&
+              botMessage.reasoningDuration === undefined &&
+              reasoningStartTime !== undefined
+            ) {
+              botMessage.reasoningDuration = Date.now() - reasoningStartTime;
+            }
+            botMessage.date = botMessage.date || new Date().toLocaleString();
             ChatControllerPool.remove(
               session.id,
               botMessage.id ?? messageIndex,
             );
+            get().updateTargetSession(session, (session) => {
+              session.messages = session.messages.concat();
+            });
 
             console.error("[Chat] failed ", err);
+          } finally {
+            ChatControllerPool.remove(
+              session.id,
+              botMessage.id ?? messageIndex,
+            );
           }
         })();
       },
