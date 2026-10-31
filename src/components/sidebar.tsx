@@ -5,7 +5,7 @@ import styles from "./home.module.scss";
 import { IconButton } from "./button";
 import SettingsIcon from "../icons/settings.svg";
 import GithubIcon from "../icons/github.svg";
-import ChatGptIcon from "../icons/chatgpt.svg";
+import NextImage from "next/image";
 import AddIcon from "../icons/add.svg";
 import DeleteIcon from "../icons/delete.svg";
 import MaskIcon from "../icons/mask.svg";
@@ -235,7 +235,17 @@ export function SideBar(props: { className?: string }) {
       <SideBarHeader
         title="NextChatLite"
         subTitle="Build your own AI assistant."
-        logo={<ChatGptIcon />}
+        logo={
+          <NextImage
+            src="/logo.png"
+            alt="logo"
+            width={40}
+            height={40}
+            style={{ width: 40, height: 40, objectFit: "contain" }}
+            priority
+            unoptimized
+          />
+        }
         shouldNarrow={shouldNarrow}
       >
         <div className={styles["sidebar-header-bar"]}>

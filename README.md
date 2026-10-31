@@ -84,15 +84,33 @@ pnpm test:e2e
 
 You can configure NextChatLite via environment variables in `.env.local` or container settings:
 
-| Variable            | Description                                |
-| ------------------- | ------------------------------------------ |
-| `OPENAI_API_KEY`    | Server-side OpenAI API key                 |
-| `BASE_URL`          | Custom API base URL override               |
-| `GOOGLE_API_KEY`    | Server-side Google Gemini API key          |
-| `ANTHROPIC_API_KEY` | Server-side Anthropic API key              |
-| `CODE`              | Access password for private deployments    |
-| `HIDE_USER_API_KEY` | Set to `1` to prevent client API key entry |
-| `DEFAULT_MODEL`     | Default model for new conversations        |
+| Variable            | Description                                     |
+| ------------------- | ----------------------------------------------- |
+| `OPENAI_API_KEY`    | Server-side OpenAI API key                      |
+| `OPENAI_URL`        | Custom OpenAI API base URL override             |
+| `GOOGLE_API_KEY`    | Server-side Google Gemini API key               |
+| `GOOGLE_URL`        | Custom Google Gemini API base URL override      |
+| `ANTHROPIC_API_KEY` | Server-side Anthropic API key                   |
+| `ANTHROPIC_URL`     | Custom Anthropic API base URL override          |
+| `CUSTOM_MODELS`     | Control custom model availability and providers |
+| `CODE`              | Access password for private deployments         |
+| `HIDE_USER_API_KEY` | Set to `1` to prevent client API key entry      |
+| `DEFAULT_MODEL`     | Default model for new conversations             |
+
+### Custom Models (`CUSTOM_MODELS`)
+
+Configure model availability and provider routing with a comma-separated list:
+
+- **Add / Enable**: `+model` or `model` (e.g. `+gpt-4o`, `my-model`)
+- **Hide / Disable**: `-model` (e.g. `-gpt-3.5-turbo`, or `-all` to disable all default models)
+- **Specify Provider**: `model@provider` (e.g. `claude-3-5-sonnet@anthropic`, `gemini-1.5-pro@google`, `deepseek-chat@deepseek`)
+- **Custom Display Name**: `model=displayName` (e.g. `qwen-turbo=Qwen Turbo` or `custom-model@openai=My Model`)
+
+**Example:**
+
+```bash
+CUSTOM_MODELS="-all,+gpt-4o,+claude-3-5-sonnet@anthropic,+deepseek-chat@deepseek=DeepSeek V3"
+```
 
 ---
 

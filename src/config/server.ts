@@ -10,7 +10,7 @@ declare global {
       OPENAI_API_KEY?: string;
       CODE?: string;
 
-      BASE_URL?: string;
+      OPENAI_URL?: string;
       OPENAI_ORG_ID?: string; // openai only
 
       VERCEL?: string;
@@ -173,7 +173,7 @@ export const getServerSideConfig = () => {
   ).split(",");
 
   return {
-    baseUrl: process.env.BASE_URL,
+    openaiUrl: process.env.OPENAI_URL,
     apiKey: getApiKey(process.env.OPENAI_API_KEY),
     openaiOrgId: process.env.OPENAI_ORG_ID,
 

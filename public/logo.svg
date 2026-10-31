@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- 冰透极光背景（无发光滤镜） -->
+    <linearGradient id="ice-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="60%" stop-color="#F4F9FF" />
+      <stop offset="100%" stop-color="#E6F2FF" />
+    </linearGradient>
+
+    <!-- 左侧水滴：清透薄荷青 -->
+    <linearGradient id="cyan-drop" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00D2FF" stop-opacity="0.85" />
+      <stop offset="100%" stop-color="#3A7BD5" stop-opacity="0.45" />
+    </linearGradient>
+
+    <!-- 右侧胶囊：柔和电光紫蓝 -->
+    <linearGradient id="indigo-pill" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366F1" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#3B82F6" stop-opacity="0.4" />
+    </linearGradient>
+
+    <!-- 中间主胶囊：高光亮蓝 -->
+    <linearGradient id="main-glass" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563EB" stop-opacity="0.92" />
+      <stop offset="100%" stop-color="#06B6D4" stop-opacity="0.75" />
+    </linearGradient>
+
+    <!-- 角标：深空暗夜渐变 -->
+    <linearGradient id="dark-badge" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A" />
+      <stop offset="100%" stop-color="#1E3A8A" />
+    </linearGradient>
+  </defs>
+
+  <!-- 圆形底板 -->
+  <circle cx="256" cy="256" r="240" fill="url(#ice-bg)" stroke="#DBEAFE" stroke-width="6" />
+  <circle cx="256" cy="256" r="228" fill="none" stroke="#BFDBFE" stroke-width="2" />
+
+  <!-- 中心 N 字极光流体组合（微缩并上移，为圆内底部的 LITE 留出空间） -->
+  <g transform="translate(24, 6) scale(0.9)">
+    <!-- 左侧水滴图形 -->
+    <path d="M 145 180 L 204 305 A 55 55 0 1 1 101 312 Z" fill="url(#cyan-drop)" />
+
+    <!-- 右侧上扬胶囊 -->
+    <path d="M 264 316 L 318 178 A 55 55 0 0 1 420 218 L 366 356 A 55 55 0 0 1 264 316 Z" fill="url(#indigo-pill)" />
+
+    <!-- 中间斜向主胶囊 -->
+    <path d="M 162 246 A 56 56 0 0 1 240 166 L 352 278 A 56 56 0 0 1 274 358 Z" fill="url(#main-glass)" stroke="#FFFFFF" stroke-width="5" stroke-opacity="0.95" />
+  </g>
+
+  <!-- 收纳在圆圈内部的 LITE 角标 -->
+  <g transform="translate(236, 356)">
+    <rect x="0" y="0" width="142" height="52" rx="26" fill="url(#dark-badge)" stroke="#FFFFFF" stroke-width="6" />
+    <circle cx="28" cy="26" r="6.5" fill="#10B981" />
+    <text x="82" y="34" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="2.5">LITE</text>
+  </g>
+</svg>

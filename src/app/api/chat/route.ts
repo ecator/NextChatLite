@@ -156,7 +156,7 @@ export function createLanguageModel(payload: ChatApiPayload): LanguageModel {
       "";
     const baseURL =
       normalizedCustomUrl ||
-      serverConfig.baseUrl ||
+      serverConfig.openaiUrl ||
       "https://api.openai.com/v1";
     const openaiProvider = createOpenAI({ apiKey, baseURL });
 
@@ -187,7 +187,7 @@ export function createLanguageModel(payload: ChatApiPayload): LanguageModel {
 
   // Custom and third-party OpenAI-compatible providers (DeepSeek, Moonshot, SiliconFlow, XAI, ChatGLM, Alibaba, etc.)
   let fallbackApiKey = serverConfig.apiKey || process.env.OPENAI_API_KEY || "";
-  let fallbackBaseUrl = serverConfig.baseUrl || "https://api.openai.com/v1";
+  let fallbackBaseUrl = serverConfig.openaiUrl || "https://api.openai.com/v1";
 
   if (providerLower.includes("deepseek")) {
     fallbackApiKey =
