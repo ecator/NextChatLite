@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-page-custom-font */
 import "@/styles/globals.scss";
 import "@/styles/markdown.scss";
 import "@/styles/highlight.scss";
@@ -9,11 +8,26 @@ import { GoogleTagManager, GoogleAnalytics } from "@next/third-parties/google";
 import { getServerSideConfig } from "@/config/server";
 
 export const metadata: Metadata = {
-  title: "NextChat",
+  title: "NextChatLite",
   description: "Your personal ChatGPT Chat Bot.",
   appleWebApp: {
-    title: "NextChat",
+    title: "NextChatLite",
     statusBarStyle: "default",
+  },
+  icons: {
+    icon: [
+      {
+        url: "/favicon.svg",
+        type: "image/svg+xml",
+      },
+    ],
+    shortcut: ["/favicon.svg"],
+    apple: [
+      {
+        url: "/favicon.svg",
+        type: "image/svg+xml",
+      },
+    ],
   },
 };
 
@@ -42,6 +56,8 @@ export default function RootLayout({
           name="viewport"
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
         />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/favicon.svg" />
         <link
           rel="manifest"
           href="/site.webmanifest"
