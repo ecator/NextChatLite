@@ -37,6 +37,24 @@ function getProviderName(providerName?: string): string {
   if (p === "openai") return "openai";
   return providerName || "custom";
 }
+function getCustomConfig(providerName?: string) {
+  const accessStore = useAccessStore.getState();
+  if (!accessStore.useCustomConfig) {
+    return undefined;
+  }
+  const customApiKey = accessStore.getApiKeyByProvider(providerName)?.trim();
+  const rawBaseUrl = accessStore.getBaseUrlByProvider(providerName)?.trim();
+  const customBaseUrl =
+    rawBaseUrl && !rawBaseUrl.startsWith("/api/") ? rawBaseUrl : undefined;
+
+  if (customApiKey || customBaseUrl) {
+    return {
+      apiKey: customApiKey || undefined,
+      baseUrl: customBaseUrl || undefined,
+    };
+  }
+  return undefined;
+}
 
 export type ChatMessageTool = {
   id: string;
@@ -451,20 +469,7 @@ export const useChatStore = createPersistStore(
           return { role: m.role, content: String(m.content) };
         });
 
-        const accessStore = useAccessStore.getState();
-        const customApiKey = accessStore.getApiKeyByProvider(
-          modelConfig.providerName,
-        );
-        const customBaseUrl = accessStore.getBaseUrlByProvider(
-          modelConfig.providerName,
-        );
-        const customConfig =
-          accessStore.useCustomConfig || customApiKey || customBaseUrl
-            ? {
-                apiKey: customApiKey || undefined,
-                baseUrl: customBaseUrl || undefined,
-              }
-            : undefined;
+        const customConfig = getCustomConfig(modelConfig.providerName);
 
         const pluginStore = usePluginStore.getState();
         const activePlugins = (session.mask.plugin || [])
@@ -774,16 +779,7 @@ export const useChatStore = createPersistStore(
               session.mask.modelConfig.model,
               session.mask.modelConfig.providerName,
             );
-        const accessStore = useAccessStore.getState();
-        const customApiKey = accessStore.getApiKeyByProvider(providerName);
-        const customBaseUrl = accessStore.getBaseUrlByProvider(providerName);
-        const customConfig =
-          accessStore.useCustomConfig || customApiKey || customBaseUrl
-            ? {
-                apiKey: customApiKey || undefined,
-                baseUrl: customBaseUrl || undefined,
-              }
-            : undefined;
+        const customConfig = getCustomConfig(providerName);
 
         // remove error messages if any
         const messages = session.messages;
