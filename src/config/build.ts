@@ -45,6 +45,9 @@ export const getBuildConfig = () => {
     buildMode,
     isApp,
     template: process.env.DEFAULT_INPUT_TEMPLATE ?? DEFAULT_INPUT_TEMPLATE,
+    title: process.env.NEXTCHATLITE_TITLE || "NextChatLite",
+    subTitle:
+      process.env.NEXTCHATLITE_SUBTITLE || "Build your own AI assistant.",
   };
 };
 

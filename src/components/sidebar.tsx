@@ -14,7 +14,8 @@ import DiscoveryIcon from "../icons/discovery.svg";
 
 import Locale from "../locales";
 
-import { useAppConfig, useChatStore } from "../store";
+import { useAccessStore, useAppConfig, useChatStore } from "../store";
+import { getClientConfig } from "../config/client";
 
 import {
   DEFAULT_SIDEBAR_WIDTH,
@@ -173,7 +174,13 @@ export function SideBarHeader(props: {
   children?: React.ReactNode;
   shouldNarrow?: boolean;
 }) {
-  const { title, subTitle, logo, children, shouldNarrow } = props;
+  const {
+    title = "NextChatLite",
+    subTitle = "Build your own AI assistant.",
+    logo,
+    children,
+    shouldNarrow,
+  } = props;
   return (
     <Fragment>
       <div
@@ -225,6 +232,18 @@ export function SideBar(props: { className?: string }) {
   const navigate = useNavigate();
   const config = useAppConfig();
   const chatStore = useChatStore();
+  const accessStore = useAccessStore();
+  const clientConfig = useMemo(() => getClientConfig(), []);
+
+  const title = accessStore.title || clientConfig?.title || "NextChatLite";
+  const subTitle =
+    accessStore.subTitle ||
+    clientConfig?.subTitle ||
+    "Build your own AI assistant.";
+
+  useEffect(() => {
+    document.title = title;
+  }, [title]);
 
   return (
     <SideBarContainer
@@ -233,8 +252,8 @@ export function SideBar(props: { className?: string }) {
       {...props}
     >
       <SideBarHeader
-        title="NextChatLite"
-        subTitle="Build your own AI assistant."
+        title={title}
+        subTitle={subTitle}
         logo={
           <NextImage
             src="/logo.png"

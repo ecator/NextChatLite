@@ -84,18 +84,20 @@ pnpm test:e2e
 
 You can configure NextChatLite via environment variables in `.env.local` or container settings:
 
-| Variable            | Description                                     |
-| ------------------- | ----------------------------------------------- |
-| `OPENAI_API_KEY`    | Server-side OpenAI API key                      |
-| `OPENAI_URL`        | Custom OpenAI API base URL override             |
-| `GOOGLE_API_KEY`    | Server-side Google Gemini API key               |
-| `GOOGLE_URL`        | Custom Google Gemini API base URL override      |
-| `ANTHROPIC_API_KEY` | Server-side Anthropic API key                   |
-| `ANTHROPIC_URL`     | Custom Anthropic API base URL override          |
-| `CUSTOM_MODELS`     | Control custom model availability and providers |
-| `CODE`              | Access password for private deployments         |
-| `HIDE_USER_API_KEY` | Set to `1` to prevent client API key entry      |
-| `DEFAULT_MODEL`     | Default model for new conversations             |
+| Variable                | Description                                                                |
+| ----------------------- | -------------------------------------------------------------------------- |
+| `OPENAI_API_KEY`        | Server-side OpenAI API key                                                 |
+| `OPENAI_URL`            | Custom OpenAI API base URL override                                        |
+| `GOOGLE_API_KEY`        | Server-side Google Gemini API key                                          |
+| `GOOGLE_URL`            | Custom Google Gemini API base URL override                                 |
+| `ANTHROPIC_API_KEY`     | Server-side Anthropic API key                                              |
+| `ANTHROPIC_URL`         | Custom Anthropic API base URL override                                     |
+| `CUSTOM_MODELS`         | Control custom model availability and providers                            |
+| `CODE`                  | Access password for private deployments                                    |
+| `HIDE_USER_API_KEY`     | Set to `1` to prevent client API key entry                                 |
+| `DEFAULT_MODEL`         | Default model for new conversations                                        |
+| `NEXTCHATLITE_TITLE`    | Custom title for sidebar header and document.title (default: NextChatLite) |
+| `NEXTCHATLITE_SUBTITLE` | Custom subtitle for sidebar header (default: Build your own AI assistant.) |
 
 ### Custom Models (`CUSTOM_MODELS`)
 

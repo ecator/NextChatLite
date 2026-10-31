@@ -223,7 +223,9 @@ export function Home() {
   useHtmlLang();
 
   useEffect(() => {
-    console.log("[Config] got config from build time", getClientConfig());
+    const clientConfig = getClientConfig();
+    document.title = clientConfig?.title || "NextChatLite";
+    console.log("[Config] got config from build time", clientConfig);
     useAccessStore.getState().fetch();
   }, []);
 

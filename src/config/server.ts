@@ -90,6 +90,10 @@ declare global {
 
       // custom template for preprocessing user input
       DEFAULT_INPUT_TEMPLATE?: string;
+
+      // custom title and subtitle
+      NEXTCHATLITE_TITLE?: string;
+      NEXTCHATLITE_SUBTITLE?: string;
     }
   }
 }
@@ -176,6 +180,10 @@ export const getServerSideConfig = () => {
     openaiUrl: process.env.OPENAI_URL,
     apiKey: getApiKey(process.env.OPENAI_API_KEY),
     openaiOrgId: process.env.OPENAI_ORG_ID,
+
+    title: process.env.NEXTCHATLITE_TITLE || "NextChatLite",
+    subTitle:
+      process.env.NEXTCHATLITE_SUBTITLE || "Build your own AI assistant.",
 
     isAzure,
     azureUrl: process.env.AZURE_URL,
