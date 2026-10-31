@@ -103,15 +103,13 @@ export function ChatItem(props: {
 }
 
 export function ChatList(props: { narrow?: boolean }) {
-  const [sessions, selectedIndex, selectSession, moveSession] = useChatStore(
-    (state) => [
-      state.sessions,
-      state.currentSessionIndex,
-      state.selectSession,
-      state.moveSession,
-    ],
-  );
   const chatStore = useChatStore();
+  const {
+    sessions,
+    currentSessionIndex: selectedIndex,
+    selectSession,
+    moveSession,
+  } = chatStore;
   const navigate = useNavigate();
   const isMobileScreen = useMobileScreen();
 
