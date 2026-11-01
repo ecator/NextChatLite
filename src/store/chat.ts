@@ -24,8 +24,6 @@ import { prettyObject } from "../utils/format";
 import { createPersistStore } from "../utils/store";
 import { estimateTokenLength } from "../utils/token";
 import { DEFAULT_CONFIG, ModelConfig, ModelType, useAppConfig } from "./config";
-import { useAccessStore } from "./access";
-import { collectModelsWithDefaultModel } from "../utils/model";
 import { createEmptyMask, Mask } from "./mask";
 import { usePluginStore } from "./plugin";
 import {
@@ -140,30 +138,26 @@ function createEmptySession(): ChatSession {
 function getSummarizeModel(
   currentModel: string,
   providerName: string,
-): string[] {
-  // if it is using gpt-* models, force to use 4o-mini to summarize
-  if (currentModel.startsWith("gpt") || currentModel.startsWith("chatgpt")) {
-    const configStore = useAppConfig.getState();
-    const accessStore = useAccessStore.getState();
-    const allModel = collectModelsWithDefaultModel(
-      configStore.models,
-      configStore.customModels,
-      accessStore.defaultModel,
-    );
-    const summarizeModel = allModel.find(
-      (m) => m.name === SUMMARIZE_MODEL && m.available,
-    );
-    if (summarizeModel) {
-      return [
-        summarizeModel.name,
-        summarizeModel.provider?.providerName as string,
-      ];
+): [string, string] {
+  const modelStore = useModelStore.getState();
+  const lower = (currentModel || "").toLowerCase();
+
+  if (lower.includes("google") || lower.includes("gemini")) {
+    if (modelStore.getModel(GEMINI_SUMMARIZE_MODEL)) {
+      return [GEMINI_SUMMARIZE_MODEL, ServiceProvider.Google];
     }
-  }
-  if (currentModel.startsWith("gemini")) {
-    return [GEMINI_SUMMARIZE_MODEL, ServiceProvider.Google];
-  } else if (currentModel.startsWith("deepseek-")) {
-    return [DEEPSEEK_SUMMARIZE_MODEL, ServiceProvider.DeepSeek];
+  } else if (
+    lower.includes("openai") ||
+    lower.startsWith("gpt") ||
+    lower.startsWith("chatgpt")
+  ) {
+    if (modelStore.getModel(SUMMARIZE_MODEL)) {
+      return [SUMMARIZE_MODEL, ServiceProvider.OpenAI];
+    }
+  } else if (lower.includes("deepseek")) {
+    if (modelStore.getModel(DEEPSEEK_SUMMARIZE_MODEL)) {
+      return [DEEPSEEK_SUMMARIZE_MODEL, ServiceProvider.DeepSeek];
+    }
   }
 
   return [currentModel, providerName];
@@ -878,80 +872,125 @@ export const useChatStore = createPersistStore(
         const session = targetSession;
         const modelConfig = session.mask.modelConfig;
 
-        // if not config compressModel, then using getSummarizeModel
-        const [model, providerName] = modelConfig.compressModel
-          ? [modelConfig.compressModel, modelConfig.compressProviderName]
-          : getSummarizeModel(
-              session.mask.modelConfig.model,
-              session.mask.modelConfig.providerName,
-            );
-        const customConfig = getCustomConfig(providerName);
+        // Fallback chain for compress/summarize model:
+        // 1. Session-level compressModel override (if valid in catalog)
+        // 2. Global-level config compressModel (if valid in catalog)
+        // 3. Dynamic provider fallback via getSummarizeModel
+        const configuredModel =
+          modelConfig.compressModel || config.modelConfig.compressModel;
+        const configuredProvider =
+          modelConfig.compressProviderName ||
+          config.modelConfig.compressProviderName;
+
+        const modelStore = useModelStore.getState();
+        let model: string;
+        let providerName: string;
+
+        if (configuredModel && modelStore.getModel(configuredModel)) {
+          model = configuredModel;
+          providerName =
+            configuredProvider || session.mask.modelConfig.providerName;
+        } else {
+          [model, providerName] = getSummarizeModel(
+            session.mask.modelConfig.model,
+            session.mask.modelConfig.providerName,
+          );
+        }
 
         // remove error messages if any
-        const messages = session.messages;
+        const messages = session.messages.filter((msg) => !msg.isError);
 
-        // should summarize topic after chating more than 50 words
+        // should summarize topic after chatting more than 50 words or at least 2 messages (1 Q&A round)
         const SUMMARIZE_MIN_LEN = 50;
+        const isDefaultTopic =
+          session.topic === DEFAULT_TOPIC ||
+          session.topic === "新的聊天" ||
+          session.topic === "New Conversation" ||
+          session.topic === "New Chat";
+
         if (
           (config.enableAutoGenerateTitle &&
-            session.topic === DEFAULT_TOPIC &&
-            countMessages(messages) >= SUMMARIZE_MIN_LEN) ||
+            isDefaultTopic &&
+            messages.length >= 2 &&
+            (countMessages(messages) >= SUMMARIZE_MIN_LEN ||
+              messages.length >= 2)) ||
           refreshTitle
         ) {
-          const startIndex = Math.max(
-            0,
-            messages.length - modelConfig.historyMessageCount,
-          );
-          const topicMessages = messages
-            .slice(
+          if (messages.length > 0) {
+            const startIndex = Math.max(
+              0,
+              messages.length - modelConfig.historyMessageCount,
+            );
+            const historySlice = messages.slice(
               startIndex < messages.length ? startIndex : messages.length - 1,
               messages.length,
-            )
-            .concat(
-              createMessage({
-                role: "user",
-                content: Locale.Store.Prompt.Topic,
-              }),
             );
 
-          const topicMeta = useModelStore.getState().getModel(model);
-          const topicPayload: any = {
-            messages: topicMessages.map((m) => ({
-              role: m.role,
-              content: m.content,
-            })),
-            model,
-            provider: topicMeta?.provider || getProviderName(providerName),
-            env: topicMeta?.env,
-            npm: topicMeta?.npm,
-            api: topicMeta?.api,
-            modelInfo: topicMeta,
-          };
+            const mappedTopicHistory = historySlice
+              .map((m) => ({
+                role: m.role,
+                content: getMessageTextContent(m),
+              }))
+              .filter((m) => Boolean(m.content && m.content.trim().length > 0));
 
-          fetch(ApiPath.Chat, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(topicPayload),
-          })
-            .then(async (res) => {
-              if (res.ok && res.body) {
-                let topicContent = "";
-                await processDataStream({
-                  stream: res.body,
-                  onTextPart: (delta) => {
-                    topicContent += delta;
+            if (mappedTopicHistory.length > 0) {
+              const topicMessages = [
+                ...mappedTopicHistory,
+                {
+                  role: "user" as const,
+                  content: Locale.Store.Prompt.Topic,
+                },
+              ];
+
+              const topicMeta = modelStore.getModel(model);
+              const topicPayload: any = {
+                messages: topicMessages,
+                model,
+                provider: topicMeta?.provider || getProviderName(providerName),
+                env: topicMeta?.env,
+                npm: topicMeta?.npm,
+                api: topicMeta?.api,
+                modelInfo: topicMeta,
+                modelConfig: {
+                  max_tokens: 50,
+                  temperature: 0.3,
+                  reasoningConfig: {
+                    thinkingLevel: "minimal",
                   },
-                  onFinishMessagePart: () => {
-                    if (topicContent.length > 0) {
-                      get().updateTargetSession(session, (session) => {
-                        session.topic = trimTopic(topicContent);
-                      });
-                    }
-                  },
-                });
-              }
-            })
-            .catch((err) => console.error("[Summarize topic error]", err));
+                },
+              };
+
+              return fetch(ApiPath.Chat, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(topicPayload),
+              })
+                .then(async (res) => {
+                  if (res.ok && res.body) {
+                    let topicContent = "";
+                    await processDataStream({
+                      stream: res.body,
+                      onTextPart: (delta) => {
+                        topicContent += delta;
+                      },
+                      onFinishMessagePart: () => {
+                        if (topicContent.length > 0) {
+                          get().updateTargetSession(session, (session) => {
+                            session.topic = trimTopic(topicContent);
+                          });
+                        }
+                      },
+                    });
+                  } else {
+                    console.error(
+                      "[Summarize topic error] HTTP status:",
+                      res.status,
+                    );
+                  }
+                })
+                .catch((err) => console.error("[Summarize topic error]", err));
+            }
+          }
         }
 
         const summarizeIndex = Math.max(
@@ -1002,7 +1041,7 @@ export const useChatStore = createPersistStore(
           const memoryPayload: any = {
             messages: memoryMessages.map((m) => ({
               role: m.role,
-              content: m.content,
+              content: getMessageTextContent(m),
             })),
             model,
             provider: memoryMeta?.provider || getProviderName(providerName),

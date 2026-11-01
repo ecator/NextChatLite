@@ -28,6 +28,15 @@ describe("trimTopic", () => {
     expect(trimTopic("a, b, c")).toBe("a, b, c");
     expect(trimTopic("")).toBe("");
   });
+
+  test("removes common prefixes like 主题/标题/Topic/Title and brackets", () => {
+    expect(trimTopic("主题：Python脚本开发")).toBe("Python脚本开发");
+    expect(trimTopic("标题: NextChat使用指南")).toBe("NextChat使用指南");
+    expect(trimTopic("Topic: AI Streaming")).toBe("AI Streaming");
+    expect(trimTopic("Title: Web Performance")).toBe("Web Performance");
+    expect(trimTopic("《深入理解计算机系统》")).toBe("深入理解计算机系统");
+    expect(trimTopic("【今日总结】")).toBe("今日总结");
+  });
 });
 
 describe("semverCompare", () => {

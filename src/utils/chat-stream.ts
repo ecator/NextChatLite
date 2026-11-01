@@ -247,7 +247,7 @@ export async function processDataStream(
 
       if (typeof value === "string") {
         buffer += value;
-      } else if (value instanceof Uint8Array) {
+      } else if (value instanceof Uint8Array || ArrayBuffer.isView(value)) {
         buffer += decoder.decode(value, { stream: true });
       }
 
