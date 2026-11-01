@@ -91,16 +91,16 @@ You can configure NextChatLite via environment variables in `.env.local` or cont
 | `ANTHROPIC_API_KEY`                    | Server-side Anthropic API key (or as defined in `public/providers.json`)     |
 | `DEEPSEEK_API_KEY`                     | Server-side DeepSeek API key (or as defined in `public/providers.json`)      |
 | `PROXY_URL`                            | Outbound network proxy for server-side requests                              |
-| `DEFAULT_MODEL`                        | Default model for new conversations in `provider/model` format               |
+| `NEXTCHATLITE_DEFAULT_MODEL`           | Default model for new conversations in `provider/model` format               |
 | `NEXTCHATLITE_TITLE`                   | Custom title for sidebar header and document.title (default: NextChatLite)   |
 | `NEXTCHATLITE_SUBTITLE`                | Custom subtitle for sidebar header (default: Build your own AI assistant.)   |
 | `NEXTCHATLITE_HELP_URL`                | Custom help URL displayed as an icon in sidebar lower-left corner (optional) |
-| `DEFAULT_INPUT_TEMPLATE`               | Custom input template for user prompt preprocessing (default: `{{input}}`)   |
+| `NEXTCHATLITE_DEFAULT_INPUT_TEMPLATE`  | Custom input template for user prompt preprocessing (default: `{{input}}`)   |
 | `NEXTCHATLITE_DEFAULT_SYSTEM_TEMPLATE` | Custom global system prompt template injected for all models when enabled    |
 
 ### Template Placeholders
 
-Both `DEFAULT_INPUT_TEMPLATE` and `NEXTCHATLITE_DEFAULT_SYSTEM_TEMPLATE` (as well as custom user templates configured in Settings) support the following dynamic placeholders:
+Both `NEXTCHATLITE_DEFAULT_INPUT_TEMPLATE` and `NEXTCHATLITE_DEFAULT_SYSTEM_TEMPLATE` (as well as custom user templates configured in Settings) support the following dynamic placeholders:
 
 | Placeholder           | Description                                                          | Example Output                              |
 | --------------------- | -------------------------------------------------------------------- | ------------------------------------------- |

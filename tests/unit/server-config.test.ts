@@ -1,11 +1,12 @@
 import { getServerSideConfig, getDefaultModel } from "@/config/server";
 import { getBuildConfig } from "@/config/build";
 
-describe("getServerSideConfig - DEFAULT_MODEL", () => {
+describe("getServerSideConfig - NEXTCHATLITE_DEFAULT_MODEL & DEFAULT_MODEL", () => {
   const originalEnv = process.env;
 
   beforeEach(() => {
     process.env = { ...originalEnv };
+    delete process.env.NEXTCHATLITE_DEFAULT_MODEL;
     delete process.env.DEFAULT_MODEL;
   });
 
@@ -17,6 +18,21 @@ describe("getServerSideConfig - DEFAULT_MODEL", () => {
     const config = getServerSideConfig();
     expect(config.defaultModel).toBe("google/gemini-3.5-flash");
     expect(getDefaultModel()).toBe("google/gemini-3.5-flash");
+  });
+
+  test("uses NEXTCHATLITE_DEFAULT_MODEL when provided", () => {
+    process.env.NEXTCHATLITE_DEFAULT_MODEL = "openai/gpt-5.1";
+    const config = getServerSideConfig();
+    expect(config.defaultModel).toBe("openai/gpt-5.1");
+    expect(getDefaultModel()).toBe("openai/gpt-5.1");
+  });
+
+  test("prioritizes NEXTCHATLITE_DEFAULT_MODEL over DEFAULT_MODEL", () => {
+    process.env.NEXTCHATLITE_DEFAULT_MODEL = "google/gemini-2.5-flash";
+    process.env.DEFAULT_MODEL = "openai/gpt-5.1";
+    const config = getServerSideConfig();
+    expect(config.defaultModel).toBe("google/gemini-2.5-flash");
+    expect(getDefaultModel()).toBe("google/gemini-2.5-flash");
   });
 
   test("preserves provider/model format when DEFAULT_MODEL already includes provider", () => {
@@ -161,5 +177,43 @@ describe("NEXTCHATLITE_DEFAULT_SYSTEM_TEMPLATE config", () => {
     expect(buildConfig.defaultSystemTemplate).toBe(
       "Custom system prompt for {{model}}",
     );
+  });
+});
+
+describe("NEXTCHATLITE_DEFAULT_INPUT_TEMPLATE config", () => {
+  const originalEnv = process.env;
+
+  beforeEach(() => {
+    process.env = { ...originalEnv };
+    delete process.env.NEXTCHATLITE_DEFAULT_INPUT_TEMPLATE;
+    delete process.env.DEFAULT_INPUT_TEMPLATE;
+  });
+
+  afterAll(() => {
+    process.env = originalEnv;
+  });
+
+  test("defaults template to DEFAULT_INPUT_TEMPLATE when unset", () => {
+    const buildConfig = getBuildConfig();
+    expect(buildConfig.template).toBe("{{input}}");
+  });
+
+  test("uses custom NEXTCHATLITE_DEFAULT_INPUT_TEMPLATE when provided", () => {
+    process.env.NEXTCHATLITE_DEFAULT_INPUT_TEMPLATE = "Prefix: {{input}}";
+    const buildConfig = getBuildConfig();
+    expect(buildConfig.template).toBe("Prefix: {{input}}");
+  });
+
+  test("falls back to DEFAULT_INPUT_TEMPLATE when NEXTCHATLITE_DEFAULT_INPUT_TEMPLATE is unset", () => {
+    process.env.DEFAULT_INPUT_TEMPLATE = "Fallback: {{input}}";
+    const buildConfig = getBuildConfig();
+    expect(buildConfig.template).toBe("Fallback: {{input}}");
+  });
+
+  test("prioritizes NEXTCHATLITE_DEFAULT_INPUT_TEMPLATE over DEFAULT_INPUT_TEMPLATE", () => {
+    process.env.NEXTCHATLITE_DEFAULT_INPUT_TEMPLATE = "Primary: {{input}}";
+    process.env.DEFAULT_INPUT_TEMPLATE = "Fallback: {{input}}";
+    const buildConfig = getBuildConfig();
+    expect(buildConfig.template).toBe("Primary: {{input}}");
   });
 });

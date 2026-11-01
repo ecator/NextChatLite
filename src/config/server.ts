@@ -9,9 +9,11 @@ declare global {
       BUILD_MODE?: "standalone" | "export";
       BUILD_APP?: string; // is building desktop app
 
+      NEXTCHATLITE_DEFAULT_MODEL?: string;
       DEFAULT_MODEL?: string; // to control default model in every new chat window
 
       // custom template for preprocessing user input
+      NEXTCHATLITE_DEFAULT_INPUT_TEMPLATE?: string;
       DEFAULT_INPUT_TEMPLATE?: string;
 
       // custom default system template
@@ -49,7 +51,11 @@ export interface ServerConfig {
 }
 
 export function getDefaultModel(): string {
-  let defaultModel = (process.env.DEFAULT_MODEL || "").trim();
+  let defaultModel = (
+    process.env.NEXTCHATLITE_DEFAULT_MODEL ||
+    process.env.DEFAULT_MODEL ||
+    ""
+  ).trim();
 
   let firstModel = "google/gemini-3.5-flash";
   let firstProviderId = "google";

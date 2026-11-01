@@ -46,7 +46,10 @@ export const getBuildConfig = () => {
     buildMode,
     isApp,
     defaultModel: getDefaultModel(),
-    template: process.env.DEFAULT_INPUT_TEMPLATE ?? DEFAULT_INPUT_TEMPLATE,
+    template:
+      process.env.NEXTCHATLITE_DEFAULT_INPUT_TEMPLATE ??
+      process.env.DEFAULT_INPUT_TEMPLATE ??
+      DEFAULT_INPUT_TEMPLATE,
     defaultSystemTemplate:
       process.env.NEXTCHATLITE_DEFAULT_SYSTEM_TEMPLATE ??
       DEFAULT_SYSTEM_TEMPLATE,
