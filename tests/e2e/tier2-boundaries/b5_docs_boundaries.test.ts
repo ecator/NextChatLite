@@ -1,7 +1,10 @@
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 
-function validateAgentsDocCompleteness(content: string): { valid: boolean; missingSections: string[] } {
+function validateAgentsDocCompleteness(content: string): {
+  valid: boolean;
+  missingSections: string[];
+} {
   const requiredSections = [
     "Architecture",
     "Conventions",
@@ -20,10 +23,19 @@ function validateAgentsDocCompleteness(content: string): { valid: boolean; missi
   return { valid: missing.length === 0, missingSections: missing };
 }
 
-function checkDocLinkHealth(markdown: string): { valid: boolean; brokenRefs: string[] } {
+function checkDocLinkHealth(markdown: string): {
+  valid: boolean;
+  brokenRefs: string[];
+} {
   const broken: string[] = [];
   // Detect references to deleted docs
-  const deletedFiles = ["README_CN.md", "README_JA.md", "README_KO.md", "src-tauri", "sd.ts"];
+  const deletedFiles = [
+    "README_CN.md",
+    "README_JA.md",
+    "README_KO.md",
+    "src-tauri",
+    "sd.ts",
+  ];
   for (const df of deletedFiles) {
     if (markdown.includes(df)) {
       broken.push(df);

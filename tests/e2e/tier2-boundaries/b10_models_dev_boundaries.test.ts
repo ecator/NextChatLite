@@ -1,4 +1,4 @@
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 
 function parseModelMetadataSafely(raw: any): {
@@ -9,12 +9,24 @@ function parseModelMetadataSafely(raw: any): {
   hasReasoning: boolean;
   provider: string;
 } {
-  const contextLimit = typeof raw?.contextLimit === "number" && raw.contextLimit > 0 ? raw.contextLimit : 4096;
-  const outputLimit = typeof raw?.outputLimit === "number" && raw.outputLimit > 0 ? raw.outputLimit : 4096;
+  const contextLimit =
+    typeof raw?.contextLimit === "number" && raw.contextLimit > 0
+      ? raw.contextLimit
+      : 4096;
+  const outputLimit =
+    typeof raw?.outputLimit === "number" && raw.outputLimit > 0
+      ? raw.outputLimit
+      : 4096;
 
   return {
-    id: typeof raw?.id === "string" && raw.id.trim() ? raw.id.trim() : "unknown-model",
-    provider: typeof raw?.provider === "string" && raw.provider.trim() ? raw.provider.trim() : "custom",
+    id:
+      typeof raw?.id === "string" && raw.id.trim()
+        ? raw.id.trim()
+        : "unknown-model",
+    provider:
+      typeof raw?.provider === "string" && raw.provider.trim()
+        ? raw.provider.trim()
+        : "custom",
     contextLimit,
     outputLimit,
     hasVision: Boolean(raw?.hasVision),
@@ -34,7 +46,10 @@ describe("Tier 2 Boundary B10: models.dev Dynamic Metadata Boundaries", () => {
   });
 
   it("B10-2: clamps negative or zero context limits to minimum default (4096)", () => {
-    const parsedZero = parseModelMetadataSafely({ contextLimit: 0, outputLimit: -100 });
+    const parsedZero = parseModelMetadataSafely({
+      contextLimit: 0,
+      outputLimit: -100,
+    });
     assert.strictEqual(parsedZero.contextLimit, 4096);
     assert.strictEqual(parsedZero.outputLimit, 4096);
   });
@@ -64,7 +79,10 @@ describe("Tier 2 Boundary B10: models.dev Dynamic Metadata Boundaries", () => {
 
   it("B10-5: handles non-object metadata input (null, string, array) gracefully", () => {
     assert.strictEqual(parseModelMetadataSafely(null).id, "unknown-model");
-    assert.strictEqual(parseModelMetadataSafely("string-input").id, "unknown-model");
+    assert.strictEqual(
+      parseModelMetadataSafely("string-input").id,
+      "unknown-model",
+    );
     assert.strictEqual(parseModelMetadataSafely([]).id, "unknown-model");
   });
 });

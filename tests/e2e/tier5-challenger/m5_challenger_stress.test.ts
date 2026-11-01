@@ -5,14 +5,12 @@ import {
   extractPlainText,
 } from "../../../src/utils/thinking";
 import {
-  chatApiPayloadSchema,
   createLanguageModel,
   ChatApiPayload,
 } from "../../../src/app/api/chat/route";
 import {
   parseDataStreamResponse,
   accumulateStreamState,
-  createGemini3ThinkingStream,
   encodeDataStreamChunk,
 } from "../fixtures/mock_chat_streams";
 
@@ -47,44 +45,86 @@ describe("Milestone 5 Challenger Empirical Stress Suite", () => {
       assert.strictEqual(formatThinkingDuration(45200), "Thought for 45.2s");
       assert.strictEqual(formatThinkingDuration(59900), "Thought for 59.9s");
       assert.strictEqual(formatThinkingDuration(65400), "Thought for 65.4s");
-      assert.strictEqual(formatThinkingDuration(3599900), "Thought for 3599.9s");
+      assert.strictEqual(
+        formatThinkingDuration(3599900),
+        "Thought for 3599.9s",
+      );
     });
 
     it("1.4 formats multi-hour and day-scale durations accurately", () => {
       assert.strictEqual(formatThinkingDuration(3600_000), "Thought for 1.0h");
       assert.strictEqual(formatThinkingDuration(5400_000), "Thought for 1.5h");
       assert.strictEqual(formatThinkingDuration(7200_000), "Thought for 2.0h");
-      assert.strictEqual(formatThinkingDuration(36000_000), "Thought for 10.0h");
-      assert.strictEqual(formatThinkingDuration(86400_000), "Thought for 24.0h");
-      assert.strictEqual(formatThinkingDuration(360000_000), "Thought for 100.0h");
+      assert.strictEqual(
+        formatThinkingDuration(36000_000),
+        "Thought for 10.0h",
+      );
+      assert.strictEqual(
+        formatThinkingDuration(86400_000),
+        "Thought for 24.0h",
+      );
+      assert.strictEqual(
+        formatThinkingDuration(360000_000),
+        "Thought for 100.0h",
+      );
     });
 
     it("1.5 formats multilingual labels across cn, jp, fr, en and unknown fallbacks", () => {
       // Chinese (cn)
       assert.strictEqual(formatThinkingDuration(3400, "cn"), "思考耗时 3.4 秒");
-      assert.strictEqual(formatThinkingDuration(7200_000, "cn"), "思考耗时 2.0 小时");
+      assert.strictEqual(
+        formatThinkingDuration(7200_000, "cn"),
+        "思考耗时 2.0 小时",
+      );
       assert.strictEqual(formatThinkingDuration(0, "cn"), "思考耗时 0.0 秒");
 
       // Japanese (jp)
       assert.strictEqual(formatThinkingDuration(3400, "jp"), "思考時間 3.4 秒");
-      assert.strictEqual(formatThinkingDuration(7200_000, "jp"), "思考時間 2.0 時間");
+      assert.strictEqual(
+        formatThinkingDuration(7200_000, "jp"),
+        "思考時間 2.0 時間",
+      );
       assert.strictEqual(formatThinkingDuration(0, "jp"), "思考時間 0.0 秒");
 
       // French (fr)
-      assert.strictEqual(formatThinkingDuration(3400, "fr"), "Pensé pendant 3.4s");
-      assert.strictEqual(formatThinkingDuration(7200_000, "fr"), "Pensé pendant 2.0h");
+      assert.strictEqual(
+        formatThinkingDuration(3400, "fr"),
+        "Pensé pendant 3.4s",
+      );
+      assert.strictEqual(
+        formatThinkingDuration(7200_000, "fr"),
+        "Pensé pendant 2.0h",
+      );
       assert.strictEqual(formatThinkingDuration(0, "fr"), "Pensé pendant 0.0s");
 
       // English (en)
-      assert.strictEqual(formatThinkingDuration(3400, "en"), "Thought for 3.4s");
-      assert.strictEqual(formatThinkingDuration(7200_000, "en"), "Thought for 2.0h");
+      assert.strictEqual(
+        formatThinkingDuration(3400, "en"),
+        "Thought for 3.4s",
+      );
+      assert.strictEqual(
+        formatThinkingDuration(7200_000, "en"),
+        "Thought for 2.0h",
+      );
 
       // Fallbacks (de, es, ru, undefined, empty string)
-      assert.strictEqual(formatThinkingDuration(3400, "de"), "Thought for 3.4s");
-      assert.strictEqual(formatThinkingDuration(3400, "es"), "Thought for 3.4s");
-      assert.strictEqual(formatThinkingDuration(3400, "ru"), "Thought for 3.4s");
+      assert.strictEqual(
+        formatThinkingDuration(3400, "de"),
+        "Thought for 3.4s",
+      );
+      assert.strictEqual(
+        formatThinkingDuration(3400, "es"),
+        "Thought for 3.4s",
+      );
+      assert.strictEqual(
+        formatThinkingDuration(3400, "ru"),
+        "Thought for 3.4s",
+      );
       assert.strictEqual(formatThinkingDuration(3400, ""), "Thought for 3.4s");
-      assert.strictEqual(formatThinkingDuration(3400, undefined), "Thought for 3.4s");
+      assert.strictEqual(
+        formatThinkingDuration(3400, undefined),
+        "Thought for 3.4s",
+      );
     });
   });
 
@@ -101,7 +141,10 @@ describe("Milestone 5 Challenger Empirical Stress Suite", () => {
 
     it("2.2 strips markdown code blocks with and without language tags", () => {
       const withLang = "```typescript\nconst message = 'hello';\n```";
-      assert.strictEqual(extractPlainText(withLang), "const message = 'hello';");
+      assert.strictEqual(
+        extractPlainText(withLang),
+        "const message = 'hello';",
+      );
 
       const noLang = "```\nplain text inside fence\n```";
       assert.strictEqual(extractPlainText(noLang), "plain text inside fence");
@@ -138,7 +181,8 @@ describe("Milestone 5 Challenger Empirical Stress Suite", () => {
         "Let x = 10 and y = 20, then x + y = 30.",
       );
 
-      const complexFormula = "Roots: $\\alpha = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$";
+      const complexFormula =
+        "Roots: $\\alpha = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$";
       assert.strictEqual(
         extractPlainText(complexFormula),
         "Roots: \\alpha = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}",
@@ -156,7 +200,8 @@ describe("Milestone 5 Challenger Empirical Stress Suite", () => {
     });
 
     it("2.6 executes massive 100,000+ character reasoning extraction in < 50ms (ReDoS Safety)", () => {
-      const chunk = "Step $i = 1$: Analyze formula.\n```ts\nconst check = (i: number) => i > 0;\n```\n";
+      const chunk =
+        "Step $i = 1$: Analyze formula.\n```ts\nconst check = (i: number) => i > 0;\n```\n";
       const hugeReasoning = chunk.repeat(1500); // > 110,000 chars
       assert.ok(hugeReasoning.length > 100_000);
 
@@ -166,7 +211,10 @@ describe("Milestone 5 Challenger Empirical Stress Suite", () => {
 
       assert.ok(plain.length > 50_000);
       assert.ok(!plain.includes("```"));
-      assert.ok(durationMs < 50, `Extraction took ${durationMs.toFixed(2)}ms, expected < 50ms`);
+      assert.ok(
+        durationMs < 50,
+        `Extraction took ${durationMs.toFixed(2)}ms, expected < 50ms`,
+      );
     });
   });
 
@@ -186,15 +234,34 @@ describe("Milestone 5 Challenger Empirical Stress Suite", () => {
     });
 
     it("3.2 state machine: default state is expanded during stream, collapsed after completion", () => {
-      const computeInitialCollapsed = (streaming: boolean, defaultCollapsed?: boolean) => {
+      const computeInitialCollapsed = (
+        streaming: boolean,
+        defaultCollapsed?: boolean,
+      ) => {
         if (defaultCollapsed !== undefined) return defaultCollapsed;
         return !streaming;
       };
 
-      assert.strictEqual(computeInitialCollapsed(true), false, "Streaming should default to expanded");
-      assert.strictEqual(computeInitialCollapsed(false), true, "Completed should default to collapsed");
-      assert.strictEqual(computeInitialCollapsed(true, true), true, "Explicit override honored");
-      assert.strictEqual(computeInitialCollapsed(false, false), false, "Explicit override honored");
+      assert.strictEqual(
+        computeInitialCollapsed(true),
+        false,
+        "Streaming should default to expanded",
+      );
+      assert.strictEqual(
+        computeInitialCollapsed(false),
+        true,
+        "Completed should default to collapsed",
+      );
+      assert.strictEqual(
+        computeInitialCollapsed(true, true),
+        true,
+        "Explicit override honored",
+      );
+      assert.strictEqual(
+        computeInitialCollapsed(false, false),
+        false,
+        "Explicit override honored",
+      );
     });
 
     it("3.3 state machine: auto-collapses on stream finish when user has not manually interacted", () => {
@@ -216,7 +283,11 @@ describe("Milestone 5 Challenger Empirical Stress Suite", () => {
         sm.isCollapsed = true;
       }
 
-      assert.strictEqual(sm.isCollapsed, true, "Auto-collapsed on stream finish");
+      assert.strictEqual(
+        sm.isCollapsed,
+        true,
+        "Auto-collapsed on stream finish",
+      );
     });
 
     it("3.4 state machine: user manual interaction locks preference across stream state changes", () => {
@@ -241,22 +312,38 @@ describe("Milestone 5 Challenger Empirical Stress Suite", () => {
       if (!sm.userInteracted) {
         sm.isCollapsed = false;
       }
-      assert.strictEqual(sm.isCollapsed, true, "Remains collapsed despite active stream");
+      assert.strictEqual(
+        sm.isCollapsed,
+        true,
+        "Remains collapsed despite active stream",
+      );
 
       // Stream finishes
       sm.streaming = false;
       if (!sm.userInteracted) {
         sm.isCollapsed = true;
       }
-      assert.strictEqual(sm.isCollapsed, true, "Remains collapsed after finish");
+      assert.strictEqual(
+        sm.isCollapsed,
+        true,
+        "Remains collapsed after finish",
+      );
 
       // User manually expands after finish
       sm.isCollapsed = false;
-      assert.strictEqual(sm.isCollapsed, false, "Remains expanded after manual toggle");
+      assert.strictEqual(
+        sm.isCollapsed,
+        false,
+        "Remains expanded after manual toggle",
+      );
     });
 
     it("3.5 live duration timer format during streaming vs completed state", () => {
-      const getDurationLabel = (streaming: boolean, elapsedMs: number, lang = "en") => {
+      const getDurationLabel = (
+        streaming: boolean,
+        elapsedMs: number,
+        lang = "en",
+      ) => {
         if (streaming) {
           const sec = (Math.max(0, elapsedMs) / 1000).toFixed(1);
           switch (lang) {
@@ -274,17 +361,33 @@ describe("Milestone 5 Challenger Empirical Stress Suite", () => {
       };
 
       // Streaming state
-      assert.strictEqual(getDurationLabel(true, 1250, "en"), "Thinking (1.3s)...");
-      assert.strictEqual(getDurationLabel(true, 3420, "cn"), "思考中 (3.4s)...");
-      assert.strictEqual(getDurationLabel(true, 500, "fr"), "Réflexion (0.5s)...");
+      assert.strictEqual(
+        getDurationLabel(true, 1250, "en"),
+        "Thinking (1.3s)...",
+      );
+      assert.strictEqual(
+        getDurationLabel(true, 3420, "cn"),
+        "思考中 (3.4s)...",
+      );
+      assert.strictEqual(
+        getDurationLabel(true, 500, "fr"),
+        "Réflexion (0.5s)...",
+      );
 
       // Completed state
-      assert.strictEqual(getDurationLabel(false, 3420, "en"), "Thought for 3.4s");
-      assert.strictEqual(getDurationLabel(false, 3420, "cn"), "思考耗时 3.4 秒");
+      assert.strictEqual(
+        getDurationLabel(false, 3420, "en"),
+        "Thought for 3.4s",
+      );
+      assert.strictEqual(
+        getDurationLabel(false, 3420, "cn"),
+        "思考耗时 3.4 秒",
+      );
     });
 
     it("3.6 handles massive 10,000+ words reasoning process safely without memory leak", () => {
-      const hugeReasoning = "Analyzing logical step and constraint satisfaction. ".repeat(10_000);
+      const hugeReasoning =
+        "Analyzing logical step and constraint satisfaction. ".repeat(10_000);
       assert.ok(hugeReasoning.length > 200_000);
 
       // Verify substring inspection and processing
@@ -469,7 +572,10 @@ describe("Milestone 5 Challenger Empirical Stress Suite", () => {
       const chunks = parseDataStreamResponse(streamChunks);
       const state = accumulateStreamState(chunks);
 
-      assert.strictEqual(state.reasoning, "Step 1: Parse AST.\nStep 2: Typecheck.\n");
+      assert.strictEqual(
+        state.reasoning,
+        "Step 1: Parse AST.\nStep 2: Typecheck.\n",
+      );
       assert.strictEqual(state.text, "The code is valid.");
       assert.strictEqual(state.isFinished, true);
     });

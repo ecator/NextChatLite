@@ -1,4 +1,4 @@
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 import {
   parseDataStreamResponse,
@@ -18,7 +18,7 @@ describe("Tier 2 Boundary B12: Vercel AI SDK Streaming Protocol Boundaries", () 
     assert.strictEqual(state.finishReason, undefined);
   });
 
-  it("B12-2: handles empty text-delta chunks (0:\"\") and whitespace deltas cleanly", () => {
+  it('B12-2: handles empty text-delta chunks (0:"") and whitespace deltas cleanly', () => {
     const stream = [
       encodeDataStreamChunk("0", ""),
       encodeDataStreamChunk("0", "   "),
@@ -50,7 +50,10 @@ describe("Tier 2 Boundary B12: Vercel AI SDK Streaming Protocol Boundaries", () 
     const c2 = parseDataStreamResponse(filterFinish);
 
     assert.strictEqual(accumulateStreamState(c1).finishReason, "length");
-    assert.strictEqual(accumulateStreamState(c2).finishReason, "content-filter");
+    assert.strictEqual(
+      accumulateStreamState(c2).finishReason,
+      "content-filter",
+    );
   });
 
   it("B12-5: processes high-frequency stream of 1,000 chunks without memory or buffer lag", () => {

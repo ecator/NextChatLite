@@ -648,3 +648,64 @@ export function streamWithThink(
   console.debug("[ChatAPI] start");
   chatApi(chatPath, headers, requestPayload, tools); // call fetchEventSource
 }
+
+export function trimTopic(topic: string) {
+  // Fix an issue where double quotes still show in the Indonesian language
+  // This will remove the specified punctuation from the end of the string
+  // and also trim quotes from both the start and end if they exist.
+  return (
+    topic
+      // fix for gemini
+      .replace(/^["“”*]+|["“”*]+$/g, "")
+      .replace(/[，。！？”“"、,.!?*]*$/, "")
+  );
+}
+
+export function getMessageTextContent(message: RequestMessage) {
+  if (typeof message.content === "string") {
+    return message.content;
+  }
+  for (const c of message.content) {
+    if (c.type === "text") {
+      return c.text ?? "";
+    }
+  }
+  return "";
+}
+
+export function getMessageTextContentWithoutThinking(message: RequestMessage) {
+  let content = "";
+
+  if (typeof message.content === "string") {
+    content = message.content;
+  } else {
+    for (const c of message.content) {
+      if (c.type === "text") {
+        content = c.text ?? "";
+        break;
+      }
+    }
+  }
+
+  // Filter out thinking lines (starting with "> ")
+  return content
+    .split("\n")
+    .filter((line) => !line.startsWith("> ") && line.trim() !== "")
+    .join("\n")
+    .trim();
+}
+
+export function getMessageImages(message: RequestMessage): string[] {
+  if (typeof message.content === "string") {
+    return [];
+  }
+  const urls: string[] = [];
+  for (const c of message.content) {
+    if (c.type === "image_url") {
+      urls.push(c.image_url?.url ?? "");
+    } else if ((c as any).type === "image") {
+      urls.push((c as any).image ?? "");
+    }
+  }
+  return urls;
+}

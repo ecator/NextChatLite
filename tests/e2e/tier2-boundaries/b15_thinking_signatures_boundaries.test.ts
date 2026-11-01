@@ -1,4 +1,4 @@
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 import {
   parseDataStreamResponse,
@@ -20,12 +20,19 @@ describe("Tier 2 Boundary B15: Gemini 3 Thinking Signatures Boundaries", () => {
     const chunks = parseDataStreamResponse(interleavedStream);
     const state = accumulateStreamState(chunks);
 
-    assert.strictEqual(state.reasoning, "Step 1: Parse input.\nStep 2: Compute result.\n");
-    assert.strictEqual(state.text, "Part 1: Input parsed. Part 2: Result is 100.");
+    assert.strictEqual(
+      state.reasoning,
+      "Step 1: Parse input.\nStep 2: Compute result.\n",
+    );
+    assert.strictEqual(
+      state.text,
+      "Part 1: Input parsed. Part 2: Result is 100.",
+    );
   });
 
   it("B15-2: handles markdown and LaTeX code blocks within reasoning deltas", () => {
-    const complexReasoning = "Let $f(x) = x^2 + 3x$.\n```python\ndef f(x):\n    return x**2 + 3*x\n```\n";
+    const complexReasoning =
+      "Let $f(x) = x^2 + 3x$.\n```python\ndef f(x):\n    return x**2 + 3*x\n```\n";
     const stream = `${encodeDataStreamChunk("g", complexReasoning)}${encodeDataStreamChunk("0", "The function is quadratic.")}`;
 
     const chunks = parseDataStreamResponse(stream);
@@ -49,7 +56,8 @@ describe("Tier 2 Boundary B15: Gemini 3 Thinking Signatures Boundaries", () => {
   });
 
   it("B15-4: handles thought process containing quote characters and escaped JSON symbols", () => {
-    const quoteReasoning = 'He said: "Quotes and \\slashes" are tricky in JSON.';
+    const quoteReasoning =
+      'He said: "Quotes and \\slashes" are tricky in JSON.';
     const stream = `${encodeDataStreamChunk("g", quoteReasoning)}${encodeDataStreamChunk("0", "Acknowledged.")}`;
 
     const chunks = parseDataStreamResponse(stream);

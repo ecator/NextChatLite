@@ -1,4 +1,4 @@
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 
 class ThinkingUiHelper {
@@ -27,10 +27,22 @@ class ThinkingUiHelper {
 describe("Tier 2 Boundary B16: Collapsible Reasoning UI Block Boundaries", () => {
   it("B16-1: formats duration across wide time ranges (0ms, 250ms, 45s, 2 hours)", () => {
     assert.strictEqual(ThinkingUiHelper.formatDuration(0), "Thought for 0.0s");
-    assert.strictEqual(ThinkingUiHelper.formatDuration(250), "Thought for 0.3s");
-    assert.strictEqual(ThinkingUiHelper.formatDuration(45200), "Thought for 45.2s");
-    assert.strictEqual(ThinkingUiHelper.formatDuration(7200_000), "Thought for 2.0h");
-    assert.strictEqual(ThinkingUiHelper.formatDuration(-500), "Thought for 0.0s");
+    assert.strictEqual(
+      ThinkingUiHelper.formatDuration(250),
+      "Thought for 0.3s",
+    );
+    assert.strictEqual(
+      ThinkingUiHelper.formatDuration(45200),
+      "Thought for 45.2s",
+    );
+    assert.strictEqual(
+      ThinkingUiHelper.formatDuration(7200_000),
+      "Thought for 2.0h",
+    );
+    assert.strictEqual(
+      ThinkingUiHelper.formatDuration(-500),
+      "Thought for 0.0s",
+    );
   });
 
   it("B16-2: extracts plain text from formatted reasoning markdown for clipboard copy", () => {
@@ -44,7 +56,8 @@ describe("Tier 2 Boundary B16: Collapsible Reasoning UI Block Boundaries", () =>
   });
 
   it("B16-3: handles empty reasoning string without rendering empty UI block container", () => {
-    const isVisible = (reasoningText?: string) => Boolean(reasoningText && reasoningText.trim().length > 0);
+    const isVisible = (reasoningText?: string) =>
+      Boolean(reasoningText && reasoningText.trim().length > 0);
     assert.strictEqual(isVisible(""), false);
     assert.strictEqual(isVisible("   "), false);
     assert.strictEqual(isVisible(undefined), false);
@@ -64,6 +77,9 @@ describe("Tier 2 Boundary B16: Collapsible Reasoning UI Block Boundaries", () =>
     const hugeReasoning = "Analyzing step. ".repeat(10_000);
     assert.ok(hugeReasoning.length > 150_000);
     const excerpt = hugeReasoning.slice(0, 100);
-    assert.strictEqual(excerpt, "Analyzing step. Analyzing step. Analyzing step. Analyzing step. Analyzing step. Analyzing step. Anal");
+    assert.strictEqual(
+      excerpt,
+      "Analyzing step. Analyzing step. Analyzing step. Analyzing step. Analyzing step. Analyzing step. Anal",
+    );
   });
 });

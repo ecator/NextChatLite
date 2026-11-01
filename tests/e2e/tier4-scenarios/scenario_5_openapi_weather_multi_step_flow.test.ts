@@ -1,4 +1,4 @@
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 import {
   parseDataStreamResponse,
@@ -42,7 +42,10 @@ describe("Tier 4 Scenario 5: OpenAPI Plugin Multi-Step Tool Execution Flow", () 
       encodeDataStreamChunk("0", "### Weather Comparison: Paris vs. Rome\n\n"),
       encodeDataStreamChunk("0", "- **Paris**: 18.0°C (Cloudy)\n"),
       encodeDataStreamChunk("0", "- **Rome**: 26.5°C (Sunny)\n\n"),
-      encodeDataStreamChunk("0", "Rome is significantly warmer (+8.5°C) and sunnier than Paris today."),
+      encodeDataStreamChunk(
+        "0",
+        "Rome is significantly warmer (+8.5°C) and sunnier than Paris today.",
+      ),
       encodeDataStreamChunk("d", { finishReason: "stop" }),
     ].join("");
 

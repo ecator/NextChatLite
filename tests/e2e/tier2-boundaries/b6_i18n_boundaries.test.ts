@@ -1,4 +1,4 @@
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 
 class MockI18nResolver {
@@ -11,7 +11,8 @@ class MockI18nResolver {
   }
 
   t(locale: string, path: string, params?: Record<string, string>): string {
-    const activeDict = this.locales[locale] || this.locales[this.defaultLocale] || {};
+    const activeDict =
+      this.locales[locale] || this.locales[this.defaultLocale] || {};
     const fallbackDict = this.locales[this.defaultLocale] || {};
 
     const resolvePath = (dict: any, p: string) => {
@@ -85,8 +86,14 @@ describe("Tier 2 Boundary B6: UI i18n Localization Boundaries", () => {
   });
 
   it("B6-4: replaces interpolation parameters and handles missing param placeholders", () => {
-    assert.strictEqual(i18n.t("en", "Chat.Welcome", { user: "Alice" }), "Welcome Alice!");
-    assert.strictEqual(i18n.t("cn", "Chat.Welcome", { user: "张三" }), "欢迎 张三！");
+    assert.strictEqual(
+      i18n.t("en", "Chat.Welcome", { user: "Alice" }),
+      "Welcome Alice!",
+    );
+    assert.strictEqual(
+      i18n.t("cn", "Chat.Welcome", { user: "张三" }),
+      "欢迎 张三！",
+    );
     // Missing param leaves placeholder or untouched
     assert.strictEqual(i18n.t("en", "Chat.Welcome"), "Welcome {user}!");
   });

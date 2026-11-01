@@ -1,4 +1,4 @@
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 import {
   parseDataStreamResponse,
@@ -20,12 +20,18 @@ describe("Tier 4 Scenario 2: Custom Base URL & OpenAPI Tool Calling Flow", () =>
       provider: "openai",
       customConfig: userAccessConfig,
       messages: [
-        { role: "user", content: "What is the temperature in San Francisco right now?" },
+        {
+          role: "user",
+          content: "What is the temperature in San Francisco right now?",
+        },
       ],
       pluginIds: ["weather_service"],
     };
 
-    assert.strictEqual(requestPayload.customConfig.baseUrl, "https://ai-gateway.internal.corp/v1");
+    assert.strictEqual(
+      requestPayload.customConfig.baseUrl,
+      "https://ai-gateway.internal.corp/v1",
+    );
 
     // 3. Server initiates stream to custom gateway and executes tool
     const customGatewayStream = [
@@ -36,10 +42,21 @@ describe("Tier 4 Scenario 2: Custom Base URL & OpenAPI Tool Calling Flow", () =>
       }),
       encodeDataStreamChunk("a", {
         toolCallId: "call_sf_weather",
-        result: { city: "San Francisco", temperature: 16.5, condition: "Partly Cloudy", humidity: 72 },
+        result: {
+          city: "San Francisco",
+          temperature: 16.5,
+          condition: "Partly Cloudy",
+          humidity: 72,
+        },
       }),
-      encodeDataStreamChunk("0", "The current temperature in San Francisco is **16.5°C** with partly cloudy skies and 72% humidity."),
-      encodeDataStreamChunk("d", { finishReason: "stop", usage: { promptTokens: 45, completionTokens: 68 } }),
+      encodeDataStreamChunk(
+        "0",
+        "The current temperature in San Francisco is **16.5°C** with partly cloudy skies and 72% humidity.",
+      ),
+      encodeDataStreamChunk("d", {
+        finishReason: "stop",
+        usage: { promptTokens: 45, completionTokens: 68 },
+      }),
     ].join("");
 
     const chunks = parseDataStreamResponse(customGatewayStream);

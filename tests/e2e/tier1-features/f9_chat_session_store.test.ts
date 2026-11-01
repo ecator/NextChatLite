@@ -1,4 +1,4 @@
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 
 interface Message {
@@ -105,9 +105,19 @@ describe("Feature F9: Multi-Turn Chat & Session Management Store", () => {
     manager.createSession();
 
     const m1 = manager.appendMessage({ role: "user", content: "What is 2+2?" });
-    const m2 = manager.appendMessage({ role: "assistant", content: "2 + 2 = 4", reasoning: "Basic math addition." });
-    const m3 = manager.appendMessage({ role: "user", content: "Multiply by 10" });
-    const m4 = manager.appendMessage({ role: "assistant", content: "4 * 10 = 40" });
+    const m2 = manager.appendMessage({
+      role: "assistant",
+      content: "2 + 2 = 4",
+      reasoning: "Basic math addition.",
+    });
+    const m3 = manager.appendMessage({
+      role: "user",
+      content: "Multiply by 10",
+    });
+    const m4 = manager.appendMessage({
+      role: "assistant",
+      content: "4 * 10 = 40",
+    });
 
     const session = manager.currentSession()!;
     assert.strictEqual(session.messages.length, 4);
@@ -144,7 +154,10 @@ describe("Feature F9: Multi-Turn Chat & Session Management Store", () => {
     const session = manager.createSession("Coding Help", personaMask);
     assert.ok(session.mask);
     assert.strictEqual(session.mask.name, "Senior Software Engineer");
-    assert.strictEqual(session.mask.context[0].content, "You are an expert TypeScript architect.");
+    assert.strictEqual(
+      session.mask.context[0].content,
+      "You are an expert TypeScript architect.",
+    );
   });
 
   it("F9-5: supports forking session at specific turn and clearing history", () => {

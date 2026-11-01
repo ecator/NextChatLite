@@ -1,4 +1,4 @@
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 
 function isNext16Compliant(versionString: string): boolean {
@@ -7,7 +7,11 @@ function isNext16Compliant(versionString: string): boolean {
   return major >= 16;
 }
 
-function handleRouteParamsBoundary(params: any): { valid: boolean; resolvedParams?: any; error?: string } {
+function handleRouteParamsBoundary(params: any): {
+  valid: boolean;
+  resolvedParams?: any;
+  error?: string;
+} {
   if (params === null || params === undefined) {
     return { valid: false, error: "Null or undefined params" };
   }
@@ -61,30 +65,46 @@ describe("Tier 2 Boundary B2: Next.js 16+ & React 19 Boundaries", () => {
     assert.strictEqual((await parseRouteBody("")).error, "EMPTY_BODY");
     assert.strictEqual((await parseRouteBody("   ")).error, "EMPTY_BODY");
     assert.strictEqual((await parseRouteBody(null)).error, "EMPTY_BODY");
-    assert.strictEqual((await parseRouteBody("{ broken json")).error, "INVALID_JSON");
+    assert.strictEqual(
+      (await parseRouteBody("{ broken json")).error,
+      "INVALID_JSON",
+    );
     assert.strictEqual((await parseRouteBody('{"valid":"json"}')).status, 200);
   });
 
   it("B2-4: handles route params with URL encoded characters and slashes", () => {
     const sanitizeRouteParam = (param: string): string => {
-      return decodeURIComponent(param).replace(/[\0\r\n]/g, "").trim();
+      return decodeURIComponent(param)
+        .replace(/[\0\r\n]/g, "")
+        .trim();
     };
 
-    assert.strictEqual(sanitizeRouteParam("google%2Fgemini-3-pro"), "google/gemini-3-pro");
-    assert.strictEqual(sanitizeRouteParam("model%20name%20with%20spaces"), "model name with spaces");
+    assert.strictEqual(
+      sanitizeRouteParam("google%2Fgemini-3-pro"),
+      "google/gemini-3-pro",
+    );
+    assert.strictEqual(
+      sanitizeRouteParam("model%20name%20with%20spaces"),
+      "model name with spaces",
+    );
     assert.strictEqual(sanitizeRouteParam("clean-id"), "clean-id");
   });
 
   it("B2-5: verifies React 19 Action and useActionState compatibility bounds", () => {
     // React 19 supports async actions in transitions
-    const executeAction = async (prevState: { count: number }, formData: FormData) => {
+    const executeAction = async (
+      prevState: { count: number },
+      formData: FormData,
+    ) => {
       const increment = Number(formData.get("inc")) || 1;
       return { count: prevState.count + increment };
     };
 
     const mockFormData = new Map<string, any>();
     mockFormData.set("inc", "5");
-    const formDataShim = { get: (k: string) => mockFormData.get(k) } as FormData;
+    const formDataShim = {
+      get: (k: string) => mockFormData.get(k),
+    } as FormData;
 
     return executeAction({ count: 10 }, formDataShim).then((next) => {
       assert.strictEqual(next.count, 15);

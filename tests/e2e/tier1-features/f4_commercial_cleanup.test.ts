@@ -1,4 +1,4 @@
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 import { readProjectFile, fileExists } from "../fixtures/test_helpers";
 
@@ -9,7 +9,7 @@ describe("Feature F4: Commercial / SaaS Cleanup & Paywall Removal", () => {
       assert.doesNotMatch(
         constantContent,
         /SAAS_CHAT_URL|NEXT_PUBLIC_SAAS_URL|saas-pricing/i,
-        "Commercial SaaS URLs must be removed from constant.ts"
+        "Commercial SaaS URLs must be removed from constant.ts",
       );
     }
   });
@@ -18,7 +18,7 @@ describe("Feature F4: Commercial / SaaS Cleanup & Paywall Removal", () => {
     assert.strictEqual(
       fileExists("src/components/top-banner.tsx"),
       false,
-      "TopBanner SaaS component must be deleted"
+      "TopBanner SaaS component must be deleted",
     );
   });
 
@@ -28,7 +28,7 @@ describe("Feature F4: Commercial / SaaS Cleanup & Paywall Removal", () => {
       assert.doesNotMatch(
         accessContent,
         /isCommercial|licenseKey|checkLicense|saasStart/i,
-        "Commercial license checks and SaaS hooks must be pruned from access.ts"
+        "Commercial license checks and SaaS hooks must be pruned from access.ts",
       );
     }
   });
@@ -39,7 +39,7 @@ describe("Feature F4: Commercial / SaaS Cleanup & Paywall Removal", () => {
       assert.doesNotMatch(
         sidebarContent,
         /goSaas|sponsorLink|buyPlan/i,
-        "Sponsorship and SaaS buttons must be removed from sidebar"
+        "Sponsorship and SaaS buttons must be removed from sidebar",
       );
     }
   });
@@ -50,7 +50,7 @@ describe("Feature F4: Commercial / SaaS Cleanup & Paywall Removal", () => {
       assert.doesNotMatch(
         settingsContent,
         /proSubscription|upgradeToPro|saasUsage/i,
-        "Settings view must be free from Pro upgrade gates"
+        "Settings view must be free from Pro upgrade gates",
       );
     }
   });

@@ -1,4 +1,4 @@
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 import { readJsonFile } from "../fixtures/test_helpers";
 import {
@@ -13,7 +13,9 @@ interface OpenApiToolDefinition {
   parameters: any;
 }
 
-function convertOpenApiSpecToAiTools(spec: any): Record<string, OpenApiToolDefinition> {
+function convertOpenApiSpecToAiTools(
+  spec: any,
+): Record<string, OpenApiToolDefinition> {
   const tools: Record<string, OpenApiToolDefinition> = {};
   const paths = spec.paths || {};
 
@@ -38,7 +40,8 @@ function convertOpenApiSpecToAiTools(spec: any): Record<string, OpenApiToolDefin
 
       tools[op.operationId] = {
         name: op.operationId,
-        description: op.summary || op.description || `${method.toUpperCase()} ${pathKey}`,
+        description:
+          op.summary || op.description || `${method.toUpperCase()} ${pathKey}`,
         parameters: {
           type: "object",
           properties,
@@ -56,10 +59,18 @@ describe("Feature F14: OpenAPI Plugin Tool Calling in Vercel AI SDK", () => {
 
   it("F14-1: converts OpenAPI 3.x specification into AI SDK tool definition", () => {
     const tools = convertOpenApiSpecToAiTools(weatherSpec);
-    assert.ok(tools.getCurrentWeather, "Tool getCurrentWeather must be generated");
+    assert.ok(
+      tools.getCurrentWeather,
+      "Tool getCurrentWeather must be generated",
+    );
     assert.strictEqual(tools.getCurrentWeather.name, "getCurrentWeather");
-    assert.strictEqual(tools.getCurrentWeather.parameters.properties.location.type, "string");
-    assert.deepStrictEqual(tools.getCurrentWeather.parameters.required, ["location"]);
+    assert.strictEqual(
+      tools.getCurrentWeather.parameters.properties.location.type,
+      "string",
+    );
+    assert.deepStrictEqual(tools.getCurrentWeather.parameters.required, [
+      "location",
+    ]);
   });
 
   it("F14-2: parses tool_call stream chunks (prefix 9) from AI SDK", () => {
@@ -93,9 +104,19 @@ describe("Feature F14: OpenAPI Plugin Tool Calling in Vercel AI SDK", () => {
 
   it("F14-4: supports multi-step execution (tool calling followed by synthesis text)", () => {
     const multiStepStream = [
-      encodeDataStreamChunk("9", { toolCallId: "call_1", toolName: "getCurrentWeather", args: { location: "Paris" } }),
-      encodeDataStreamChunk("a", { toolCallId: "call_1", result: { city: "Paris", temperature: 18, condition: "Cloudy" } }),
-      encodeDataStreamChunk("0", "The current weather in Paris is 18°C and cloudy."),
+      encodeDataStreamChunk("9", {
+        toolCallId: "call_1",
+        toolName: "getCurrentWeather",
+        args: { location: "Paris" },
+      }),
+      encodeDataStreamChunk("a", {
+        toolCallId: "call_1",
+        result: { city: "Paris", temperature: 18, condition: "Cloudy" },
+      }),
+      encodeDataStreamChunk(
+        "0",
+        "The current weather in Paris is 18°C and cloudy.",
+      ),
       encodeDataStreamChunk("d", { finishReason: "stop" }),
     ].join("");
 
@@ -104,19 +125,33 @@ describe("Feature F14: OpenAPI Plugin Tool Calling in Vercel AI SDK", () => {
 
     assert.strictEqual(state.toolCalls.length, 1);
     assert.strictEqual(state.toolResults.length, 1);
-    assert.strictEqual(state.text, "The current weather in Paris is 18°C and cloudy.");
+    assert.strictEqual(
+      state.text,
+      "The current weather in Paris is 18°C and cloudy.",
+    );
     assert.strictEqual(state.isFinished, true);
   });
 
   it("F14-5: validates CORS proxy URL formatting for external API plugin requests", () => {
-    const makeProxyUrl = (targetUrl: string, proxyEndpoint = "/api/proxy"): string => {
+    const makeProxyUrl = (
+      targetUrl: string,
+      proxyEndpoint = "/api/proxy",
+    ): string => {
       const url = new URL(proxyEndpoint, "http://localhost:3000");
       url.searchParams.set("url", targetUrl);
       return url.pathname + url.search;
     };
 
-    const proxyPath = makeProxyUrl("https://api.weather-example.com/v1/weather/current?location=London");
+    const proxyPath = makeProxyUrl(
+      "https://api.weather-example.com/v1/weather/current?location=London",
+    );
     assert.ok(proxyPath.startsWith("/api/proxy?url="));
-    assert.ok(proxyPath.includes(encodeURIComponent("https://api.weather-example.com/v1/weather/current?location=London")));
+    assert.ok(
+      proxyPath.includes(
+        encodeURIComponent(
+          "https://api.weather-example.com/v1/weather/current?location=London",
+        ),
+      ),
+    );
   });
 });

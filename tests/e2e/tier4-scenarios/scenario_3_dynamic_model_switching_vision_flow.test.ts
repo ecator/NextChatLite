@@ -1,4 +1,4 @@
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 import { readJsonFile } from "../fixtures/test_helpers";
 import {
@@ -8,7 +8,9 @@ import {
 } from "../fixtures/mock_chat_streams";
 
 describe("Tier 4 Scenario 3: Dynamic Model Switching with Vision & Metadata Adaptation", () => {
-  const modelsCatalog = readJsonFile("tests/e2e/fixtures/mock_models_dev.json").models;
+  const modelsCatalog = readJsonFile(
+    "tests/e2e/fixtures/mock_models_dev.json",
+  ).models;
 
   it("handles seamless model switching from text-only to multimodal vision model with parameter recalculation", () => {
     // 1. Initial state with text-only model (o3-mini)
@@ -37,7 +39,8 @@ describe("Tier 4 Scenario 3: Dynamic Model Switching with Vision & Metadata Adap
     // 3. User attaches an image and submits multimodal prompt
     const mockImageAttachment = {
       type: "image/png",
-      base64: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+      base64:
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
     };
 
     const visionChatRequest = {
@@ -47,7 +50,10 @@ describe("Tier 4 Scenario 3: Dynamic Model Switching with Vision & Metadata Adap
         {
           role: "user",
           content: [
-            { type: "text", text: "Describe what is depicted in this uploaded architecture schematic." },
+            {
+              type: "text",
+              text: "Describe what is depicted in this uploaded architecture schematic.",
+            },
             { type: "image", image: mockImageAttachment.base64 },
           ],
         },
@@ -58,8 +64,14 @@ describe("Tier 4 Scenario 3: Dynamic Model Switching with Vision & Metadata Adap
 
     // 4. Stream response from Gemini 3 Vision
     const visionStream = [
-      encodeDataStreamChunk("g", "Inspecting diagram nodes: Next.js frontend, AI SDK backend, models.dev catalog.\n"),
-      encodeDataStreamChunk("0", "The diagram illustrates a modern server-rendered architecture connecting the client UI to Vercel AI SDK and dynamic models.dev metadata."),
+      encodeDataStreamChunk(
+        "g",
+        "Inspecting diagram nodes: Next.js frontend, AI SDK backend, models.dev catalog.\n",
+      ),
+      encodeDataStreamChunk(
+        "0",
+        "The diagram illustrates a modern server-rendered architecture connecting the client UI to Vercel AI SDK and dynamic models.dev metadata.",
+      ),
       encodeDataStreamChunk("d", { finishReason: "stop" }),
     ].join("");
 

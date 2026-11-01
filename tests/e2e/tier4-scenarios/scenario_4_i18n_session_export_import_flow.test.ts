@@ -1,4 +1,4 @@
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 
 describe("Tier 4 Scenario 4: Multi-Language Switching & Session Backup Export/Import Flow", () => {
@@ -26,7 +26,8 @@ describe("Tier 4 Scenario 4: Multi-Language Switching & Session Backup Export/Im
         {
           id: "m2",
           role: "assistant",
-          content: "Next.js 16 では React 19 と完全に統合され、非同期ルートパラメータなどの最新機能がサポートされています。",
+          content:
+            "Next.js 16 では React 19 と完全に統合され、非同期ルートパラメータなどの最新機能がサポートされています。",
           date: new Date().toISOString(),
         },
       ],
@@ -57,7 +58,10 @@ describe("Tier 4 Scenario 4: Multi-Language Switching & Session Backup Export/Im
     assert.strictEqual(restoredSession.id, "session_jp_001");
     assert.strictEqual(restoredSession.topic, "システム設計相談");
     assert.strictEqual(restoredSession.messages.length, 2);
-    assert.strictEqual(restoredSession.messages[0].content, "Next.js 16 の App Router について教えてください。");
+    assert.strictEqual(
+      restoredSession.messages[0].content,
+      "Next.js 16 の App Router について教えてください。",
+    );
 
     // UI locale is French
     assert.strictEqual(activeLocale, "fr");

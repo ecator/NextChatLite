@@ -1,4 +1,4 @@
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 
 interface ThinkingBlockState {
@@ -42,7 +42,7 @@ function createThinkingBlockController(initialReasoning = ""): {
       return Math.max(0, (end - state.startTime) / 1000);
     },
     getFormattedDuration() {
-      const sec = (this.getDurationSeconds()).toFixed(1);
+      const sec = this.getDurationSeconds().toFixed(1);
       return `Thought for ${sec}s`;
     },
   };
@@ -58,7 +58,9 @@ describe("Feature F16: Collapsible Reasoning UI Block (<ThinkingBlock />)", () =
 
   it("F16-2: renders markdown, code blocks, and math formulas inside reasoning block", () => {
     const ctrl = createThinkingBlockController();
-    ctrl.appendReasoning("Let $\\alpha = 45^\\circ$ and ```ts\nconst x = 10;\n```");
+    ctrl.appendReasoning(
+      "Let $\\alpha = 45^\\circ$ and ```ts\nconst x = 10;\n```",
+    );
 
     assert.ok(ctrl.state.reasoningText.includes("$\\alpha = 45^\\circ$"));
     assert.ok(ctrl.state.reasoningText.includes("```ts\nconst x = 10;\n```"));

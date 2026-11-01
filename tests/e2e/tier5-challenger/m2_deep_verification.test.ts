@@ -2,7 +2,6 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
-import { execSync } from "node:child_process";
 
 describe("Milestone 2 Empirical Challenger Deep Verification & Stress Suite", () => {
   const rootDir = process.cwd();
@@ -12,41 +11,41 @@ describe("Milestone 2 Empirical Challenger Deep Verification & Stress Suite", ()
     assert.strictEqual(
       fs.existsSync(path.join(rootDir, "src/components/sd")),
       false,
-      "src/components/sd must not exist"
+      "src/components/sd must not exist",
     );
     assert.strictEqual(
       fs.existsSync(path.join(rootDir, "src/store/sd.ts")),
       false,
-      "src/store/sd.ts must not exist"
+      "src/store/sd.ts must not exist",
     );
     assert.strictEqual(
       fs.existsSync(path.join(rootDir, "src/app/api/stability.ts")),
       false,
-      "src/app/api/stability.ts must not exist"
+      "src/app/api/stability.ts must not exist",
     );
 
     // Check settings.tsx has no Stability config components
     const settingsContent = fs.readFileSync(
       path.join(rootDir, "src/components/settings.tsx"),
-      "utf-8"
+      "utf-8",
     );
     assert.ok(
       !settingsContent.includes("stabilityConfigComponent"),
-      "settings.tsx must not contain stabilityConfigComponent"
+      "settings.tsx must not contain stabilityConfigComponent",
     );
     assert.ok(
       !settingsContent.includes("ServiceProvider.Stability"),
-      "settings.tsx must not contain ServiceProvider.Stability"
+      "settings.tsx must not contain ServiceProvider.Stability",
     );
 
     // Check sidebar has no SD navigation
     const sidebarContent = fs.readFileSync(
       path.join(rootDir, "src/components/sidebar.tsx"),
-      "utf-8"
+      "utf-8",
     );
     assert.ok(
       !sidebarContent.includes("Path.Sd"),
-      "sidebar.tsx must not contain Path.Sd"
+      "sidebar.tsx must not contain Path.Sd",
     );
   });
 
@@ -55,102 +54,102 @@ describe("Milestone 2 Empirical Challenger Deep Verification & Stress Suite", ()
     assert.strictEqual(
       fs.existsSync(path.join(rootDir, "app/mcp")),
       false,
-      "app/mcp directory must not exist"
+      "app/mcp directory must not exist",
     );
     assert.strictEqual(
       fs.existsSync(path.join(rootDir, "src/components/mcp-market.tsx")),
       false,
-      "src/components/mcp-market.tsx must not exist"
+      "src/components/mcp-market.tsx must not exist",
     );
 
     // Check package.json
     const pkg = JSON.parse(
-      fs.readFileSync(path.join(rootDir, "package.json"), "utf-8")
+      fs.readFileSync(path.join(rootDir, "package.json"), "utf-8"),
     );
     const deps = { ...pkg.dependencies, ...pkg.devDependencies };
     assert.strictEqual(
       deps["@modelcontextprotocol/sdk"],
       undefined,
-      "package.json must not have @modelcontextprotocol/sdk"
+      "package.json must not have @modelcontextprotocol/sdk",
     );
 
     // Check chat.ts for MCP stubs or templates
     const chatStoreContent = fs.readFileSync(
       path.join(rootDir, "src/store/chat.ts"),
-      "utf-8"
+      "utf-8",
     );
     assert.ok(
       !chatStoreContent.includes("MCP_SYSTEM_TEMPLATE"),
-      "chat.ts must not reference MCP_SYSTEM_TEMPLATE"
+      "chat.ts must not reference MCP_SYSTEM_TEMPLATE",
     );
     assert.ok(
       !chatStoreContent.includes("MCP_TOOLS_TEMPLATE"),
-      "chat.ts must not reference MCP_TOOLS_TEMPLATE"
+      "chat.ts must not reference MCP_TOOLS_TEMPLATE",
     );
     assert.ok(
       !chatStoreContent.includes("isMcpResponse"),
-      "chat.ts must not reference isMcpResponse"
+      "chat.ts must not reference isMcpResponse",
     );
     assert.ok(
       !chatStoreContent.includes("checkMcpJson"),
-      "chat.ts must not reference checkMcpJson"
+      "chat.ts must not reference checkMcpJson",
     );
     assert.ok(
       !chatStoreContent.includes("executeMcpAction"),
-      "chat.ts must not reference executeMcpAction"
+      "chat.ts must not reference executeMcpAction",
     );
 
     // Check chat.tsx for MCP action button
     const chatViewContent = fs.readFileSync(
       path.join(rootDir, "src/components/chat.tsx"),
-      "utf-8"
+      "utf-8",
     );
     assert.ok(
       !chatViewContent.includes("<MCPAction"),
-      "chat.tsx must not reference <MCPAction"
+      "chat.tsx must not reference <MCPAction",
     );
   });
 
   it("3. Zero DALL-E special-case selector branches in chat UI and store", () => {
     const chatViewContent = fs.readFileSync(
       path.join(rootDir, "src/components/chat.tsx"),
-      "utf-8"
+      "utf-8",
     );
     assert.ok(
       !chatViewContent.includes("dalle3Qualitys"),
-      "chat.tsx must not have dalle3Qualitys state"
+      "chat.tsx must not have dalle3Qualitys state",
     );
     assert.ok(
       !chatViewContent.includes("dalle3Styles"),
-      "chat.tsx must not have dalle3Styles state"
+      "chat.tsx must not have dalle3Styles state",
     );
     assert.ok(
       !chatViewContent.includes("isDalle3("),
-      "chat.tsx must not have isDalle3 branching"
+      "chat.tsx must not have isDalle3 branching",
     );
 
     const chatStoreContent = fs.readFileSync(
       path.join(rootDir, "src/store/chat.ts"),
-      "utf-8"
+      "utf-8",
     );
     assert.ok(
       !chatStoreContent.includes("isDalle3("),
-      "chat.ts must not have isDalle3 branching"
+      "chat.ts must not have isDalle3 branching",
     );
   });
 
   it("4. OpenAPI Plugin store operates cleanly without MCP dependencies", () => {
     const pluginStoreContent = fs.readFileSync(
       path.join(rootDir, "src/store/plugin.ts"),
-      "utf-8"
+      "utf-8",
     );
     assert.ok(
       !pluginStoreContent.includes("mcp"),
-      "plugin.ts must not contain MCP references"
+      "plugin.ts must not contain MCP references",
     );
     assert.ok(
       pluginStoreContent.includes("openapi-client-axios"),
-      "plugin.ts should use openapi-client-axios"
+      "plugin.ts should use openapi-client-axios",
     );
   });
 
@@ -236,7 +235,10 @@ describe("Milestone 2 Empirical Challenger Deep Verification & Stress Suite", ()
       forkSession(messageIndex: number): TestSession {
         const s = this.currentSession();
         const sliced = s.messages.slice(0, messageIndex + 1);
-        const forked = this.createSession(`${s.topic} (Fork)`, s.mask ? JSON.parse(JSON.stringify(s.mask)) : undefined);
+        const forked = this.createSession(
+          `${s.topic} (Fork)`,
+          s.mask ? JSON.parse(JSON.stringify(s.mask)) : undefined,
+        );
         forked.messages = JSON.parse(JSON.stringify(sliced));
         return forked;
       }
@@ -272,12 +274,15 @@ describe("Milestone 2 Empirical Challenger Deep Verification & Stress Suite", ()
       reasoning: "Thinking about the TypeScript code formatting...",
     });
     mgr.appendMessage({ role: "user", content: "Can you elaborate?" });
-    mgr.appendMessage({ role: "assistant", content: "Sure, let us delve deeper." });
+    mgr.appendMessage({
+      role: "assistant",
+      content: "Sure, let us delve deeper.",
+    });
 
     assert.strictEqual(mgr.currentSession().messages.length, 4);
     assert.strictEqual(
       mgr.currentSession().messages[1].reasoning,
-      "Thinking about the TypeScript code formatting..."
+      "Thinking about the TypeScript code formatting...",
     );
 
     // D. Test context clearing divider
@@ -290,12 +295,18 @@ describe("Milestone 2 Empirical Challenger Deep Verification & Stress Suite", ()
     const forked = mgr.forkSession(1);
     assert.strictEqual(mgr.sessions.length, 101);
     assert.strictEqual(forked.messages.length, 2);
-    assert.strictEqual(forked.messages[1].reasoning, "Thinking about the TypeScript code formatting...");
+    assert.strictEqual(
+      forked.messages[1].reasoning,
+      "Thinking about the TypeScript code formatting...",
+    );
 
     // Mutate fork and ensure original is unmutated (deep isolation)
     forked.messages[0].content = "Modified in fork";
     mgr.selectSession(51); // Original session was at 50, but unshift moved it to 51
-    assert.strictEqual(mgr.currentSession().messages[0].content, "Hello multi-turn!");
+    assert.strictEqual(
+      mgr.currentSession().messages[0].content,
+      "Hello multi-turn!",
+    );
 
     // F. Clear messages in session
     mgr.clearSessionMessages();
@@ -330,14 +341,19 @@ describe("Milestone 2 Empirical Challenger Deep Verification & Stress Suite", ()
           role: "assistant",
           content: "Here is your image result",
           isMcpResponse: true,
-          tools: [{ id: "call_1", type: "mcp", function: { name: "mcp_tool" } }],
+          tools: [
+            { id: "call_1", type: "mcp", function: { name: "mcp_tool" } },
+          ],
         },
       ],
       mask: {
         id: "mask_legacy",
         name: "Legacy Mask",
         context: [
-          { role: "system", content: "System instruction with {mcp:server:tool} tag" },
+          {
+            role: "system",
+            content: "System instruction with {mcp:server:tool} tag",
+          },
         ],
       },
     };
@@ -354,6 +370,9 @@ describe("Milestone 2 Empirical Challenger Deep Verification & Stress Suite", ()
 
     assert.strictEqual((sanitized.messages[0] as any).isMcpResponse, undefined);
     assert.strictEqual((sanitized.messages[0] as any).sdParams, undefined);
-    assert.strictEqual(sanitized.mask.context[0].content, "System instruction with  tag");
+    assert.strictEqual(
+      sanitized.mask.context[0].content,
+      "System instruction with  tag",
+    );
   });
 });

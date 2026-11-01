@@ -1,4 +1,4 @@
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 import {
   parseDataStreamResponse,
@@ -55,14 +55,20 @@ describe("Tier 4 Scenario 8: Offline Metadata Fallback & Chat Recovery Flow", ()
 
     // 4. Stream response proceeds cleanly
     const stream = [
-      encodeDataStreamChunk("0", "Fallback model loaded successfully. Ready to assist!"),
+      encodeDataStreamChunk(
+        "0",
+        "Fallback model loaded successfully. Ready to assist!",
+      ),
       encodeDataStreamChunk("d", { finishReason: "stop" }),
     ].join("");
 
     const chunks = parseDataStreamResponse(stream);
     const state = accumulateStreamState(chunks);
 
-    assert.strictEqual(state.text, "Fallback model loaded successfully. Ready to assist!");
+    assert.strictEqual(
+      state.text,
+      "Fallback model loaded successfully. Ready to assist!",
+    );
     assert.strictEqual(state.isFinished, true);
   });
 });

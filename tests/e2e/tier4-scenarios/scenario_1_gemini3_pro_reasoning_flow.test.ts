@@ -1,4 +1,4 @@
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 import {
   parseDataStreamResponse,
@@ -26,7 +26,8 @@ describe("Tier 4 Scenario 1: Full Gemini 3 Pro Reasoning & Thinking Block Flow",
     const userMsg = {
       id: "m_user_1",
       role: "user",
-      content: "Prove that MergeSort has asymptotic time complexity O(N log N) in all cases.",
+      content:
+        "Prove that MergeSort has asymptotic time complexity O(N log N) in all cases.",
       date: new Date().toISOString(),
     };
     userSession.messages.push(userMsg);
@@ -77,7 +78,10 @@ describe("Tier 4 Scenario 1: Full Gemini 3 Pro Reasoning & Thinking Block Flow",
     };
 
     assert.strictEqual(userSession.messages.length, 2);
-    assert.strictEqual(userSession.messages[1].reasoning, assistantMsg.reasoning);
+    assert.strictEqual(
+      userSession.messages[1].reasoning,
+      assistantMsg.reasoning,
+    );
     assert.strictEqual(thinkingBlockUi.isCollapsed, true);
     assert.strictEqual(thinkingBlockUi.durationLabel, "Thought for 3.8s");
   });

@@ -1,4 +1,4 @@
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 import { validateChatApiPayload } from "../fixtures/test_helpers";
 import type { ChatApiPayload } from "../fixtures/test_helpers";
@@ -8,14 +8,20 @@ function normalizeBaseUrl(url?: string): string | undefined {
   return url.trim().replace(/\/+$/, "");
 }
 
-function resolveProviderEndpoint(provider: string, customConfig?: { baseUrl?: string; apiKey?: string }) {
+function resolveProviderEndpoint(
+  provider: string,
+  customConfig?: { baseUrl?: string; apiKey?: string },
+) {
   const defaultEndpoints: Record<string, string> = {
     openai: "https://api.openai.com/v1",
     google: "https://generativelanguage.googleapis.com/v1beta",
     anthropic: "https://api.anthropic.com/v1",
   };
 
-  const finalBaseUrl = normalizeBaseUrl(customConfig?.baseUrl) || defaultEndpoints[provider] || defaultEndpoints.openai;
+  const finalBaseUrl =
+    normalizeBaseUrl(customConfig?.baseUrl) ||
+    defaultEndpoints[provider] ||
+    defaultEndpoints.openai;
   const apiKey = customConfig?.apiKey || "env_default_key";
 
   return {
@@ -67,12 +73,18 @@ describe("Feature F13: Custom BASE_URL & API Key Overrides", () => {
     const resolvedGoogle = resolveProviderEndpoint("google");
 
     assert.strictEqual(resolvedOpenAi.baseUrl, "https://api.openai.com/v1");
-    assert.strictEqual(resolvedGoogle.baseUrl, "https://generativelanguage.googleapis.com/v1beta");
+    assert.strictEqual(
+      resolvedGoogle.baseUrl,
+      "https://generativelanguage.googleapis.com/v1beta",
+    );
     assert.strictEqual(resolvedOpenAi.isCustom, false);
   });
 
   it("F13-5: sanitizes error responses to prevent API key leakage in logs or client messages", () => {
-    const sanitizeErrorMessage = (errorMsg: string, secretKey: string): string => {
+    const sanitizeErrorMessage = (
+      errorMsg: string,
+      secretKey: string,
+    ): string => {
       if (!secretKey) return errorMsg;
       return errorMsg.replaceAll(secretKey, "[REDACTED_API_KEY]");
     };

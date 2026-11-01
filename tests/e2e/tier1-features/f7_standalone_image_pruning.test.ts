@@ -1,13 +1,17 @@
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
-import { directoryExists, fileExists, readProjectFile } from "../fixtures/test_helpers";
+import {
+  directoryExists,
+  fileExists,
+  readProjectFile,
+} from "../fixtures/test_helpers";
 
 describe("Feature F7: Standalone Image Generation Pruning (Stable Diffusion & DALL-E)", () => {
   it("F7-1: verifies complete absence of app/components/sd/ directory", () => {
     assert.strictEqual(
       directoryExists("src/components/sd"),
       false,
-      "src/components/sd directory must be deleted"
+      "src/components/sd directory must be deleted",
     );
   });
 
@@ -15,7 +19,7 @@ describe("Feature F7: Standalone Image Generation Pruning (Stable Diffusion & DA
     assert.strictEqual(
       fileExists("src/store/sd.ts"),
       false,
-      "src/store/sd.ts must be deleted"
+      "src/store/sd.ts must be deleted",
     );
   });
 
@@ -23,7 +27,7 @@ describe("Feature F7: Standalone Image Generation Pruning (Stable Diffusion & DA
     assert.strictEqual(
       fileExists("src/app/api/stability.ts"),
       false,
-      "src/app/api/stability.ts must be deleted"
+      "src/app/api/stability.ts must be deleted",
     );
   });
 
@@ -33,7 +37,7 @@ describe("Feature F7: Standalone Image Generation Pruning (Stable Diffusion & DA
       assert.doesNotMatch(
         sidebarContent,
         /Path\.Sd|Path\.StableDiffusion|useSdStore/i,
-        "Sidebar must not contain Stable Diffusion tab navigation"
+        "Sidebar must not contain Stable Diffusion tab navigation",
       );
     }
   });
@@ -44,7 +48,7 @@ describe("Feature F7: Standalone Image Generation Pruning (Stable Diffusion & DA
       assert.doesNotMatch(
         chatContent,
         /dall-e-3-generator|generateImageModal/i,
-        "Chat component must not contain standalone image generation modals"
+        "Chat component must not contain standalone image generation modals",
       );
     }
   });

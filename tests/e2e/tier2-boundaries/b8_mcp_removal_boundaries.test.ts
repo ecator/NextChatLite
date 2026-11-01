@@ -1,4 +1,4 @@
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 
 class MockPromptSanitizer {
@@ -17,10 +17,14 @@ class MockPromptSanitizer {
 
 describe("Tier 2 Boundary B8: MCP Removal Boundaries", () => {
   it("B8-1: removes {mcp:...} tags from legacy prompt templates", () => {
-    const rawPrompt = "You are a coding assistant. {mcp:filesystem_tool} Please inspect the repo.";
+    const rawPrompt =
+      "You are a coding assistant. {mcp:filesystem_tool} Please inspect the repo.";
     const clean = MockPromptSanitizer.sanitizePrompt(rawPrompt);
 
-    assert.strictEqual(clean, "You are a coding assistant.  Please inspect the repo.");
+    assert.strictEqual(
+      clean,
+      "You are a coding assistant.  Please inspect the repo.",
+    );
     assert.doesNotMatch(clean, /\{mcp:/);
   });
 

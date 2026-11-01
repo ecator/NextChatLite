@@ -1,4 +1,4 @@
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 
 class ParameterValidator {
@@ -50,14 +50,23 @@ describe("Tier 2 Boundary B11: Model Selector & Parameter Limits Boundaries", ()
     assert.strictEqual(ParameterValidator.validateMaxTokens(8000, 4096), 4096);
 
     // Gemini 3 Pro limit: 65536
-    assert.strictEqual(ParameterValidator.validateMaxTokens(50000, 65536), 50000);
-    assert.strictEqual(ParameterValidator.validateMaxTokens(100000, 65536), 65536);
+    assert.strictEqual(
+      ParameterValidator.validateMaxTokens(50000, 65536),
+      50000,
+    );
+    assert.strictEqual(
+      ParameterValidator.validateMaxTokens(100000, 65536),
+      65536,
+    );
   });
 
   it("B11-4: handles zero, negative, or non-numeric max_tokens gracefully", () => {
     assert.strictEqual(ParameterValidator.validateMaxTokens(0, 4096), 2048);
     assert.strictEqual(ParameterValidator.validateMaxTokens(-500, 4096), 2048);
-    assert.strictEqual(ParameterValidator.validateMaxTokens("not-a-number", 4096), 2048);
+    assert.strictEqual(
+      ParameterValidator.validateMaxTokens("not-a-number", 4096),
+      2048,
+    );
   });
 
   it("B11-5: filters model search keyword with special characters, regex meta-chars, and unicode", () => {
@@ -67,9 +76,23 @@ describe("Tier 2 Boundary B11: Model Selector & Parameter Limits Boundaries", ()
       return list.filter((m) => m.toLowerCase().includes(q));
     };
 
-    const models = ["gpt-4o", "gemini-3-pro", "gemini-3-flash", "o3-mini", "claude-3-5-sonnet"];
-    assert.deepStrictEqual(searchModels("gemini", models), ["gemini-3-pro", "gemini-3-flash"]);
-    assert.deepStrictEqual(searchModels("3-", models), ["gemini-3-pro", "gemini-3-flash", "o3-mini", "claude-3-5-sonnet"]);
+    const models = [
+      "gpt-4o",
+      "gemini-3-pro",
+      "gemini-3-flash",
+      "o3-mini",
+      "claude-3-5-sonnet",
+    ];
+    assert.deepStrictEqual(searchModels("gemini", models), [
+      "gemini-3-pro",
+      "gemini-3-flash",
+    ]);
+    assert.deepStrictEqual(searchModels("3-", models), [
+      "gemini-3-pro",
+      "gemini-3-flash",
+      "o3-mini",
+      "claude-3-5-sonnet",
+    ]);
     assert.deepStrictEqual(searchModels(".*", models), []);
     assert.deepStrictEqual(searchModels("", models), models);
   });

@@ -1,7 +1,10 @@
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 
-function validatePackageManagerSpec(spec?: string): { valid: boolean; error?: string } {
+function validatePackageManagerSpec(spec?: string): {
+  valid: boolean;
+  error?: string;
+} {
   if (!spec || typeof spec !== "string") {
     return { valid: false, error: "Missing or invalid packageManager string" };
   }
@@ -12,7 +15,9 @@ function validatePackageManagerSpec(spec?: string): { valid: boolean; error?: st
   return { valid: true };
 }
 
-function detectHiddenYarnInvocations(scripts: Record<string, string>): string[] {
+function detectHiddenYarnInvocations(
+  scripts: Record<string, string>,
+): string[] {
   const violations: string[] = [];
   const yarnPattern = /(?:^|[;&|`$()\s])yarn(?:\s+[a-z0-9_:-]+|\s*$)/i;
 
@@ -32,14 +37,17 @@ describe("Tier 2 Boundary B1: pnpm & Package Specification Boundaries", () => {
     assert.strictEqual(validatePackageManagerSpec("pnpm@").valid, false);
     assert.strictEqual(validatePackageManagerSpec(undefined).valid, false);
     assert.strictEqual(validatePackageManagerSpec("pnpm@9.15.0").valid, true);
-    assert.strictEqual(validatePackageManagerSpec("pnpm@10.0.0-rc.1").valid, true);
+    assert.strictEqual(
+      validatePackageManagerSpec("pnpm@10.0.0-rc.1").valid,
+      true,
+    );
   });
 
   it("B1-2: detects hidden and nested yarn invocations in chained scripts", () => {
     const scriptsWithHiddenYarn = {
       build: "pnpm mask && cross-env yarn next build",
       test: "node --test $(yarn bin jest)",
-      dev: "concurrently -r \"pnpm mask:watch\" \"next dev\"",
+      dev: 'concurrently -r "pnpm mask:watch" "next dev"',
       clean: "rimraf node_modules && (yarn cache clean || true)",
     };
 
@@ -64,8 +72,14 @@ describe("Tier 2 Boundary B1: pnpm & Package Specification Boundaries", () => {
       return "OK";
     };
 
-    assert.strictEqual(checkLockfileHygiene(["yarn.lock", "pnpm-lock.yaml"]), "CONFLICT_DUAL_LOCKFILE");
-    assert.strictEqual(checkLockfileHygiene(["yarn.lock"]), "MISSING_PNPM_LOCKFILE");
+    assert.strictEqual(
+      checkLockfileHygiene(["yarn.lock", "pnpm-lock.yaml"]),
+      "CONFLICT_DUAL_LOCKFILE",
+    );
+    assert.strictEqual(
+      checkLockfileHygiene(["yarn.lock"]),
+      "MISSING_PNPM_LOCKFILE",
+    );
     assert.strictEqual(checkLockfileHygiene(["pnpm-lock.yaml"]), "OK");
   });
 
@@ -77,7 +91,10 @@ describe("Tier 2 Boundary B1: pnpm & Package Specification Boundaries", () => {
 
     assert.strictEqual(validateDepSpecifier("^18.2.0"), true);
     assert.strictEqual(validateDepSpecifier("workspace:*"), true);
-    assert.strictEqual(validateDepSpecifier("npm:@opencode-ai/models@^1.0.0"), true);
+    assert.strictEqual(
+      validateDepSpecifier("npm:@opencode-ai/models@^1.0.0"),
+      true,
+    );
     assert.strictEqual(validateDepSpecifier("link:../invalid-relative"), false);
   });
 });

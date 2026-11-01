@@ -76,3 +76,5 @@ export function createPersistStore<T extends object, M>(
     ),
   );
 }
+
+export { safeLocalStorage } from "./storage";

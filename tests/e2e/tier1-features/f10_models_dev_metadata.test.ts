@@ -1,4 +1,4 @@
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 import { readJsonFile } from "../fixtures/test_helpers";
 
@@ -42,7 +42,10 @@ describe("Feature F10: models.dev Dynamic Metadata Integration", () => {
 
   it("F10-1: parses models catalog from models.dev fixture structure", () => {
     const catalog = parseModelsDevCatalog(samplePayload);
-    assert.ok(Object.keys(catalog).length >= 5, "Should parse at least 5 models");
+    assert.ok(
+      Object.keys(catalog).length >= 5,
+      "Should parse at least 5 models",
+    );
     assert.ok(catalog["google/gemini-3-pro"]);
     assert.ok(catalog["openai/gpt-4o"]);
     assert.ok(catalog["anthropic/claude-3-5-sonnet"]);
@@ -64,7 +67,10 @@ describe("Feature F10: models.dev Dynamic Metadata Integration", () => {
     assert.strictEqual(catalog["google/gemini-3-pro"].hasVision, true);
     assert.strictEqual(catalog["openai/gpt-4o"].hasVision, true);
     assert.strictEqual(catalog["openai/o3-mini"].hasVision, false);
-    assert.strictEqual(catalog["openai/text-embedding-3-small"].hasVision, false);
+    assert.strictEqual(
+      catalog["openai/text-embedding-3-small"].hasVision,
+      false,
+    );
   });
 
   it("F10-4: identifies Gemini 3 & o-series reasoning capabilities and reasoningType", () => {
@@ -97,6 +103,9 @@ describe("Feature F10: models.dev Dynamic Metadata Integration", () => {
     });
 
     assert.ok(fallbackCatalog["google/gemini-3-flash"]);
-    assert.strictEqual(fallbackCatalog["google/gemini-3-flash"].contextLimit, 1048576);
+    assert.strictEqual(
+      fallbackCatalog["google/gemini-3-flash"].contextLimit,
+      1048576,
+    );
   });
 });

@@ -1,13 +1,19 @@
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 import { readJsonFile } from "../fixtures/test_helpers";
 
 describe("Feature F11: Dynamic Model Selector & Parameter Limits Validation", () => {
-  const modelsCatalog = readJsonFile("tests/e2e/fixtures/mock_models_dev.json").models;
+  const modelsCatalog = readJsonFile(
+    "tests/e2e/fixtures/mock_models_dev.json",
+  ).models;
 
   it("F11-1: dynamically filters model list by provider", () => {
-    const googleModels = Object.values<any>(modelsCatalog).filter((m) => m.provider === "google");
-    const openaiModels = Object.values<any>(modelsCatalog).filter((m) => m.provider === "openai");
+    const googleModels = Object.values<any>(modelsCatalog).filter(
+      (m) => m.provider === "google",
+    );
+    const openaiModels = Object.values<any>(modelsCatalog).filter(
+      (m) => m.provider === "openai",
+    );
 
     assert.ok(googleModels.length >= 3);
     assert.ok(openaiModels.length >= 2);
@@ -16,7 +22,9 @@ describe("Feature F11: Dynamic Model Selector & Parameter Limits Validation", ()
 
   it("F11-2: toggles image attachment button state based on hasVision capability", () => {
     const isImageUploadAllowed = (modelId: string): boolean => {
-      const match = Object.values<any>(modelsCatalog).find((m) => m.id === modelId);
+      const match = Object.values<any>(modelsCatalog).find(
+        (m) => m.id === modelId,
+      );
       return match ? Boolean(match.hasVision) : false;
     };
 
@@ -27,8 +35,13 @@ describe("Feature F11: Dynamic Model Selector & Parameter Limits Validation", ()
   });
 
   it("F11-3: bounds max_tokens slider by model outputLimit metadata", () => {
-    const clampMaxTokens = (modelId: string, requestedTokens: number): number => {
-      const match = Object.values<any>(modelsCatalog).find((m) => m.id === modelId);
+    const clampMaxTokens = (
+      modelId: string,
+      requestedTokens: number,
+    ): number => {
+      const match = Object.values<any>(modelsCatalog).find(
+        (m) => m.id === modelId,
+      );
       const limit = match?.outputLimit ?? 4096;
       return Math.min(requestedTokens, limit);
     };
@@ -40,7 +53,9 @@ describe("Feature F11: Dynamic Model Selector & Parameter Limits Validation", ()
 
   it("F11-4: validates temperature parameter range (0.0 - 2.0)", () => {
     const validateTemperature = (temp: number): boolean => {
-      return typeof temp === "number" && temp >= 0.0 && temp <= 2.0 && !isNaN(temp);
+      return (
+        typeof temp === "number" && temp >= 0.0 && temp <= 2.0 && !isNaN(temp)
+      );
     };
 
     assert.strictEqual(validateTemperature(0.7), true);
@@ -52,7 +67,9 @@ describe("Feature F11: Dynamic Model Selector & Parameter Limits Validation", ()
 
   it("F11-5: enables reasoning configuration panel only for hasReasoning models", () => {
     const isReasoningConfigEnabled = (modelId: string): boolean => {
-      const match = Object.values<any>(modelsCatalog).find((m) => m.id === modelId);
+      const match = Object.values<any>(modelsCatalog).find(
+        (m) => m.id === modelId,
+      );
       return match ? Boolean(match.hasReasoning) : false;
     };
 

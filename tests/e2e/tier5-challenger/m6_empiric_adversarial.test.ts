@@ -5,7 +5,6 @@ import {
   normalizeBaseUrl,
   sanitizeError,
   createLanguageModel,
-  ChatApiPayload,
 } from "../../../src/app/api/chat/route";
 import {
   convertOpenApiSpecToAiTools,
@@ -30,7 +29,9 @@ describe("Milestone 6 Empirical Adversarial Stress & Hardening Test Suite", () =
       });
       assert.strictEqual(res1.success, false);
       if (!res1.success) {
-        assert.ok(res1.error.errors.some((e) => e.message.includes("non-empty")));
+        assert.ok(
+          res1.error.errors.some((e) => e.message.includes("non-empty")),
+        );
       }
 
       // Non-array messages
@@ -48,7 +49,11 @@ describe("Milestone 6 Empirical Adversarial Stress & Hardening Test Suite", () =
           model: "gpt-4o",
           provider: "openai",
         });
-        assert.strictEqual(res.success, false, `Expected failure for messages=${JSON.stringify(m)}`);
+        assert.strictEqual(
+          res.success,
+          false,
+          `Expected failure for messages=${JSON.stringify(m)}`,
+        );
       }
     });
 
@@ -60,7 +65,11 @@ describe("Milestone 6 Empirical Adversarial Stress & Hardening Test Suite", () =
           model: "gpt-4o",
           provider: "openai",
         });
-        assert.strictEqual(res.success, false, `Expected rejection for role=${role}`);
+        assert.strictEqual(
+          res.success,
+          false,
+          `Expected rejection for role=${role}`,
+        );
       }
 
       // Invalid content types
@@ -79,7 +88,11 @@ describe("Milestone 6 Empirical Adversarial Stress & Hardening Test Suite", () =
           model: "gpt-4o",
           provider: "openai",
         });
-        assert.strictEqual(res.success, false, `Expected rejection for content=${JSON.stringify(content)}`);
+        assert.strictEqual(
+          res.success,
+          false,
+          `Expected rejection for content=${JSON.stringify(content)}`,
+        );
       }
     });
 
@@ -91,7 +104,11 @@ describe("Milestone 6 Empirical Adversarial Stress & Hardening Test Suite", () =
           model,
           provider: "openai",
         });
-        assert.strictEqual(res.success, false, `Expected rejection for model=${JSON.stringify(model)}`);
+        assert.strictEqual(
+          res.success,
+          false,
+          `Expected rejection for model=${JSON.stringify(model)}`,
+        );
       }
 
       const invalidProviders = ["", null, undefined, 456, false, {}, []];
@@ -101,7 +118,11 @@ describe("Milestone 6 Empirical Adversarial Stress & Hardening Test Suite", () =
           model: "gpt-4o",
           provider,
         });
-        assert.strictEqual(res.success, false, `Expected rejection for provider=${JSON.stringify(provider)}`);
+        assert.strictEqual(
+          res.success,
+          false,
+          `Expected rejection for provider=${JSON.stringify(provider)}`,
+        );
       }
     });
 
@@ -115,7 +136,11 @@ describe("Milestone 6 Empirical Adversarial Stress & Hardening Test Suite", () =
           provider: "openai",
           modelConfig: { temperature: temperature as any },
         });
-        assert.strictEqual(res.success, false, `Expected rejection for temperature=${temperature}`);
+        assert.strictEqual(
+          res.success,
+          false,
+          `Expected rejection for temperature=${temperature}`,
+        );
       }
 
       const goodTemps = [0, 0.0, 0.5, 1.0, 1.99, 2.0];
@@ -126,7 +151,11 @@ describe("Milestone 6 Empirical Adversarial Stress & Hardening Test Suite", () =
           provider: "openai",
           modelConfig: { temperature },
         });
-        assert.strictEqual(res.success, true, `Expected acceptance for temperature=${temperature}`);
+        assert.strictEqual(
+          res.success,
+          true,
+          `Expected acceptance for temperature=${temperature}`,
+        );
       }
 
       // top_p tests
@@ -138,7 +167,11 @@ describe("Milestone 6 Empirical Adversarial Stress & Hardening Test Suite", () =
           provider: "openai",
           modelConfig: { top_p: top_p as any },
         });
-        assert.strictEqual(res.success, false, `Expected rejection for top_p=${top_p}`);
+        assert.strictEqual(
+          res.success,
+          false,
+          `Expected rejection for top_p=${top_p}`,
+        );
       }
 
       const goodTopPs = [0, 0.0, 0.1, 0.9, 1.0];
@@ -149,7 +182,11 @@ describe("Milestone 6 Empirical Adversarial Stress & Hardening Test Suite", () =
           provider: "openai",
           modelConfig: { top_p },
         });
-        assert.strictEqual(res.success, true, `Expected acceptance for top_p=${top_p}`);
+        assert.strictEqual(
+          res.success,
+          true,
+          `Expected acceptance for top_p=${top_p}`,
+        );
       }
 
       // max_tokens tests
@@ -161,7 +198,11 @@ describe("Milestone 6 Empirical Adversarial Stress & Hardening Test Suite", () =
           provider: "openai",
           modelConfig: { max_tokens: max_tokens as any },
         });
-        assert.strictEqual(res.success, false, `Expected rejection for max_tokens=${max_tokens}`);
+        assert.strictEqual(
+          res.success,
+          false,
+          `Expected rejection for max_tokens=${max_tokens}`,
+        );
       }
 
       const goodTokens = [1, 512, 4096, 65536, 1000000];
@@ -172,7 +213,11 @@ describe("Milestone 6 Empirical Adversarial Stress & Hardening Test Suite", () =
           provider: "openai",
           modelConfig: { max_tokens },
         });
-        assert.strictEqual(res.success, true, `Expected acceptance for max_tokens=${max_tokens}`);
+        assert.strictEqual(
+          res.success,
+          true,
+          `Expected acceptance for max_tokens=${max_tokens}`,
+        );
       }
     });
 
@@ -187,7 +232,11 @@ describe("Milestone 6 Empirical Adversarial Stress & Hardening Test Suite", () =
             reasoningConfig: { thinkingLevel: thinkingLevel as any },
           },
         });
-        assert.strictEqual(res.success, true, `Expected acceptance for thinkingLevel=${thinkingLevel}`);
+        assert.strictEqual(
+          res.success,
+          true,
+          `Expected acceptance for thinkingLevel=${thinkingLevel}`,
+        );
       }
 
       const invalidLevels = ["none", "ultra", "extreme", "off", 1, true];
@@ -200,7 +249,11 @@ describe("Milestone 6 Empirical Adversarial Stress & Hardening Test Suite", () =
             reasoningConfig: { thinkingLevel: thinkingLevel as any },
           },
         });
-        assert.strictEqual(res.success, false, `Expected rejection for thinkingLevel=${thinkingLevel}`);
+        assert.strictEqual(
+          res.success,
+          false,
+          `Expected rejection for thinkingLevel=${thinkingLevel}`,
+        );
       }
 
       // thinkingBudget bounds
@@ -259,8 +312,14 @@ describe("Milestone 6 Empirical Adversarial Stress & Hardening Test Suite", () =
     it("2.2 safely cleans valid HTTP/HTTPS URLs and strips query strings / fragments", () => {
       const cases: Array<[string, string]> = [
         ["https://api.openai.com/v1///", "https://api.openai.com/v1"],
-        ["http://127.0.0.1:11434/v1/?token=secret#hash", "http://127.0.0.1:11434/v1"],
-        ["https://custom.gateway.internal:8443/openai/v1", "https://custom.gateway.internal:8443/openai/v1"],
+        [
+          "http://127.0.0.1:11434/v1/?token=secret#hash",
+          "http://127.0.0.1:11434/v1",
+        ],
+        [
+          "https://custom.gateway.internal:8443/openai/v1",
+          "https://custom.gateway.internal:8443/openai/v1",
+        ],
         ["http://[::1]:8000/v1/", "http://[::1]:8000/v1"],
       ];
 
@@ -298,8 +357,14 @@ describe("Milestone 6 Empirical Adversarial Stress & Hardening Test Suite", () =
     it("2.5 handles empty strings, undefined keys, and whitespace-only errors without exceptions", () => {
       assert.strictEqual(sanitizeError(""), "");
       assert.strictEqual(sanitizeError("", undefined), "");
-      assert.strictEqual(sanitizeError("Regular error without keys"), "Regular error without keys");
-      assert.strictEqual(sanitizeError("Regular error", "   "), "Regular error");
+      assert.strictEqual(
+        sanitizeError("Regular error without keys"),
+        "Regular error without keys",
+      );
+      assert.strictEqual(
+        sanitizeError("Regular error", "   "),
+        "Regular error",
+      );
     });
   });
 
@@ -331,7 +396,10 @@ describe("Milestone 6 Empirical Adversarial Stress & Hardening Test Suite", () =
 
       // Normal small payload is unchanged
       const smallData = { status: "ok", count: 42 };
-      assert.deepStrictEqual(clampToolResultSize(smallData, 100_000), smallData);
+      assert.deepStrictEqual(
+        clampToolResultSize(smallData, 100_000),
+        smallData,
+      );
     });
 
     it("3.3 converts invalid, empty, or corrupted OpenAPI schemas without throwing unhandled exceptions", () => {
@@ -340,7 +408,10 @@ describe("Milestone 6 Empirical Adversarial Stress & Hardening Test Suite", () =
       assert.deepStrictEqual(convertOpenApiSpecToAiTools(undefined), {});
       assert.deepStrictEqual(convertOpenApiSpecToAiTools(""), {});
       assert.deepStrictEqual(convertOpenApiSpecToAiTools("{}"), {});
-      assert.deepStrictEqual(convertOpenApiSpecToAiTools("{ invalid json :: [ }"), {});
+      assert.deepStrictEqual(
+        convertOpenApiSpecToAiTools("{ invalid json :: [ }"),
+        {},
+      );
       assert.deepStrictEqual(convertOpenApiToAiTools(undefined, undefined), {});
       assert.deepStrictEqual(convertOpenApiToAiTools([], []), {});
 
@@ -366,8 +437,17 @@ describe("Milestone 6 Empirical Adversarial Stress & Hardening Test Suite", () =
               operationId: "getCityWeather",
               summary: "Fetch live city weather",
               parameters: [
-                { name: "city", in: "path", required: true, schema: { type: "string" } },
-                { name: "units", in: "query", schema: { type: "string", enum: ["metric", "imperial"] } },
+                {
+                  name: "city",
+                  in: "path",
+                  required: true,
+                  schema: { type: "string" },
+                },
+                {
+                  name: "units",
+                  in: "query",
+                  schema: { type: "string", enum: ["metric", "imperial"] },
+                },
               ],
             },
           },
@@ -401,12 +481,18 @@ describe("Milestone 6 Empirical Adversarial Stress & Hardening Test Suite", () =
 
       assert.ok(tools.getCityWeather, "Tool getCityWeather must be generated");
       assert.ok(tools.getStockQuote, "Tool getStockQuote must be generated");
-      assert.strictEqual(tools.getCityWeather.description, "Fetch live city weather");
+      assert.strictEqual(
+        tools.getCityWeather.description,
+        "Fetch live city weather",
+      );
       assert.strictEqual(tools.getStockQuote.description, "Fetch stock quote");
     });
 
     it("3.5 captures tool execution errors cleanly in handleToolExecutionError", () => {
-      const err = handleToolExecutionError("databaseQuery", new Error("Connection refused on port 5432"));
+      const err = handleToolExecutionError(
+        "databaseQuery",
+        new Error("Connection refused on port 5432"),
+      );
       assert.strictEqual(err.isError, true);
       assert.strictEqual(
         err.result,
@@ -414,7 +500,10 @@ describe("Milestone 6 Empirical Adversarial Stress & Hardening Test Suite", () =
       );
 
       // Non-Error exception
-      const stringErr = handleToolExecutionError("customTool", "Fatal timeout string error");
+      const stringErr = handleToolExecutionError(
+        "customTool",
+        "Fatal timeout string error",
+      );
       assert.strictEqual(stringErr.isError, true);
       assert.strictEqual(
         stringErr.result,
@@ -425,7 +514,10 @@ describe("Milestone 6 Empirical Adversarial Stress & Hardening Test Suite", () =
     it("3.6 sanitizes raw tool arguments safely against invalid types", () => {
       assert.deepStrictEqual(sanitizeToolArguments(null), {});
       assert.deepStrictEqual(sanitizeToolArguments(undefined), {});
-      assert.deepStrictEqual(sanitizeToolArguments("string-instead-of-object"), {});
+      assert.deepStrictEqual(
+        sanitizeToolArguments("string-instead-of-object"),
+        {},
+      );
       assert.deepStrictEqual(sanitizeToolArguments(12345), {});
       assert.deepStrictEqual(
         sanitizeToolArguments({ location: "Tokyo", count: 5 }),
@@ -536,7 +628,10 @@ describe("Milestone 6 Empirical Adversarial Stress & Hardening Test Suite", () =
           },
         });
 
-        assert.ok(model, `Provider ${provider} must create a language model instance`);
+        assert.ok(
+          model,
+          `Provider ${provider} must create a language model instance`,
+        );
         assert.strictEqual(model.modelId, `test-model-${provider}`);
       }
     });

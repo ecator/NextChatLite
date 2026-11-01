@@ -2,10 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
-import {
-  formatThinkingDuration,
-  extractPlainText,
-} from "../../../src/utils/thinking";
+import { formatThinkingDuration } from "../../../src/utils/thinking";
 import {
   parseDataStreamResponse,
   accumulateStreamState,
@@ -111,7 +108,10 @@ describe("Milestone 5 Empirical Challenger Deep Verification & Stress Suite", ()
   describe("3. Complex Interleaved Stream & Error Recovery", () => {
     it("3.1 handles stream with reasoning followed by tool execution and final answer", () => {
       const complexStream = [
-        encodeDataStreamChunk("g", "I need to look up the current stock price.\n"),
+        encodeDataStreamChunk(
+          "g",
+          "I need to look up the current stock price.\n",
+        ),
         encodeDataStreamChunk("9", {
           toolCallId: "call_stock_1",
           toolName: "get_stock_price",
@@ -121,8 +121,14 @@ describe("Milestone 5 Empirical Challenger Deep Verification & Stress Suite", ()
           toolCallId: "call_stock_1",
           result: { price: 230.5 },
         }),
-        encodeDataStreamChunk("g", "The price is $230.50. Now formatting final response.\n"),
-        encodeDataStreamChunk("0", "Apple Inc. (AAPL) is currently trading at $230.50."),
+        encodeDataStreamChunk(
+          "g",
+          "The price is $230.50. Now formatting final response.\n",
+        ),
+        encodeDataStreamChunk(
+          "0",
+          "Apple Inc. (AAPL) is currently trading at $230.50.",
+        ),
         encodeDataStreamChunk("d", { finishReason: "stop" }),
       ].join("");
 
@@ -131,7 +137,11 @@ describe("Milestone 5 Empirical Challenger Deep Verification & Stress Suite", ()
 
       assert.ok(state.reasoning.includes("look up the current stock price"));
       assert.ok(state.reasoning.includes("formatting final response"));
-      assert.ok(state.text.includes("Apple Inc. (AAPL) is currently trading at $230.50."));
+      assert.ok(
+        state.text.includes(
+          "Apple Inc. (AAPL) is currently trading at $230.50.",
+        ),
+      );
       assert.strictEqual(state.toolCalls.length, 1);
       assert.strictEqual(state.toolCalls[0].toolName, "get_stock_price");
       assert.strictEqual(state.toolResults.length, 1);
@@ -159,17 +169,35 @@ describe("Milestone 5 Empirical Challenger Deep Verification & Stress Suite", ()
   describe("4. Multi-language and Extreme Duration Formats", () => {
     it("4.1 formats durations up to 1000 hours in all supported languages", () => {
       const ms1000h = 1000 * 3600_000;
-      assert.strictEqual(formatThinkingDuration(ms1000h, "en"), "Thought for 1000.0h");
-      assert.strictEqual(formatThinkingDuration(ms1000h, "cn"), "思考耗时 1000.0 小时");
-      assert.strictEqual(formatThinkingDuration(ms1000h, "jp"), "思考時間 1000.0 時間");
-      assert.strictEqual(formatThinkingDuration(ms1000h, "fr"), "Pensé pendant 1000.0h");
+      assert.strictEqual(
+        formatThinkingDuration(ms1000h, "en"),
+        "Thought for 1000.0h",
+      );
+      assert.strictEqual(
+        formatThinkingDuration(ms1000h, "cn"),
+        "思考耗时 1000.0 小时",
+      );
+      assert.strictEqual(
+        formatThinkingDuration(ms1000h, "jp"),
+        "思考時間 1000.0 時間",
+      );
+      assert.strictEqual(
+        formatThinkingDuration(ms1000h, "fr"),
+        "Pensé pendant 1000.0h",
+      );
     });
 
     it("4.2 formats 1 second boundary across all supported languages", () => {
-      assert.strictEqual(formatThinkingDuration(1000, "en"), "Thought for 1.0s");
+      assert.strictEqual(
+        formatThinkingDuration(1000, "en"),
+        "Thought for 1.0s",
+      );
       assert.strictEqual(formatThinkingDuration(1000, "cn"), "思考耗时 1.0 秒");
       assert.strictEqual(formatThinkingDuration(1000, "jp"), "思考時間 1.0 秒");
-      assert.strictEqual(formatThinkingDuration(1000, "fr"), "Pensé pendant 1.0s");
+      assert.strictEqual(
+        formatThinkingDuration(1000, "fr"),
+        "Pensé pendant 1.0s",
+      );
     });
   });
 });

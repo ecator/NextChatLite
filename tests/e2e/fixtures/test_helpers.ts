@@ -1,6 +1,5 @@
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 export const PROJECT_ROOT = process.cwd();
 
@@ -36,7 +35,8 @@ export function listDirFiles(relativePath: string): string[] {
 export interface ChatApiPayload {
   messages: Array<{
     role: "system" | "user" | "assistant" | "tool";
-    content: string | Array<{ type: "text" | "image"; text?: string; image?: string }>;
+    content:
+      string | Array<{ type: "text" | "image"; text?: string; image?: string }>;
   }>;
   model: string;
   provider: "openai" | "google" | "anthropic" | "custom";
@@ -56,7 +56,10 @@ export interface ChatApiPayload {
   pluginIds?: string[];
 }
 
-export function validateChatApiPayload(payload: any): { valid: boolean; errors: string[] } {
+export function validateChatApiPayload(payload: any): {
+  valid: boolean;
+  errors: string[];
+} {
   const errors: string[] = [];
 
   if (!payload || typeof payload !== "object") {
@@ -85,27 +88,44 @@ export function validateChatApiPayload(payload: any): { valid: boolean; errors: 
     errors.push("model must be a non-empty string");
   }
 
-  if (!payload.provider || !["openai", "google", "anthropic", "custom"].includes(payload.provider)) {
+  if (
+    !payload.provider ||
+    !["openai", "google", "anthropic", "custom"].includes(payload.provider)
+  ) {
     errors.push(`provider invalid: ${payload.provider}`);
   }
 
   if (payload.modelConfig) {
     if (payload.modelConfig.temperature !== undefined) {
-      if (typeof payload.modelConfig.temperature !== "number" || payload.modelConfig.temperature < 0 || payload.modelConfig.temperature > 2) {
+      if (
+        typeof payload.modelConfig.temperature !== "number" ||
+        payload.modelConfig.temperature < 0 ||
+        payload.modelConfig.temperature > 2
+      ) {
         errors.push("temperature must be number between 0 and 2");
       }
     }
     if (payload.modelConfig.top_p !== undefined) {
-      if (typeof payload.modelConfig.top_p !== "number" || payload.modelConfig.top_p < 0 || payload.modelConfig.top_p > 1) {
+      if (
+        typeof payload.modelConfig.top_p !== "number" ||
+        payload.modelConfig.top_p < 0 ||
+        payload.modelConfig.top_p > 1
+      ) {
         errors.push("top_p must be number between 0 and 1");
       }
     }
     if (payload.modelConfig.reasoningConfig) {
       const rc = payload.modelConfig.reasoningConfig;
-      if (rc.thinkingLevel && !["minimal", "low", "medium", "high"].includes(rc.thinkingLevel)) {
+      if (
+        rc.thinkingLevel &&
+        !["minimal", "low", "medium", "high"].includes(rc.thinkingLevel)
+      ) {
         errors.push(`thinkingLevel invalid: ${rc.thinkingLevel}`);
       }
-      if (rc.thinkingBudget !== undefined && (typeof rc.thinkingBudget !== "number" || rc.thinkingBudget < 0)) {
+      if (
+        rc.thinkingBudget !== undefined &&
+        (typeof rc.thinkingBudget !== "number" || rc.thinkingBudget < 0)
+      ) {
         errors.push("thinkingBudget must be positive number");
       }
     }

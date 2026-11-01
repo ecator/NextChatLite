@@ -1,13 +1,18 @@
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
-import { directoryExists, fileExists, readJsonFile, readProjectFile } from "../fixtures/test_helpers";
+import {
+  directoryExists,
+  fileExists,
+  readJsonFile,
+  readProjectFile,
+} from "../fixtures/test_helpers";
 
 describe("Feature F8: Model Context Protocol (MCP) Stripping", () => {
   it("F8-1: verifies complete absence of app/mcp/ directory", () => {
     assert.strictEqual(
       directoryExists("app/mcp"),
       false,
-      "app/mcp directory must be deleted"
+      "app/mcp directory must be deleted",
     );
   });
 
@@ -17,7 +22,7 @@ describe("Feature F8: Model Context Protocol (MCP) Stripping", () => {
     assert.strictEqual(
       allDeps["@modelcontextprotocol/sdk"],
       undefined,
-      "@modelcontextprotocol/sdk dependency must be pruned"
+      "@modelcontextprotocol/sdk dependency must be pruned",
     );
   });
 
@@ -25,12 +30,12 @@ describe("Feature F8: Model Context Protocol (MCP) Stripping", () => {
     assert.strictEqual(
       fileExists("src/components/mcp-market.tsx"),
       false,
-      "src/components/mcp-market.tsx must be deleted"
+      "src/components/mcp-market.tsx must be deleted",
     );
     assert.strictEqual(
       fileExists("src/components/mcp-market.module.scss"),
       false,
-      "src/components/mcp-market.module.scss must be deleted"
+      "src/components/mcp-market.module.scss must be deleted",
     );
   });
 
@@ -38,12 +43,12 @@ describe("Feature F8: Model Context Protocol (MCP) Stripping", () => {
     assert.strictEqual(
       fileExists("test/extract-mcp-json.test.ts"),
       false,
-      "test/extract-mcp-json.test.ts should be removed"
+      "test/extract-mcp-json.test.ts should be removed",
     );
     assert.strictEqual(
       fileExists("test/is-mcp-json.test.ts"),
       false,
-      "test/is-mcp-json.test.ts should be removed"
+      "test/is-mcp-json.test.ts should be removed",
     );
   });
 
@@ -53,7 +58,7 @@ describe("Feature F8: Model Context Protocol (MCP) Stripping", () => {
       assert.doesNotMatch(
         pluginStoreContent,
         /from "@modelcontextprotocol|MCPClient|mcpServer/i,
-        "Plugin store must not reference Model Context Protocol"
+        "Plugin store must not reference Model Context Protocol",
       );
     }
   });

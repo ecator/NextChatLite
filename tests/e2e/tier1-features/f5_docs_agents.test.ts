@@ -1,4 +1,4 @@
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 import { readProjectFile, fileExists } from "../fixtures/test_helpers";
 
@@ -6,7 +6,7 @@ describe("Feature F5: Documentation Unification & Root AGENTS.md", () => {
   it("F5-1: verifies presence of root AGENTS.md", () => {
     assert.ok(
       fileExists("AGENTS.md"),
-      "AGENTS.md must exist at repository root"
+      "AGENTS.md must exist at repository root",
     );
   });
 
@@ -14,12 +14,12 @@ describe("Feature F5: Documentation Unification & Root AGENTS.md", () => {
     const agentsContent = readProjectFile("AGENTS.md");
     assert.ok(
       agentsContent.length > 100,
-      "AGENTS.md should contain detailed project instructions"
+      "AGENTS.md should contain detailed project instructions",
     );
     assert.match(
       agentsContent,
       /NextChatLite|Next\.js|AI SDK|models\.dev/i,
-      "AGENTS.md should document NextChatLite architecture and AI stack"
+      "AGENTS.md should document NextChatLite architecture and AI stack",
     );
   });
 
@@ -27,17 +27,17 @@ describe("Feature F5: Documentation Unification & Root AGENTS.md", () => {
     assert.strictEqual(
       fileExists("README_CN.md"),
       false,
-      "README_CN.md must be removed"
+      "README_CN.md must be removed",
     );
     assert.strictEqual(
       fileExists("README_JA.md"),
       false,
-      "README_JA.md must be removed"
+      "README_JA.md must be removed",
     );
     assert.strictEqual(
       fileExists("README_KO.md"),
       false,
-      "README_KO.md must be removed"
+      "README_KO.md must be removed",
     );
   });
 
@@ -47,7 +47,7 @@ describe("Feature F5: Documentation Unification & Root AGENTS.md", () => {
     assert.match(
       readmeContent,
       /# NextChat|# NextChatLite/i,
-      "README.md must be the unified English documentation"
+      "README.md must be the unified English documentation",
     );
   });
 
@@ -56,7 +56,7 @@ describe("Feature F5: Documentation Unification & Root AGENTS.md", () => {
     assert.doesNotMatch(
       readmeContent,
       /yarn dev|yarn build|yarn install/i,
-      "README.md should not instruct users to use yarn commands"
+      "README.md should not instruct users to use yarn commands",
     );
   });
 });

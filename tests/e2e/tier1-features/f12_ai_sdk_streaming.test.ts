@@ -1,4 +1,4 @@
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 import { validateChatApiPayload } from "../fixtures/test_helpers";
 import type { ChatApiPayload } from "../fixtures/test_helpers";
@@ -28,7 +28,11 @@ describe("Feature F12: Vercel AI SDK Core Migration & Chat Streaming", () => {
     };
 
     const res = validateChatApiPayload(validPayload);
-    assert.strictEqual(res.valid, true, `Validation failed: ${res.errors.join(", ")}`);
+    assert.strictEqual(
+      res.valid,
+      true,
+      `Validation failed: ${res.errors.join(", ")}`,
+    );
   });
 
   it("F12-2: parses text-delta streaming chunks into final response", () => {
@@ -43,14 +47,20 @@ describe("Feature F12: Vercel AI SDK Core Migration & Chat Streaming", () => {
 
   it("F12-3: parses reasoning-delta chunks independently from text response", () => {
     const stream = createGemini3ThinkingStream({
-      thinkingParts: ["First analyze the premise.", " Then derive the conclusion."],
+      thinkingParts: [
+        "First analyze the premise.",
+        " Then derive the conclusion.",
+      ],
       responseParts: ["The answer is 42."],
     });
 
     const chunks = parseDataStreamResponse(stream);
     const state = accumulateStreamState(chunks);
 
-    assert.strictEqual(state.reasoning, "First analyze the premise. Then derive the conclusion.");
+    assert.strictEqual(
+      state.reasoning,
+      "First analyze the premise. Then derive the conclusion.",
+    );
     assert.strictEqual(state.text, "The answer is 42.");
     assert.strictEqual(state.isFinished, true);
   });

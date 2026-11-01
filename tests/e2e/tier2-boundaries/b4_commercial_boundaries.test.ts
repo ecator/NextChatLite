@@ -1,8 +1,11 @@
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 
 class MockAccessControl {
-  static isFeatureAllowed(featureName: string, config: { accessCode?: string }): boolean {
+  static isFeatureAllowed(
+    featureName: string,
+    config: { accessCode?: string },
+  ): boolean {
     // In pure open-source mode, all features (chat, plugins, masks) are 100% unlocked
     // regardless of whether an access code is provided
     return true;
@@ -36,14 +39,29 @@ describe("Tier 2 Boundary B4: Commercial / SaaS Cleanup Boundaries", () => {
 
   it("B4-3: validates access code when server configures ACCESS_CODE without commercial check", () => {
     // When server requires a password
-    assert.strictEqual(MockAccessControl.validateAccessCode("correct-pass", "correct-pass"), true);
-    assert.strictEqual(MockAccessControl.validateAccessCode("wrong-pass", "correct-pass"), false);
-    assert.strictEqual(MockAccessControl.validateAccessCode("  correct-pass  ", "correct-pass"), true);
+    assert.strictEqual(
+      MockAccessControl.validateAccessCode("correct-pass", "correct-pass"),
+      true,
+    );
+    assert.strictEqual(
+      MockAccessControl.validateAccessCode("wrong-pass", "correct-pass"),
+      false,
+    );
+    assert.strictEqual(
+      MockAccessControl.validateAccessCode("  correct-pass  ", "correct-pass"),
+      true,
+    );
   });
 
   it("B4-4: accepts any user input when server ACCESS_CODE is empty or unset", () => {
-    assert.strictEqual(MockAccessControl.validateAccessCode("", undefined), true);
-    assert.strictEqual(MockAccessControl.validateAccessCode("any-code", ""), true);
+    assert.strictEqual(
+      MockAccessControl.validateAccessCode("", undefined),
+      true,
+    );
+    assert.strictEqual(
+      MockAccessControl.validateAccessCode("any-code", ""),
+      true,
+    );
     assert.strictEqual(MockAccessControl.validateAccessCode("", "   "), true);
   });
 

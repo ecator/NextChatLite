@@ -8,7 +8,6 @@ import {
   useModelStore,
 } from "../../../src/store/models";
 import {
-  ParameterValidator,
   validateTemperature,
   validateTemperatureValue,
   validateTopP,
@@ -94,10 +93,22 @@ describe("Milestone 3 Empirical Challenger Deep Verification & Stress Suite", ()
 
       const catalog = parseModelsDevCatalog(payload);
       assert.ok(catalog["anthropic/claude-3-5-sonnet"]);
-      assert.strictEqual(catalog["anthropic/claude-3-5-sonnet"].contextLimit, 200000);
-      assert.strictEqual(catalog["anthropic/claude-3-5-sonnet"].outputLimit, 8192);
-      assert.strictEqual(catalog["anthropic/claude-3-5-sonnet"].hasVision, true);
-      assert.strictEqual(catalog["anthropic/claude-3-5-sonnet"].provider, "anthropic");
+      assert.strictEqual(
+        catalog["anthropic/claude-3-5-sonnet"].contextLimit,
+        200000,
+      );
+      assert.strictEqual(
+        catalog["anthropic/claude-3-5-sonnet"].outputLimit,
+        8192,
+      );
+      assert.strictEqual(
+        catalog["anthropic/claude-3-5-sonnet"].hasVision,
+        true,
+      );
+      assert.strictEqual(
+        catalog["anthropic/claude-3-5-sonnet"].provider,
+        "anthropic",
+      );
     });
 
     it("1.4 handles malformed or empty payloads gracefully without throwing", () => {
@@ -152,14 +163,21 @@ describe("Milestone 3 Empirical Challenger Deep Verification & Stress Suite", ()
   describe("2. useModelStore Querying & Fallback Layers", () => {
     it("2.1 initializes with static snapshot fallback containing core models", () => {
       const store = useModelStore.getState();
-      assert.ok(store.isLoaded(), "Store should be loaded from snapshot immediately");
-      
+      assert.ok(
+        store.isLoaded(),
+        "Store should be loaded from snapshot immediately",
+      );
+
       const allModels = store.getAllModels();
       assert.ok(allModels.length > 0, "Snapshot should contain models");
 
       // Verify core providers exist
       const providers = new Set(allModels.map((m) => m.provider));
-      assert.ok(providers.has("google") || providers.has("openai") || providers.has("anthropic"));
+      assert.ok(
+        providers.has("google") ||
+          providers.has("openai") ||
+          providers.has("anthropic"),
+      );
     });
 
     it("2.2 matches models via exact ID, lowercase ID, and provider-prefixed ID", () => {
@@ -168,17 +186,24 @@ describe("Milestone 3 Empirical Challenger Deep Verification & Stress Suite", ()
       const gpt4o = store.getModel("gpt-4o") || store.getModel("openai/gpt-4o");
       assert.ok(gpt4o, "Should resolve gpt-4o");
 
-      const gpt4oUpper = store.getModel("GPT-4O") || store.getModel("OPENAI/GPT-4O");
+      const gpt4oUpper =
+        store.getModel("GPT-4O") || store.getModel("OPENAI/GPT-4O");
       assert.ok(gpt4oUpper, "Should resolve case-insensitively");
 
-      const gemini = store.getModel("gemini-3-pro") || store.getModel("google/gemini-3-pro") || store.getModel("gemini-2.5-pro");
+      const gemini =
+        store.getModel("gemini-3-pro") ||
+        store.getModel("google/gemini-3-pro") ||
+        store.getModel("gemini-2.5-pro");
       assert.ok(gemini, "Should resolve Gemini model");
     });
 
     it("2.3 safely returns undefined for unknown, null, undefined, or empty model IDs", () => {
       const store = useModelStore.getState();
 
-      assert.strictEqual(store.getModel("nonexistent-model-xyz-12345"), undefined);
+      assert.strictEqual(
+        store.getModel("nonexistent-model-xyz-12345"),
+        undefined,
+      );
       assert.strictEqual(store.getModel(""), undefined);
       assert.strictEqual(store.getModel(null as any), undefined);
       assert.strictEqual(store.getModel(undefined as any), undefined);
@@ -192,7 +217,10 @@ describe("Milestone 3 Empirical Challenger Deep Verification & Stress Suite", ()
       assert.ok(Array.isArray(googleModels));
       const seen = new Set<string>();
       for (const m of googleModels) {
-        assert.ok(!seen.has(m.id), `Duplicate model ID in provider list: ${m.id}`);
+        assert.ok(
+          !seen.has(m.id),
+          `Duplicate model ID in provider list: ${m.id}`,
+        );
         seen.add(m.id);
       }
 
@@ -279,17 +307,42 @@ describe("Milestone 3 Empirical Challenger Deep Verification & Stress Suite", ()
 
     it("3.5 clamps max tokens and context limits using model catalog lookup", () => {
       const mockCatalog: Record<string, any> = {
-        "gpt-4o": { id: "gpt-4o", outputLimit: 4096, contextLimit: 128000, hasVision: true },
-        "gemini-3-pro": { id: "gemini-3-pro", outputLimit: 65536, contextLimit: 2097152, hasVision: true },
+        "gpt-4o": {
+          id: "gpt-4o",
+          outputLimit: 4096,
+          contextLimit: 128000,
+          hasVision: true,
+        },
+        "gemini-3-pro": {
+          id: "gemini-3-pro",
+          outputLimit: 65536,
+          contextLimit: 2097152,
+          hasVision: true,
+        },
       };
 
       assert.strictEqual(clampMaxTokens("gpt-4o", 8000, mockCatalog), 4096);
-      assert.strictEqual(clampMaxTokens("gemini-3-pro", 50000, mockCatalog), 50000);
-      assert.strictEqual(clampMaxTokens("unknown-model", 8000, mockCatalog), 4096); // default limit
+      assert.strictEqual(
+        clampMaxTokens("gemini-3-pro", 50000, mockCatalog),
+        50000,
+      );
+      assert.strictEqual(
+        clampMaxTokens("unknown-model", 8000, mockCatalog),
+        4096,
+      ); // default limit
 
-      assert.strictEqual(clampContextLimit("gpt-4o", 200000, mockCatalog), 128000);
-      assert.strictEqual(clampContextLimit("gemini-3-pro", 1000000, mockCatalog), 1000000);
-      assert.strictEqual(clampContextLimit("unknown-model", 10000, mockCatalog), 4096); // default limit
+      assert.strictEqual(
+        clampContextLimit("gpt-4o", 200000, mockCatalog),
+        128000,
+      );
+      assert.strictEqual(
+        clampContextLimit("gemini-3-pro", 1000000, mockCatalog),
+        1000000,
+      );
+      assert.strictEqual(
+        clampContextLimit("unknown-model", 10000, mockCatalog),
+        4096,
+      ); // default limit
     });
 
     it("3.6 searchModels performs safe, regex-injection-free keyword matching", () => {
@@ -378,7 +431,10 @@ describe("Milestone 3 Empirical Challenger Deep Verification & Stress Suite", ()
       assert.strictEqual(isReasoningConfigEnabled("gemini-3-pro"), true);
       assert.strictEqual(isReasoningConfigEnabled("o3-mini"), true);
       assert.strictEqual(isReasoningConfigEnabled("gpt-4o"), false);
-      assert.strictEqual(isReasoningConfigEnabled("text-embedding-3-small"), false);
+      assert.strictEqual(
+        isReasoningConfigEnabled("text-embedding-3-small"),
+        false,
+      );
       assert.strictEqual(isReasoningConfigEnabled("non-existent-model"), false);
     });
 
@@ -387,12 +443,24 @@ describe("Milestone 3 Empirical Challenger Deep Verification & Stress Suite", ()
         rootDir,
         "src/components/chat/model-selector.tsx",
       );
-      assert.ok(fs.existsSync(modelSelectorPath), "model-selector.tsx must exist");
+      assert.ok(
+        fs.existsSync(modelSelectorPath),
+        "model-selector.tsx must exist",
+      );
       const content = fs.readFileSync(modelSelectorPath, "utf-8");
-      assert.ok(content.includes("export function ModelSelector"), "Must export ModelSelector");
+      assert.ok(
+        content.includes("export function ModelSelector"),
+        "Must export ModelSelector",
+      );
       assert.ok(content.includes("useModelStore"), "Must use useModelStore");
-      assert.ok(content.includes("hasVision"), "Must display Vision capability");
-      assert.ok(content.includes("hasReasoning"), "Must display Reasoning capability");
+      assert.ok(
+        content.includes("hasVision"),
+        "Must display Vision capability",
+      );
+      assert.ok(
+        content.includes("hasReasoning"),
+        "Must display Reasoning capability",
+      );
       assert.ok(content.includes("hasTools"), "Must display Tools capability");
     });
 
@@ -400,9 +468,18 @@ describe("Milestone 3 Empirical Challenger Deep Verification & Stress Suite", ()
       const chatComponentPath = path.join(rootDir, "src/components/chat.tsx");
       assert.ok(fs.existsSync(chatComponentPath), "chat.tsx must exist");
       const content = fs.readFileSync(chatComponentPath, "utf-8");
-      assert.ok(content.includes("isVisionModel(currentModel)"), "chat.tsx must check isVisionModel");
-      assert.ok(content.includes("showUploadImage"), "chat.tsx must conditionally toggle showUploadImage");
-      assert.ok(content.includes("setAttachImages([])"), "chat.tsx must reset attachments when switching to non-vision model");
+      assert.ok(
+        content.includes("isVisionModel(currentModel)"),
+        "chat.tsx must check isVisionModel",
+      );
+      assert.ok(
+        content.includes("showUploadImage"),
+        "chat.tsx must conditionally toggle showUploadImage",
+      );
+      assert.ok(
+        content.includes("setAttachImages([])"),
+        "chat.tsx must reset attachments when switching to non-vision model",
+      );
     });
   });
 });

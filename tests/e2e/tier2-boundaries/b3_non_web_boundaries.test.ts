@@ -1,4 +1,4 @@
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 
 class MockPlatformBridge {
@@ -7,7 +7,10 @@ class MockPlatformBridge {
     return "web";
   }
 
-  static async copyToClipboard(text: string, clipboardApi?: { writeText: (t: string) => Promise<void> }): Promise<boolean> {
+  static async copyToClipboard(
+    text: string,
+    clipboardApi?: { writeText: (t: string) => Promise<void> },
+  ): Promise<boolean> {
     try {
       if (clipboardApi && typeof clipboardApi.writeText === "function") {
         await clipboardApi.writeText(text);
@@ -21,7 +24,10 @@ class MockPlatformBridge {
 
   static handleDeepLink(url: string): { handled: boolean; error?: string } {
     if (!url.startsWith("http://") && !url.startsWith("https://")) {
-      return { handled: false, error: "Non-HTTP protocol rejected in pure web mode" };
+      return {
+        handled: false,
+        error: "Non-HTTP protocol rejected in pure web mode",
+      };
     }
     return { handled: true };
   }
@@ -39,7 +45,10 @@ describe("Tier 2 Boundary B3: Non-Web Platform Stripping Boundaries", () => {
       },
     };
 
-    const success = await MockPlatformBridge.copyToClipboard("sample text", failingClipboard);
+    const success = await MockPlatformBridge.copyToClipboard(
+      "sample text",
+      failingClipboard,
+    );
     assert.strictEqual(success, false);
   });
 
@@ -51,17 +60,24 @@ describe("Tier 2 Boundary B3: Non-Web Platform Stripping Boundaries", () => {
       },
     };
 
-    const success = await MockPlatformBridge.copyToClipboard("hello web chat", workingClipboard);
+    const success = await MockPlatformBridge.copyToClipboard(
+      "hello web chat",
+      workingClipboard,
+    );
     assert.strictEqual(success, true);
     assert.strictEqual(captured, "hello web chat");
   });
 
   it("B3-4: rejects desktop custom URI protocols (e.g. nextchat://) in web mode", () => {
-    const res1 = MockPlatformBridge.handleDeepLink("nextchat://session/import?data=123");
+    const res1 = MockPlatformBridge.handleDeepLink(
+      "nextchat://session/import?data=123",
+    );
     assert.strictEqual(res1.handled, false);
     assert.ok(res1.error?.includes("Non-HTTP"));
 
-    const res2 = MockPlatformBridge.handleDeepLink("https://nextchat.example.com/share/123");
+    const res2 = MockPlatformBridge.handleDeepLink(
+      "https://nextchat.example.com/share/123",
+    );
     assert.strictEqual(res2.handled, true);
   });
 
@@ -74,6 +90,9 @@ describe("Tier 2 Boundary B3: Non-Web Platform Stripping Boundaries", () => {
     };
 
     assert.strictEqual(mockFile.type, "image/png");
-    assert.ok(!("path" in mockFile), "HTML5 File object in pure web browser does not have native .path property");
+    assert.ok(
+      !("path" in mockFile),
+      "HTML5 File object in pure web browser does not have native .path property",
+    );
   });
 });

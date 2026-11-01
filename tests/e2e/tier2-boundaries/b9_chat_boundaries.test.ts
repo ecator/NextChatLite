@@ -1,4 +1,4 @@
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 
 class ChatSessionBoundaryTester {
@@ -39,22 +39,28 @@ describe("Tier 2 Boundary B9: Chat & Session Store Boundaries", () => {
     for (let i = 0; i < 1000; i++) {
       largeMessages.push(
         ChatSessionBoundaryTester.createMessage(
-          `Message turn #${i}: some conversational text content.`
-        )
+          `Message turn #${i}: some conversational text content.`,
+        ),
       );
     }
 
     assert.strictEqual(largeMessages.length, 1000);
     const sliced = largeMessages.slice(-20); // typical context window windowing
     assert.strictEqual(sliced.length, 20);
-    assert.strictEqual(sliced[19].content, "Message turn #999: some conversational text content.");
+    assert.strictEqual(
+      sliced[19].content,
+      "Message turn #999: some conversational text content.",
+    );
   });
 
   it("B9-3: sanitizes null bytes and handles special markdown & code fence boundary inputs", () => {
     const rawWithNull = "Malicious\0 payload with ```ts\nconsole.log(1);\n";
     const clean = ChatSessionBoundaryTester.sanitizeMessageContent(rawWithNull);
 
-    assert.strictEqual(clean, "Malicious payload with ```ts\nconsole.log(1);\n");
+    assert.strictEqual(
+      clean,
+      "Malicious payload with ```ts\nconsole.log(1);\n",
+    );
     assert.ok(!clean.includes("\0"));
   });
 
@@ -66,13 +72,25 @@ describe("Tier 2 Boundary B9: Chat & Session Store Boundaries", () => {
     ];
 
     // First element (index 0)
-    assert.strictEqual(ChatSessionBoundaryTester.forkSession(msgs, 0).length, 1);
+    assert.strictEqual(
+      ChatSessionBoundaryTester.forkSession(msgs, 0).length,
+      1,
+    );
     // Last element (index 2)
-    assert.strictEqual(ChatSessionBoundaryTester.forkSession(msgs, 2).length, 3);
+    assert.strictEqual(
+      ChatSessionBoundaryTester.forkSession(msgs, 2).length,
+      3,
+    );
     // Negative index
-    assert.strictEqual(ChatSessionBoundaryTester.forkSession(msgs, -1).length, 0);
+    assert.strictEqual(
+      ChatSessionBoundaryTester.forkSession(msgs, -1).length,
+      0,
+    );
     // Out of bounds (index 10)
-    assert.strictEqual(ChatSessionBoundaryTester.forkSession(msgs, 10).length, 3);
+    assert.strictEqual(
+      ChatSessionBoundaryTester.forkSession(msgs, 10).length,
+      3,
+    );
   });
 
   it("B9-5: handles simultaneous session topic editing and rapid message additions", () => {

@@ -1,4 +1,4 @@
-import test, { describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 import {
   parseDataStreamResponse,
@@ -28,7 +28,12 @@ function configureGemini3ProviderOptions(config: Gemini3ThinkingConfig) {
 
 describe("Feature F15: Gemini 3 Thinking Signatures Extraction", () => {
   it("F15-1: configures thinkingLevel options for Gemini 3 models", () => {
-    const levels: Array<"minimal" | "low" | "medium" | "high"> = ["minimal", "low", "medium", "high"];
+    const levels: Array<"minimal" | "low" | "medium" | "high"> = [
+      "minimal",
+      "low",
+      "medium",
+      "high",
+    ];
     for (const level of levels) {
       const opts = configureGemini3ProviderOptions({ thinkingLevel: level });
       assert.strictEqual(opts.google.thinkingLevel, level);
@@ -55,7 +60,7 @@ describe("Feature F15: Gemini 3 Thinking Signatures Extraction", () => {
 
     assert.strictEqual(
       state.reasoning,
-      "1. Problem analysis: calculate factorial of 5.\n2. Formula: 5! = 5 * 4 * 3 * 2 * 1.\n3. Intermediate calculation: 120.\n"
+      "1. Problem analysis: calculate factorial of 5.\n2. Formula: 5! = 5 * 4 * 3 * 2 * 1.\n3. Intermediate calculation: 120.\n",
     );
     assert.strictEqual(state.text, "The factorial of 5 (5!) is 120.");
   });
@@ -71,7 +76,10 @@ describe("Feature F15: Gemini 3 Thinking Signatures Extraction", () => {
     };
 
     assert.ok(message.reasoning);
-    assert.strictEqual(message.reasoning, "Thinking about the algorithmic complexity...");
+    assert.strictEqual(
+      message.reasoning,
+      "Thinking about the algorithmic complexity...",
+    );
     assert.strictEqual(message.content, "The time complexity is O(N log N).");
   });
 
@@ -85,6 +93,9 @@ describe("Feature F15: Gemini 3 Thinking Signatures Extraction", () => {
     const state = accumulateStreamState(chunks);
 
     assert.strictEqual(state.reasoning, "");
-    assert.strictEqual(state.text, "Direct quick response without thinking tokens.");
+    assert.strictEqual(
+      state.text,
+      "Direct quick response without thinking tokens.",
+    );
   });
 });

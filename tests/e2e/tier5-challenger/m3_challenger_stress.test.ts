@@ -7,15 +7,12 @@ import {
   ModelMetadata,
 } from "../../../src/store/models";
 import {
-  ParameterValidator,
   validateTemperature,
   validateTemperatureValue,
   validateTopP,
   validateMaxTokens,
   clampMaxTokens,
   clampContextLimit,
-  isImageUploadAllowed,
-  isReasoningConfigEnabled,
   searchModels,
 } from "../../../src/utils/model-limits";
 
@@ -128,7 +125,8 @@ describe("Milestone 3 Challenger Empirical Stress Suite", () => {
       let list = models;
       if (selectedProvider !== "all") {
         list = list.filter(
-          (m) => (m.provider || "").toLowerCase() === selectedProvider.toLowerCase(),
+          (m) =>
+            (m.provider || "").toLowerCase() === selectedProvider.toLowerCase(),
         );
       }
       if (searchQuery && searchQuery.trim()) {
@@ -193,7 +191,11 @@ describe("Milestone 3 Challenger Empirical Stress Suite", () => {
       assert.strictEqual(zhipuMatch.length, 1);
       assert.strictEqual(zhipuMatch[0].id, "zhipu/glm-4v");
 
-      const deepseekMatch = filterModelsUI(comprehensiveCatalog, "all", "深度推理");
+      const deepseekMatch = filterModelsUI(
+        comprehensiveCatalog,
+        "all",
+        "深度推理",
+      );
       assert.strictEqual(deepseekMatch.length, 1);
       assert.strictEqual(deepseekMatch[0].id, "deepseek/deepseek-r1");
 
@@ -207,7 +209,11 @@ describe("Milestone 3 Challenger Empirical Stress Suite", () => {
       assert.strictEqual(brainMatch[0].id, "openai/o3-mini");
 
       // Whitespace padded unicode
-      const paddedMatch = filterModelsUI(comprehensiveCatalog, "all", "   智谱   ");
+      const paddedMatch = filterModelsUI(
+        comprehensiveCatalog,
+        "all",
+        "   智谱   ",
+      );
       assert.strictEqual(paddedMatch.length, 1);
     });
 
@@ -267,16 +273,28 @@ describe("Milestone 3 Challenger Empirical Stress Suite", () => {
       assert.strictEqual(googlePro[0].id, "google/gemini-3-pro");
 
       // Filter provider 'openai' and search 'gemini' -> empty
-      const openaiGemini = filterModelsUI(comprehensiveCatalog, "openai", "gemini");
+      const openaiGemini = filterModelsUI(
+        comprehensiveCatalog,
+        "openai",
+        "gemini",
+      );
       assert.strictEqual(openaiGemini.length, 0);
 
       // Case-insensitive provider filter
-      const upperGoogle = filterModelsUI(comprehensiveCatalog, "GOOGLE", "flash");
+      const upperGoogle = filterModelsUI(
+        comprehensiveCatalog,
+        "GOOGLE",
+        "flash",
+      );
       assert.strictEqual(upperGoogle.length, 1);
       assert.strictEqual(upperGoogle[0].id, "google/gemini-3-flash");
 
       // Non-existent provider
-      const nonExistent = filterModelsUI(comprehensiveCatalog, "unknown_corp", "");
+      const nonExistent = filterModelsUI(
+        comprehensiveCatalog,
+        "unknown_corp",
+        "",
+      );
       assert.strictEqual(nonExistent.length, 0);
     });
   });
@@ -382,16 +400,35 @@ describe("Milestone 3 Challenger Empirical Stress Suite", () => {
 
       // Catalog as array
       const catalogArr = [
-        { id: "m-small", outputLimit: 1024, contextLimit: 4096, name: "Small Model" },
-        { id: "m-huge", outputLimit: 100000, contextLimit: 2000000, name: "Huge Model" },
+        {
+          id: "m-small",
+          outputLimit: 1024,
+          contextLimit: 4096,
+          name: "Small Model",
+        },
+        {
+          id: "m-huge",
+          outputLimit: 100000,
+          contextLimit: 2000000,
+          name: "Huge Model",
+        },
       ];
 
-      assert.strictEqual(clampMaxTokens("Small Model", 2000, catalogArr as any), 1024);
-      assert.strictEqual(clampContextLimit("Huge Model", 3000000, catalogArr as any), 2000000);
+      assert.strictEqual(
+        clampMaxTokens("Small Model", 2000, catalogArr as any),
+        1024,
+      );
+      assert.strictEqual(
+        clampContextLimit("Huge Model", 3000000, catalogArr as any),
+        2000000,
+      );
 
       // Undefined catalog falls back gracefully
       assert.strictEqual(clampMaxTokens("unknown-xyz", 9000, null), 4096);
-      assert.strictEqual(clampContextLimit("unknown-xyz", 90000, undefined), 4096);
+      assert.strictEqual(
+        clampContextLimit("unknown-xyz", 90000, undefined),
+        4096,
+      );
     });
   });
 
@@ -414,7 +451,10 @@ describe("Milestone 3 Challenger Empirical Stress Suite", () => {
       ]);
 
       const postModels = useModelStore.getState().getAllModels();
-      assert.ok(postModels.length > 0, "Catalog must remain intact after concurrent fetches");
+      assert.ok(
+        postModels.length > 0,
+        "Catalog must remain intact after concurrent fetches",
+      );
       assert.strictEqual(useModelStore.getState().loading, false);
     });
 
@@ -463,7 +503,10 @@ describe("Milestone 3 Challenger Empirical Stress Suite", () => {
     it("3.3 resets cleanly and repopulates initial snapshot", () => {
       const store = useModelStore.getState();
       store.setModels({});
-      assert.strictEqual(Object.keys(useModelStore.getState().models).length, 0);
+      assert.strictEqual(
+        Object.keys(useModelStore.getState().models).length,
+        0,
+      );
 
       // Reset
       store.reset();

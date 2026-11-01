@@ -1,7 +1,38 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAccessStore } from "../store";
 import { useModelStore } from "../store/models";
 import { getModelProvider } from "./model";
+
+export function useWindowSize() {
+  const [size, setSize] = useState({
+    width: typeof window !== "undefined" ? window.innerWidth : 1200,
+    height: typeof window !== "undefined" ? window.innerHeight : 800,
+  });
+
+  useEffect(() => {
+    const onResize = () => {
+      setSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    window.addEventListener("resize", onResize);
+
+    return () => {
+      window.removeEventListener("resize", onResize);
+    };
+  }, []);
+
+  return size;
+}
+
+export const MOBILE_MAX_WIDTH = 600;
+export function useMobileScreen() {
+  const { width } = useWindowSize();
+
+  return width <= MOBILE_MAX_WIDTH;
+}
 
 export function useAllModels() {
   const accessStore = useAccessStore();
