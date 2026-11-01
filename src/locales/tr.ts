@@ -166,7 +166,7 @@ const tr: PartialLocaleType = {
     },
     InjectSystemPrompts: {
       Title: "Sistem Seviyesi İpucu Enjeksiyonu",
-      SubTitle: "Her isteğin başına ChatGPT benzeri bir sistem ipucu ekle",
+      SubTitle: "Her isteğin başına genel bir sistem ipucu ekle",
     },
     InputTemplate: {
       Title: "Kullanıcı Girdisi Ön İşleme",

@@ -171,7 +171,7 @@ const no: PartialLocaleType = {
     InjectSystemPrompts: {
       Title: "Injiser systemprompter",
       SubTitle:
-        "Tving inn et systemprompt som simulerer ChatGPT i starten av hver forespørsel",
+        "Tving inn et globalt systemprompt i starten av hver forespørsel",
     },
     InputTemplate: {
       Title: "Forhåndsbehandling av brukerinput",

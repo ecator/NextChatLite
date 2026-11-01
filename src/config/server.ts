@@ -1,4 +1,5 @@
 import defaultProvidersJson from "../../public/providers.json";
+import { DEFAULT_SYSTEM_TEMPLATE } from "../constant";
 
 declare global {
   namespace NodeJS {
@@ -12,6 +13,9 @@ declare global {
 
       // custom template for preprocessing user input
       DEFAULT_INPUT_TEMPLATE?: string;
+
+      // custom default system template
+      NEXTCHATLITE_DEFAULT_SYSTEM_TEMPLATE?: string;
 
       // custom title and subtitle
       NEXTCHATLITE_TITLE?: string;
@@ -40,6 +44,7 @@ export interface ServerConfig {
   helpUrl?: string;
   proxyUrl?: string;
   defaultModel: string;
+  defaultSystemTemplate?: string;
   [key: string]: any;
 }
 
@@ -125,6 +130,9 @@ export const getServerSideConfig = (): ServerConfig => {
     subTitle:
       process.env.NEXTCHATLITE_SUBTITLE || "Build your own AI assistant.",
     helpUrl: process.env.NEXTCHATLITE_HELP_URL?.trim() || undefined,
+    defaultSystemTemplate:
+      process.env.NEXTCHATLITE_DEFAULT_SYSTEM_TEMPLATE ??
+      DEFAULT_SYSTEM_TEMPLATE,
 
     proxyUrl: process.env.PROXY_URL,
     defaultModel,

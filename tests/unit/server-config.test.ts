@@ -125,3 +125,41 @@ describe("NEXTCHATLITE_HELP_URL config", () => {
     expect(buildConfig.helpUrl).toBe("https://help.example.com");
   });
 });
+
+describe("NEXTCHATLITE_DEFAULT_SYSTEM_TEMPLATE config", () => {
+  const originalEnv = process.env;
+
+  beforeEach(() => {
+    process.env = { ...originalEnv };
+    delete process.env.NEXTCHATLITE_DEFAULT_SYSTEM_TEMPLATE;
+  });
+
+  afterAll(() => {
+    process.env = originalEnv;
+  });
+
+  test("defaults defaultSystemTemplate to DEFAULT_SYSTEM_TEMPLATE when unset", () => {
+    const serverConfig = getServerSideConfig();
+    expect(serverConfig.defaultSystemTemplate).toContain(
+      "helpful AI assistant",
+    );
+
+    const buildConfig = getBuildConfig();
+    expect(buildConfig.defaultSystemTemplate).toContain("helpful AI assistant");
+  });
+
+  test("uses custom NEXTCHATLITE_DEFAULT_SYSTEM_TEMPLATE when provided", () => {
+    process.env.NEXTCHATLITE_DEFAULT_SYSTEM_TEMPLATE =
+      "Custom system prompt for {{model}}";
+
+    const serverConfig = getServerSideConfig();
+    expect(serverConfig.defaultSystemTemplate).toBe(
+      "Custom system prompt for {{model}}",
+    );
+
+    const buildConfig = getBuildConfig();
+    expect(buildConfig.defaultSystemTemplate).toBe(
+      "Custom system prompt for {{model}}",
+    );
+  });
+});

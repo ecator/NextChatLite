@@ -121,7 +121,7 @@ export enum ModelProvider {
 
 export const DEFAULT_INPUT_TEMPLATE = `{{input}}`;
 export const DEFAULT_SYSTEM_TEMPLATE = `
-You are ChatGPT, a large language model trained by {{ServiceProvider}}.
+You are a helpful AI assistant trained by {{ServiceProvider}}.
 Knowledge cutoff: {{cutoff}}
 Current model: {{model}}
 Current time: {{time}}

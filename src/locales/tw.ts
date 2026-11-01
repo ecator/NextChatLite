@@ -173,7 +173,7 @@ const tw = {
     },
     InjectSystemPrompts: {
       Title: "匯入系統提示",
-      SubTitle: "強制在每個請求的訊息列表開頭新增一個模擬 ChatGPT 的系統提示",
+      SubTitle: "強制在每個請求的訊息列表開頭新增一個全域系統提示",
     },
     InputTemplate: {
       Title: "使用者輸入預處理",

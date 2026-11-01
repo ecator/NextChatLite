@@ -27,4 +27,11 @@ describe("/api/config route", () => {
     const data = await res.json();
     expect(data.helpUrl).toBeUndefined();
   });
+
+  it("returns defaultSystemTemplate from configuration", async () => {
+    process.env.NEXTCHATLITE_DEFAULT_SYSTEM_TEMPLATE = "Hello {{model}}";
+    const res = await GET();
+    const data = await res.json();
+    expect(data.defaultSystemTemplate).toBe("Hello {{model}}");
+  });
 });

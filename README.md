@@ -84,17 +84,32 @@ pnpm test:e2e
 
 You can configure NextChatLite via environment variables in `.env.local` or container settings:
 
-| Variable                | Description                                                                  |
-| ----------------------- | ---------------------------------------------------------------------------- |
-| `GOOGLE_API_KEY`        | Server-side Google Gemini API key (or as defined in `public/providers.json`) |
-| `OPENAI_API_KEY`        | Server-side OpenAI API key (or as defined in `public/providers.json`)        |
-| `ANTHROPIC_API_KEY`     | Server-side Anthropic API key (or as defined in `public/providers.json`)     |
-| `DEEPSEEK_API_KEY`      | Server-side DeepSeek API key (or as defined in `public/providers.json`)      |
-| `PROXY_URL`             | Outbound network proxy for server-side requests                              |
-| `DEFAULT_MODEL`         | Default model for new conversations in `provider/model` format               |
-| `NEXTCHATLITE_TITLE`    | Custom title for sidebar header and document.title (default: NextChatLite)   |
-| `NEXTCHATLITE_SUBTITLE` | Custom subtitle for sidebar header (default: Build your own AI assistant.)   |
-| `NEXTCHATLITE_HELP_URL` | Custom help URL displayed as an icon in sidebar lower-left corner (optional) |
+| Variable                               | Description                                                                  |
+| -------------------------------------- | ---------------------------------------------------------------------------- |
+| `GOOGLE_API_KEY`                       | Server-side Google Gemini API key (or as defined in `public/providers.json`) |
+| `OPENAI_API_KEY`                       | Server-side OpenAI API key (or as defined in `public/providers.json`)        |
+| `ANTHROPIC_API_KEY`                    | Server-side Anthropic API key (or as defined in `public/providers.json`)     |
+| `DEEPSEEK_API_KEY`                     | Server-side DeepSeek API key (or as defined in `public/providers.json`)      |
+| `PROXY_URL`                            | Outbound network proxy for server-side requests                              |
+| `DEFAULT_MODEL`                        | Default model for new conversations in `provider/model` format               |
+| `NEXTCHATLITE_TITLE`                   | Custom title for sidebar header and document.title (default: NextChatLite)   |
+| `NEXTCHATLITE_SUBTITLE`                | Custom subtitle for sidebar header (default: Build your own AI assistant.)   |
+| `NEXTCHATLITE_HELP_URL`                | Custom help URL displayed as an icon in sidebar lower-left corner (optional) |
+| `DEFAULT_INPUT_TEMPLATE`               | Custom input template for user prompt preprocessing (default: `{{input}}`)   |
+| `NEXTCHATLITE_DEFAULT_SYSTEM_TEMPLATE` | Custom global system prompt template injected for all models when enabled    |
+
+### Template Placeholders
+
+Both `DEFAULT_INPUT_TEMPLATE` and `NEXTCHATLITE_DEFAULT_SYSTEM_TEMPLATE` (as well as custom user templates configured in Settings) support the following dynamic placeholders:
+
+| Placeholder           | Description                                                          | Example Output                              |
+| --------------------- | -------------------------------------------------------------------- | ------------------------------------------- |
+| `{{ServiceProvider}}` | AI service provider / model trainer name                             | `Google`, `OpenAI`, `Anthropic`, `DeepSeek` |
+| `{{model}}`           | Current model identifier                                             | `gemini-3.5-flash`, `gpt-5.1`               |
+| `{{time}}`            | Client local date and time string                                    | `Sun Nov 01 2026 22:10:00 GMT+0800`         |
+| `{{cutoff}}`          | Knowledge cutoff date configured for the model                       | `2024-01`, `2023-10`                        |
+| `{{lang}}`            | Current UI language code                                             | `en`, `cn`, `ja`, etc.                      |
+| `{{input}}`           | User input message text (evaluated to empty string in system prompt) | `How does quantum computing work?`          |
 
 ### Provider & Model Configuration (`public/providers.json`)
 

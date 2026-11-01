@@ -1,5 +1,5 @@
 import packageJson from "../../package.json";
-import { DEFAULT_INPUT_TEMPLATE } from "../constant";
+import { DEFAULT_INPUT_TEMPLATE, DEFAULT_SYSTEM_TEMPLATE } from "../constant";
 import { getDefaultModel } from "./server";
 
 export const getBuildConfig = () => {
@@ -47,6 +47,9 @@ export const getBuildConfig = () => {
     isApp,
     defaultModel: getDefaultModel(),
     template: process.env.DEFAULT_INPUT_TEMPLATE ?? DEFAULT_INPUT_TEMPLATE,
+    defaultSystemTemplate:
+      process.env.NEXTCHATLITE_DEFAULT_SYSTEM_TEMPLATE ??
+      DEFAULT_SYSTEM_TEMPLATE,
     title: process.env.NEXTCHATLITE_TITLE || "NextChatLite",
     subTitle:
       process.env.NEXTCHATLITE_SUBTITLE || "Build your own AI assistant.",

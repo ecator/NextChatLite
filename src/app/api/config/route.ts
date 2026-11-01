@@ -8,6 +8,7 @@ declare global {
     title: string;
     subTitle: string;
     helpUrl?: string;
+    defaultSystemTemplate?: string;
   };
 }
 
@@ -18,6 +19,7 @@ async function handle() {
     title: serverConfig.title,
     subTitle: serverConfig.subTitle,
     helpUrl: serverConfig.helpUrl,
+    defaultSystemTemplate: serverConfig.defaultSystemTemplate,
   });
 }
 

@@ -1,3 +1,4 @@
+import { getClientConfig } from "../config/client";
 import {
   getMessageTextContent,
   indexedDBStorage,
@@ -179,12 +180,30 @@ function fillTemplateWith(input: string, modelConfig: ModelConfig) {
   // Find the model in the DEFAULT_MODELS array that matches the modelConfig.model
   const modelInfo = DEFAULT_MODELS.find((m) => m.name === modelConfig.model);
 
-  var serviceProvider = "OpenAI";
+  let serviceProvider = "OpenAI";
   if (modelInfo) {
-    // TODO: auto detect the providerName from the modelConfig.model
-
-    // Directly use the providerName from the modelInfo
     serviceProvider = modelInfo.provider.providerName;
+  } else {
+    const modelMeta = useModelStore.getState().getModel(modelConfig.model);
+    const rawProvider = modelMeta?.provider || modelConfig.providerName || "";
+    const providerMap: Record<string, string> = {
+      openai: "OpenAI",
+      anthropic: "Anthropic",
+      google: "Google",
+      deepseek: "DeepSeek",
+      xai: "xAI",
+      meta: "Meta",
+      mistral: "Mistral",
+      alibaba: "Alibaba",
+      bytedance: "ByteDance",
+      tencent: "Tencent",
+      baidu: "Baidu",
+    };
+    if (rawProvider) {
+      serviceProvider =
+        providerMap[rawProvider.toLowerCase()] ||
+        rawProvider.charAt(0).toUpperCase() + rawProvider.slice(1);
+    }
   }
 
   const vars = {
@@ -214,7 +233,7 @@ function fillTemplateWith(input: string, modelConfig: ModelConfig) {
     output = output.replace(regex, value.toString()); // Ensure value is a string
   });
 
-  return output;
+  return output.trim();
 }
 
 const DEFAULT_CHAT_STATE = {
@@ -769,21 +788,22 @@ export const useChatStore = createPersistStore(
         // in-context prompts
         const contextPrompts = session.mask.context.slice();
 
-        // system prompts, to get close to OpenAI Web ChatGPT
-        const shouldInjectSystemPrompts =
-          modelConfig.enableInjectSystemPrompts &&
-          (session.mask.modelConfig.model.startsWith("gpt-") ||
-            session.mask.modelConfig.model.startsWith("chatgpt-"));
+        // system prompts
+        const shouldInjectSystemPrompts = Boolean(
+          modelConfig.enableInjectSystemPrompts,
+        );
 
         let systemPrompts: ChatMessage[] = [];
 
         if (shouldInjectSystemPrompts) {
+          const systemTemplate =
+            getClientConfig()?.defaultSystemTemplate ?? DEFAULT_SYSTEM_TEMPLATE;
           systemPrompts = [
             createMessage({
               role: "system",
               content: fillTemplateWith("", {
                 ...modelConfig,
-                template: DEFAULT_SYSTEM_TEMPLATE,
+                template: systemTemplate,
               }),
             }),
           ];
