@@ -252,8 +252,7 @@ export const usePluginStore = createPersistStore(
         await Promise.all(
           res.map(async (item: any) => {
             let content = "";
-            const rawSchema = item.schema || "";
-            const schemaUrl = rawSchema.replace(/^https?:\/\/ghp\.ci\//, "");
+            const schemaUrl = item.schema || "";
             try {
               let schemaRes: Response | null = null;
               if (schemaUrl) {
