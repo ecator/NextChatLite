@@ -1,6 +1,9 @@
-import { getMessageTextContent, safeLocalStorage, trimTopic } from "../utils";
-
-import { indexedDBStorage } from "@/utils/indexedDB-storage";
+import {
+  getMessageTextContent,
+  indexedDBStorage,
+  safeLocalStorage,
+  trimTopic,
+} from "../utils";
 import { nanoid } from "nanoid";
 import type { MultimodalContent, RequestMessage } from "../client/api";
 import { ChatControllerPool } from "../client/controller";
@@ -1003,7 +1006,11 @@ export const useChatStore = createPersistStore(
 
         const historyMsgLength = countMessages(toBeSummarizedMsgs);
 
-        if (historyMsgLength > (modelConfig?.max_tokens || 4000)) {
+        const maxSummarizeLen = Math.max(
+          (modelConfig?.max_tokens || 4000) * 2,
+          modelConfig.compressMessageLengthThreshold * 2,
+        );
+        if (historyMsgLength > maxSummarizeLen) {
           const n = toBeSummarizedMsgs.length;
           toBeSummarizedMsgs = toBeSummarizedMsgs.slice(
             Math.max(0, n - modelConfig.historyMessageCount),
@@ -1031,7 +1038,7 @@ export const useChatStore = createPersistStore(
           const { max_tokens, ...modelcfg } = modelConfig;
           const memoryMessages = toBeSummarizedMsgs.concat(
             createMessage({
-              role: "system",
+              role: "user",
               content: Locale.Store.Prompt.Summarize,
               date: "",
             }),
@@ -1130,8 +1137,8 @@ export const useChatStore = createPersistStore(
           newSession.topic = oldSession.topic;
           newSession.messages = [...oldSession.messages];
           newSession.mask.modelConfig.sendMemory = true;
-          newSession.mask.modelConfig.historyMessageCount = 4;
-          newSession.mask.modelConfig.compressMessageLengthThreshold = 1000;
+          newSession.mask.modelConfig.historyMessageCount = 20;
+          newSession.mask.modelConfig.compressMessageLengthThreshold = 8000;
           newState.sessions.push(newSession);
         }
       }

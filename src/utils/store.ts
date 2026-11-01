@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { combine, persist, createJSONStorage } from "zustand/middleware";
 import { Updater } from "../typing";
 import { deepClone } from "./clone";
-import { indexedDBStorage } from "@/utils/indexedDB-storage";
+import { indexedDBStorage } from "./storage";
 
 type SecondParam<T> = T extends (
   _f: infer _F,
@@ -77,4 +77,4 @@ export function createPersistStore<T extends object, M>(
   );
 }
 
-export { safeLocalStorage } from "./storage";
+export { safeLocalStorage, indexedDBStorage } from "./storage";

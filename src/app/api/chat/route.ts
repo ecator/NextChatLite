@@ -411,12 +411,24 @@ export async function POST(req: NextRequest) {
     const model = createLanguageModel(payload);
     const tools = convertOpenApiToAiTools(payload.pluginIds, payload.plugins);
 
+    let hasEncounteredNonSystem = false;
     const coreMessages = payload.messages.map((m) => {
+      let role = m.role as any;
+      if (role === "system") {
+        if (hasEncounteredNonSystem) {
+          // System messages after conversation start are not supported by Gemini and other providers.
+          // Fallback to "user" role to avoid UnsupportedFunctionalityError.
+          role = "user";
+        }
+      } else {
+        hasEncounteredNonSystem = true;
+      }
+
       if (typeof m.content === "string") {
-        return { role: m.role as any, content: m.content };
+        return { role, content: m.content };
       }
       return {
-        role: m.role as any,
+        role,
         content: m.content.map((part) => {
           if (part.type === "text") {
             return { type: "text" as const, text: part.text || "" };

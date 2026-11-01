@@ -176,4 +176,51 @@ describe("Chat Summarize & Compress Model Fallback", () => {
     // Verify multimodal message was converted to clean text
     expect(contents[0]).toBe("Explain React Hooks");
   });
+
+  test("summarizeSession appends summarize prompt as user role to prevent Gemini UnsupportedFunctionalityError", async () => {
+    const chatStore = useChatStore.getState();
+    const session = chatStore.currentSession();
+
+    session.mask.modelConfig.compressMessageLengthThreshold = 10;
+    session.mask.modelConfig.sendMemory = true;
+    session.topic = "Custom Topic"; // Avoid triggering topic summarization
+
+    session.messages = [
+      {
+        id: "1",
+        date: "",
+        role: "user",
+        content:
+          "First message with enough text to exceed the threshold easily.",
+      },
+      {
+        id: "2",
+        date: "",
+        role: "assistant",
+        content:
+          "Second message that ensures historyMsgLength is well over threshold.",
+      },
+    ];
+
+    let capturedPayload: any = null;
+    global.fetch = jest.fn().mockImplementation((url, init) => {
+      capturedPayload = JSON.parse(init.body);
+      return Promise.resolve({
+        ok: true,
+        body: new ReadableStream({
+          start(controller) {
+            controller.close();
+          },
+        }),
+      });
+    });
+
+    chatStore.summarizeSession(false, session);
+    await new Promise((r) => setTimeout(r, 50));
+
+    expect(capturedPayload).toBeDefined();
+    const messages = capturedPayload.messages;
+    const lastMessage = messages[messages.length - 1];
+    expect(lastMessage.role).toBe("user");
+  });
 });
