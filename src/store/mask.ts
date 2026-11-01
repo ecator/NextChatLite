@@ -62,7 +62,7 @@ export const useMaskStore = createPersistStore(
 
   (set, get) => ({
     create(mask?: Partial<Mask>) {
-      const masks = get().masks;
+      const masks = { ...get().masks };
       const id = nanoid();
       const newMask: Mask = {
         ...createEmptyMask(),
@@ -88,7 +88,7 @@ export const useMaskStore = createPersistStore(
     updateMask(id: string, updater: (mask: Mask) => void) {
       // Server-fetched masks are read-only and cannot be modified
       if (get().builtinMasks[id] || BUILTIN_MASK_STORE.get(id)) return;
-      const masks = get().masks;
+      const masks = { ...get().masks };
       const mask = masks[id];
       if (!mask || mask.builtin) return;
 
@@ -108,7 +108,7 @@ export const useMaskStore = createPersistStore(
     delete(id: string) {
       // Server-fetched masks cannot be deleted
       if (get().builtinMasks[id] || BUILTIN_MASK_STORE.get(id)) return;
-      const masks = get().masks;
+      const masks = { ...get().masks };
       if (!masks[id] || masks[id].builtin) return;
 
       delete masks[id];
@@ -201,24 +201,26 @@ export const useMaskStore = createPersistStore(
       language: state.language,
     }),
 
-    onRehydrateStorage(state: any) {
-      if (typeof window === "undefined") return;
+    onRehydrateStorage: () => (state: any) => {
+      if (typeof window === "undefined" || !state) return;
 
       // Purge any legacy builtin masks from storage
-      if (state?.masks) {
+      if (state.masks) {
         let changed = false;
-        Object.keys(state.masks).forEach((key) => {
-          if (state.masks[key]?.builtin) {
-            delete state.masks[key];
+        const cleanedMasks = { ...state.masks };
+        Object.keys(cleanedMasks).forEach((key) => {
+          if (cleanedMasks[key]?.builtin) {
+            delete cleanedMasks[key];
             changed = true;
           }
         });
         if (changed) {
-          state.markUpdate();
+          useMaskStore.setState({ masks: cleanedMasks });
+          state.markUpdate?.();
         }
       }
 
-      state?.fetchServerMasks();
+      state.fetchServerMasks?.();
     },
 
     migrate(state: any, version: number) {

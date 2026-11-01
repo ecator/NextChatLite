@@ -35,10 +35,27 @@ export function createPersistStore<T extends object, M>(
   persistOptions: any,
 ) {
   persistOptions.storage = createJSONStorage(() => indexedDBStorage);
-  const oldOonRehydrateStorage = persistOptions?.onRehydrateStorage;
-  persistOptions.onRehydrateStorage = (state: any) => {
-    oldOonRehydrateStorage?.(state);
-    return () => state.setHasHydrated(true);
+
+  const oldPartialize = persistOptions?.partialize;
+  persistOptions.partialize = (state: any) => {
+    const partial = oldPartialize ? oldPartialize(state) : state;
+    return {
+      ...partial,
+      _hasHydrated: state._hasHydrated,
+    };
+  };
+
+  const oldOnRehydrateStorage = persistOptions?.onRehydrateStorage;
+  persistOptions.onRehydrateStorage = (initialState: any) => {
+    const postRehydrate = oldOnRehydrateStorage?.(initialState);
+    return (rehydratedState: any, error: any) => {
+      if (typeof postRehydrate === "function") {
+        postRehydrate(rehydratedState, error);
+      } else if (rehydratedState && oldOnRehydrateStorage) {
+        oldOnRehydrateStorage(rehydratedState);
+      }
+      (rehydratedState ?? initialState)?.setHasHydrated?.(true);
+    };
   };
 
   return create(

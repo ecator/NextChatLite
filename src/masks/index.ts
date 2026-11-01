@@ -44,9 +44,16 @@ export function fetchBuiltinMasks(): Promise<BuiltinMask[]> {
     return fetchPromise;
   }
 
-  fetchPromise = fetch("./masks.json")
-    .catch(() => fetch("/masks.json"))
-    .then((res) => res.json())
+  const fetchUrl = async (url: string) => {
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error(`Fetch ${url} failed with status: ${res.status}`);
+    }
+    return res.json();
+  };
+
+  fetchPromise = fetchUrl("./masks.json")
+    .catch(() => fetchUrl("/masks.json"))
     .catch((error) => {
       console.error("[Fetch] failed to fetch masks", error);
       return { cn: [], tw: [], en: [] };
