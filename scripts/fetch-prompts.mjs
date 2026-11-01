@@ -1,16 +1,17 @@
 import fetch from "node-fetch";
 import fs from "fs/promises";
+import { parse as parseCsv } from "csv-parse/sync";
 
 const RAW_FILE_URL = "https://raw.githubusercontent.com/";
-const MIRRORF_FILE_URL = "http://raw.fgit.ml/";
 
 const RAW_CN_URL = "PlexPt/awesome-chatgpt-prompts-zh/main/prompts-zh.json";
-const CN_URL = MIRRORF_FILE_URL + RAW_CN_URL;
+const CN_URL = RAW_FILE_URL + RAW_CN_URL;
 const RAW_TW_URL = "PlexPt/awesome-chatgpt-prompts-zh/main/prompts-zh-TW.json";
-const TW_URL = MIRRORF_FILE_URL + RAW_TW_URL;
+const TW_URL = RAW_FILE_URL + RAW_TW_URL;
 const RAW_EN_URL = "f/awesome-chatgpt-prompts/main/prompts.csv";
-const EN_URL = MIRRORF_FILE_URL + RAW_EN_URL;
+const EN_URL = RAW_FILE_URL + RAW_EN_URL;
 const FILE = "./public/prompts.json";
+const MAX_COUNT = 100;
 
 const ignoreWords = ["涩涩", "魅魔", "澀澀"];
 
@@ -34,7 +35,8 @@ async function fetchCN() {
           v[0] &&
           v[1] &&
           ignoreWords.every((w) => !v[0].includes(w) && !v[1].includes(w)),
-      );
+      )
+      .slice(0, MAX_COUNT);
   } catch (error) {
     console.error("[Fetch] failed to fetch cn prompts", error);
     return [];
@@ -53,7 +55,8 @@ async function fetchTW() {
           v[0] &&
           v[1] &&
           ignoreWords.every((w) => !v[0].includes(w) && !v[1].includes(w)),
-      );
+      )
+      .slice(0, MAX_COUNT);
   } catch (error) {
     console.error("[Fetch] failed to fetch tw prompts", error);
     return [];
@@ -66,15 +69,17 @@ async function fetchEN() {
     // const raw = await (await fetch(EN_URL)).text();
     const response = await Promise.race([fetch(EN_URL), timeoutPromise(5000)]);
     const raw = await response.text();
-    return raw
-      .split("\n")
-      .slice(1)
-      .map((v) =>
-        v
-          .split('","')
-          .map((v) => v.replace(/^"|"$/g, "").replaceAll('""', '"'))
-          .filter((v) => v[0] && v[1]),
-      );
+    const records = parseCsv(raw, {
+      columns: true,
+      skip_empty_lines: true,
+      relax_column_count: true,
+      relax_quotes: true,
+      trim: true,
+    });
+    return records
+      .map((row) => [row.act, row.prompt])
+      .filter(([act, prompt]) => act && prompt)
+      .slice(0, MAX_COUNT);
   } catch (error) {
     console.error("[Fetch] failed to fetch en prompts", error);
     return [];
@@ -84,11 +89,11 @@ async function fetchEN() {
 async function main() {
   Promise.all([fetchCN(), fetchTW(), fetchEN()])
     .then(([cn, tw, en]) => {
-      fs.writeFile(FILE, JSON.stringify({ cn, tw, en }));
+      fs.writeFile(FILE, JSON.stringify({ cn, tw, en }, null, 2));
     })
     .catch((e) => {
       console.error("[Fetch] failed to fetch prompts");
-      fs.writeFile(FILE, JSON.stringify({ cn: [], tw: [], en: [] }));
+      fs.writeFile(FILE, JSON.stringify({ cn: [], tw: [], en: [] }, null, 2));
     })
     .finally(() => {
       console.log("[Fetch] saved to " + FILE);
