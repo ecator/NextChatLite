@@ -448,7 +448,7 @@ function useScrollToBottom(
 
 export function ChatActions(props: {
   uploadImage: () => void;
-  setAttachImages: (images: string[]) => void;
+  setAttachImages: (images: string[] | ((prev: string[]) => string[])) => void;
   setUploading: (uploading: boolean) => void;
   showPromptModal: () => void;
   scrollToBottom: () => void;
@@ -521,18 +521,25 @@ export function ChatActions(props: {
   }, [models, currentModel, currentProviderName]);
   const [showModelSelector, setShowModelSelector] = useState(false);
   const [showPluginSelector, setShowPluginSelector] = useState(false);
-  const [showUploadImage, setShowUploadImage] = useState(false);
+  const showUploadImage = isVisionModel(currentModel);
 
   const isMobileScreen = useMobileScreen();
 
   useEffect(() => {
-    const show = isVisionModel(currentModel);
-    setShowUploadImage(show);
-    if (!show) {
-      props.setAttachImages([]);
-      props.setUploading(false);
+    if (!showUploadImage) {
+      props.setAttachImages((prev) => (prev.length > 0 ? [] : prev));
+      if (props.uploading) {
+        props.setUploading(false);
+      }
     }
+  }, [
+    showUploadImage,
+    props.uploading,
+    props.setAttachImages,
+    props.setUploading,
+  ]);
 
+  useEffect(() => {
     // if current model is not available
     // switch to first available model
     const isUnavailableModel =
@@ -540,24 +547,26 @@ export function ChatActions(props: {
       !useModelStore.getState().getModel(currentModel);
     if (isUnavailableModel && models.length > 0) {
       // show next model to default model if exist
-      let nextModel = models.find((model) => model.isDefault) || models[0];
-      chatStore.updateTargetSession(session, (session) => {
-        session.mask.modelConfig.model = nextModel.name;
-        session.mask.modelConfig.providerName = nextModel?.provider
-          ?.providerName as ServiceProvider;
-      });
-      config.update((cfg) => {
-        cfg.modelConfig.model = nextModel.name;
-        cfg.modelConfig.providerName = nextModel?.provider
-          ?.providerName as ServiceProvider;
-      });
-      showToast(
-        nextModel?.provider?.providerName == "ByteDance"
-          ? nextModel.displayName
-          : nextModel.name,
-      );
+      const nextModel = models.find((model) => model.isDefault) || models[0];
+      if (nextModel && nextModel.name !== currentModel) {
+        useChatStore.getState().updateTargetSession(session, (session) => {
+          session.mask.modelConfig.model = nextModel.name;
+          session.mask.modelConfig.providerName = nextModel?.provider
+            ?.providerName as ServiceProvider;
+        });
+        useAppConfig.getState().update((cfg) => {
+          cfg.modelConfig.model = nextModel.name;
+          cfg.modelConfig.providerName = nextModel?.provider
+            ?.providerName as ServiceProvider;
+        });
+        showToast(
+          nextModel?.provider?.providerName == "ByteDance"
+            ? nextModel.displayName
+            : nextModel.name,
+        );
+      }
     }
-  }, [chatStore, currentModel, models, session]);
+  }, [currentModel, models, session.id]);
 
   return (
     <div className={styles["chat-input-actions"]}>
@@ -1053,7 +1062,7 @@ function InnerChat() {
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session]);
+  }, [session.id]);
 
   // check if should send message
   const onInputKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

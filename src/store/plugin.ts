@@ -215,7 +215,7 @@ export const usePluginStore = createPersistStore(
 
     getAsTools(ids: string[]) {
       const selected = (ids || [])
-        .map((id) => get().get(id))
+        .map((id) => (get() as any).get(id))
         .filter((i): i is Plugin => Boolean(i))
         .map((p) => FunctionToolService.add(p));
       return [
@@ -252,9 +252,23 @@ export const usePluginStore = createPersistStore(
         await Promise.all(
           res.map(async (item: any) => {
             let content = "";
+            const rawSchema = item.schema || "";
+            const schemaUrl = rawSchema.replace(/^https?:\/\/ghp\.ci\//, "");
             try {
-              const schemaRes = await fetch(item.schema);
-              content = await schemaRes.text();
+              let schemaRes: Response | null = null;
+              if (schemaUrl) {
+                schemaRes = await fetch(schemaUrl).catch(() => null);
+              }
+              if ((!schemaRes || !schemaRes.ok) && item.id) {
+                schemaRes = await fetch(`/plugins/${item.id}.json`).catch(
+                  () => null,
+                );
+              }
+              if (schemaRes && schemaRes.ok) {
+                content = await schemaRes.text();
+              } else if (schemaUrl) {
+                throw new Error(`Failed to fetch schema from ${schemaUrl}`);
+              }
             } catch (e) {
               console.error("[Plugin] fetch schema failed", item.schema, e);
             }
@@ -293,13 +307,15 @@ export const usePluginStore = createPersistStore(
     version: 2,
 
     // Only persist local user plugins, never server plugins
-    partialize: (state) => ({
+    partialize: (state: any) => ({
       plugins: Object.fromEntries(
-        Object.entries(state.plugins).filter(([_, p]) => !p.builtin),
+        Object.entries(state.plugins).filter(
+          ([_, p]: [string, any]) => !p.builtin,
+        ),
       ),
     }),
 
-    onRehydrateStorage(state) {
+    onRehydrateStorage(state: any) {
       if (typeof window === "undefined") {
         return;
       }
@@ -321,7 +337,7 @@ export const usePluginStore = createPersistStore(
       state?.fetchServerPlugins();
     },
 
-    migrate(state, version) {
+    migrate(state: any, version: number) {
       const newState = JSON.parse(
         JSON.stringify(state),
       ) as typeof DEFAULT_PLUGIN_STATE;

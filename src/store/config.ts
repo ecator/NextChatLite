@@ -193,13 +193,13 @@ export const useAppConfig = createPersistStore(
     name: StoreKey.Config,
     version: 4.2,
 
-    merge(persistedState, currentState) {
+    merge(persistedState: any, currentState: any) {
       const state = persistedState as ChatConfig | undefined;
       if (!state) return { ...currentState };
       const models = currentState.models.slice();
       state.models.forEach((pModel) => {
         const idx = models.findIndex(
-          (v) => v.name === pModel.name && v.provider === pModel.provider,
+          (v: any) => v.name === pModel.name && v.provider === pModel.provider,
         );
         if (idx !== -1) models[idx] = pModel;
         else models.push(pModel);
@@ -207,7 +207,7 @@ export const useAppConfig = createPersistStore(
       return { ...currentState, ...state, models: models };
     },
 
-    migrate(persistedState, version) {
+    migrate(persistedState: any, version: number) {
       const state = persistedState as ChatConfig;
 
       if (version < 3.4) {

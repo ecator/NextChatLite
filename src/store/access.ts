@@ -22,7 +22,7 @@ import { getHeaders } from "../client/api";
 import { getClientConfig } from "../config/client";
 import { createPersistStore } from "../utils/store";
 import { ensure } from "../utils/clone";
-import { DEFAULT_CONFIG } from "./config";
+import { DEFAULT_CONFIG, useAppConfig } from "./config";
 import { getModelProvider } from "../utils/model";
 
 let fetchState = 0; // 0 not fetch, 1 fetching, 2 done
@@ -256,7 +256,12 @@ export const useAccessStore = createPersistStore(
           ...getHeaders(),
         },
       })
-        .then((res) => res.json())
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+          }
+          return res.json();
+        })
         .then((res) => {
           const defaultModel = res.defaultModel ?? "";
           if (defaultModel !== "") {
@@ -271,7 +276,7 @@ export const useAccessStore = createPersistStore(
                 !currentConfig.modelConfig.model ||
                 currentConfig.modelConfig.model === "gpt-4o-mini"
               ) {
-                currentConfig.update((cfg) => {
+                currentConfig.update((cfg: any) => {
                   cfg.modelConfig.model = model as any;
                   if (providerName) {
                     cfg.modelConfig.providerName = providerName as any;
@@ -287,8 +292,27 @@ export const useAccessStore = createPersistStore(
           console.log("[Config] got config from server", res);
           set(() => ({ ...res }));
         })
-        .catch(() => {
-          console.error("[Config] failed to fetch config");
+        .catch((e) => {
+          console.error("[Config] failed to fetch config", e);
+          const clientConfig = getClientConfig();
+          if (clientConfig) {
+            const defaultModel = clientConfig.defaultModel ?? "";
+            if (defaultModel !== "") {
+              const [model, providerName] = getModelProvider(defaultModel);
+              if (model) {
+                DEFAULT_CONFIG.modelConfig.model = model as any;
+                if (providerName) {
+                  DEFAULT_CONFIG.modelConfig.providerName = providerName as any;
+                }
+              }
+            }
+            set(() => ({
+              defaultModel: clientConfig.defaultModel ?? "",
+              title: clientConfig.title ?? "",
+              subTitle: clientConfig.subTitle ?? "",
+              helpUrl: clientConfig.helpUrl ?? "",
+            }));
+          }
         })
         .finally(() => {
           fetchState = 2;
@@ -298,7 +322,7 @@ export const useAccessStore = createPersistStore(
   {
     name: StoreKey.Access,
     version: 2,
-    migrate(persistedState, version) {
+    migrate(persistedState: any, version: number) {
       if (version < 2) {
         const state = persistedState as {
           token: string;

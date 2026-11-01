@@ -22,7 +22,7 @@ import Locale, { getLang } from "../locales";
 import { prettyObject } from "../utils/format";
 import { createPersistStore } from "../utils/store";
 import { estimateTokenLength } from "../utils/token";
-import { ModelConfig, ModelType, useAppConfig } from "./config";
+import { DEFAULT_CONFIG, ModelConfig, ModelType, useAppConfig } from "./config";
 import { useAccessStore } from "./access";
 import { collectModelsWithDefaultModel } from "../utils/model";
 import { createEmptyMask, Mask } from "./mask";
@@ -1044,7 +1044,7 @@ export const useChatStore = createPersistStore(
   {
     name: StoreKey.Chat,
     version: 3.4,
-    migrate(persistedState, version) {
+    migrate(persistedState: any, version: number) {
       const state = persistedState as any;
       const newState = JSON.parse(
         JSON.stringify(state),

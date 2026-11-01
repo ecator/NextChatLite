@@ -1,9 +1,11 @@
+import { nanoid } from "nanoid";
 import { BUILTIN_MASKS, BUILTIN_MASK_STORE, fetchBuiltinMasks } from "../masks";
 import { getLang, Lang } from "../locales";
-import { DEFAULT_TOPIC, ChatMessage } from "./chat";
+import Locale from "../locales";
+import type { ChatMessage } from "./chat";
+export const DEFAULT_TOPIC = Locale.Store.DefaultTopic;
 import { ModelConfig, useAppConfig } from "./config";
 import { StoreKey } from "../constant";
-import { nanoid } from "nanoid";
 import { createPersistStore } from "../utils/store";
 
 export type Mask = {
@@ -31,8 +33,8 @@ export const DEFAULT_MASK_STATE = {
 export type MaskState = typeof DEFAULT_MASK_STATE;
 
 export const DEFAULT_MASK_AVATAR = "gpt-bot";
-export const createEmptyMask = () =>
-  ({
+export function createEmptyMask(): Mask {
+  return {
     id: nanoid(),
     avatar: DEFAULT_MASK_AVATAR,
     name: DEFAULT_TOPIC,
@@ -43,7 +45,8 @@ export const createEmptyMask = () =>
     builtin: false,
     createdAt: Date.now(),
     plugin: [],
-  }) as Mask;
+  };
+}
 
 export const useMaskStore = createPersistStore(
   { ...DEFAULT_MASK_STATE },
@@ -121,7 +124,7 @@ export const useMaskStore = createPersistStore(
       return userMasks.concat(serverMasks);
     },
     search(text: string) {
-      return get().getAll();
+      return (get() as any).getAll();
     },
     setLanguage(language: Lang | undefined) {
       set({
@@ -156,14 +159,16 @@ export const useMaskStore = createPersistStore(
     version: 3.2,
 
     // Only persist local user masks and language, never server masks
-    partialize: (state) => ({
+    partialize: (state: any) => ({
       masks: Object.fromEntries(
-        Object.entries(state.masks).filter(([_, m]) => !m.builtin),
+        Object.entries(state.masks).filter(
+          ([_, m]: [string, any]) => !m.builtin,
+        ),
       ),
       language: state.language,
     }),
 
-    onRehydrateStorage(state) {
+    onRehydrateStorage(state: any) {
       if (typeof window === "undefined") return;
 
       // Purge any legacy builtin masks from storage
@@ -183,7 +188,7 @@ export const useMaskStore = createPersistStore(
       state?.fetchServerMasks();
     },
 
-    migrate(state, version) {
+    migrate(state: any, version: number) {
       const newState = JSON.parse(JSON.stringify(state)) as MaskState;
 
       // Purge any legacy builtin masks

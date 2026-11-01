@@ -1,7 +1,7 @@
 import { parseModelsDevCatalog, useModelStore } from "@/store/models";
 import { createLanguageModel } from "@/app/api/chat/route";
 import { isVisionModel, showPlugins } from "@/utils";
-import defaultModelsJson from "@/../public/models.json";
+import defaultModelsJson from "@/../public/providers.json";
 import { ServiceProvider } from "@/constant";
 import { streamText } from "ai";
 

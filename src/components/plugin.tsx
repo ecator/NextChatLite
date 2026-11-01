@@ -55,7 +55,7 @@ export function PluginPage() {
 
   const [editingPluginId, setEditingPluginId] = useState<string | undefined>();
   const editingPlugin = pluginStore.get(editingPluginId);
-  const editingPluginTool = FunctionToolService.get(editingPlugin?.id);
+  const editingPluginTool = FunctionToolService.get(editingPlugin?.id || "");
   const closePluginModal = () => setEditingPluginId(undefined);
 
   const onChangePlugin = useDebouncedCallback((editingPlugin, e) => {

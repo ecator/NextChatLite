@@ -124,7 +124,7 @@ export const usePromptStore = createPersistStore(
 
     getAll() {
       // Return both user prompts and server prompts merged together (even if same title)
-      return get().getUserPrompts().concat(get().builtinPrompts);
+      return (get() as any).getUserPrompts().concat(get().builtinPrompts);
     },
 
     updatePrompt(id: string, updater: (prompt: Prompt) => void) {
@@ -145,7 +145,7 @@ export const usePromptStore = createPersistStore(
 
     search(text: string) {
       if (text.length === 0) {
-        return get().getAll();
+        return (get() as any).getAll();
       }
       return SearchService.search(text) as Prompt[];
     },
@@ -185,7 +185,7 @@ export const usePromptStore = createPersistStore(
           }
         });
 
-        const userPrompts = get().getUserPrompts() ?? [];
+        const userPrompts = (get() as any).getUserPrompts() ?? [];
         SearchService.count.builtin = builtinPrompts.length;
         SearchService.init(builtinPrompts, userPrompts);
         set(() => ({ builtinPrompts }));
@@ -199,14 +199,16 @@ export const usePromptStore = createPersistStore(
     version: 3.1,
 
     // Only persist local user prompts and counter, never server prompts
-    partialize: (state) => ({
+    partialize: (state: any) => ({
       counter: state.counter,
       prompts: Object.fromEntries(
-        Object.entries(state.prompts).filter(([_, p]) => p.isUser),
+        Object.entries(state.prompts).filter(
+          ([_, p]: [string, any]) => p.isUser,
+        ),
       ),
     }),
 
-    onRehydrateStorage(state) {
+    onRehydrateStorage(state: any) {
       if (typeof window === "undefined") {
         return;
       }
@@ -228,7 +230,7 @@ export const usePromptStore = createPersistStore(
       state?.fetchServerPrompts();
     },
 
-    migrate(state, version) {
+    migrate(state: any, version: number) {
       const newState = JSON.parse(
         JSON.stringify(state),
       ) as typeof DEFAULT_PROMPT_STATE;

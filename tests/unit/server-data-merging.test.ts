@@ -127,7 +127,7 @@ describe("Server data in-memory merging and read-only protection", () => {
 
       const allPrompts = usePromptStore.getState().getAll();
       expect(allPrompts.length).toBe(2);
-      expect(allPrompts.map((p) => p.title)).toEqual([
+      expect(allPrompts.map((p: any) => p.title)).toEqual([
         "Translate to Chinese",
         "Translate to Chinese",
       ]);
