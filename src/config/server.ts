@@ -17,6 +17,9 @@ declare global {
       NEXTCHATLITE_TITLE?: string;
       NEXTCHATLITE_SUBTITLE?: string;
 
+      // custom help url
+      NEXTCHATLITE_HELP_URL?: string;
+
       // Azure OpenAI environment variables
       AZURE_API_KEY?: string;
       AZURE_OPENAI_API_KEY?: string;
@@ -34,6 +37,7 @@ declare global {
 export interface ServerConfig {
   title: string;
   subTitle: string;
+  helpUrl?: string;
   proxyUrl?: string;
   defaultModel: string;
   [key: string]: any;
@@ -120,6 +124,7 @@ export const getServerSideConfig = (): ServerConfig => {
     title: process.env.NEXTCHATLITE_TITLE || "NextChatLite",
     subTitle:
       process.env.NEXTCHATLITE_SUBTITLE || "Build your own AI assistant.",
+    helpUrl: process.env.NEXTCHATLITE_HELP_URL?.trim() || undefined,
 
     proxyUrl: process.env.PROXY_URL,
     defaultModel,

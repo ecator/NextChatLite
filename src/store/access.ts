@@ -136,6 +136,7 @@ const DEFAULT_ACCESS_STATE = {
   defaultModel: "",
   title: "",
   subTitle: "",
+  helpUrl: "",
 };
 
 export const useAccessStore = createPersistStore(

@@ -94,3 +94,34 @@ describe("NEXTCHATLITE_TITLE and NEXTCHATLITE_SUBTITLE config", () => {
     expect(buildConfig.subTitle).toBe("Powering intelligence daily.");
   });
 });
+
+describe("NEXTCHATLITE_HELP_URL config", () => {
+  const originalEnv = process.env;
+
+  beforeEach(() => {
+    process.env = { ...originalEnv };
+    delete process.env.NEXTCHATLITE_HELP_URL;
+  });
+
+  afterAll(() => {
+    process.env = originalEnv;
+  });
+
+  test("defaults helpUrl to undefined when NEXTCHATLITE_HELP_URL is unset", () => {
+    const serverConfig = getServerSideConfig();
+    expect(serverConfig.helpUrl).toBeUndefined();
+
+    const buildConfig = getBuildConfig();
+    expect(buildConfig.helpUrl).toBeUndefined();
+  });
+
+  test("uses custom NEXTCHATLITE_HELP_URL when provided", () => {
+    process.env.NEXTCHATLITE_HELP_URL = "https://help.example.com";
+
+    const serverConfig = getServerSideConfig();
+    expect(serverConfig.helpUrl).toBe("https://help.example.com");
+
+    const buildConfig = getBuildConfig();
+    expect(buildConfig.helpUrl).toBe("https://help.example.com");
+  });
+});

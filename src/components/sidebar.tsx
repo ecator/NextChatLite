@@ -5,6 +5,7 @@ import styles from "./home.module.scss";
 import { IconButton } from "./button";
 import SettingsIcon from "../icons/settings.svg";
 import GithubIcon from "../icons/github.svg";
+import HelpIcon from "../icons/help.svg";
 import NextImage from "next/image";
 import AddIcon from "../icons/add.svg";
 import DeleteIcon from "../icons/delete.svg";
@@ -240,6 +241,7 @@ export function SideBar(props: { className?: string }) {
     accessStore.subTitle ||
     clientConfig?.subTitle ||
     "Build your own AI assistant.";
+  const helpUrl = (accessStore.helpUrl || clientConfig?.helpUrl || "").trim();
 
   useEffect(() => {
     document.title = title;
@@ -346,6 +348,13 @@ export function SideBar(props: { className?: string }) {
                 />
               </a>
             </div>
+            {helpUrl && (
+              <div className={styles["sidebar-action"]}>
+                <a href={helpUrl} target="_blank" rel="noopener noreferrer">
+                  <IconButton aria="Help" icon={<HelpIcon />} shadow />
+                </a>
+              </div>
+            )}
           </>
         }
         secondaryAction={

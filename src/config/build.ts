@@ -50,6 +50,7 @@ export const getBuildConfig = () => {
     title: process.env.NEXTCHATLITE_TITLE || "NextChatLite",
     subTitle:
       process.env.NEXTCHATLITE_SUBTITLE || "Build your own AI assistant.",
+    helpUrl: process.env.NEXTCHATLITE_HELP_URL?.trim() || undefined,
   };
 };
 

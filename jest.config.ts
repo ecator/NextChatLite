@@ -8,14 +8,18 @@ const createJestConfig = nextJest({
 const config: Config = {
   coverageProvider: "v8",
   testEnvironment: "jsdom",
-  testMatch: ["**/tests/unit/**/*.test.ts", "**/tests/unit/**/*.test.js"],
+  testMatch: [
+    "**/tests/unit/**/*.test.ts",
+    "**/tests/unit/**/*.test.js",
+    "**/tests/unit/**/*.test.tsx",
+  ],
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
   },
 };
 
-export default async () => {
+const makeJestConfig = async () => {
   const jestConfig = await createJestConfig(config)();
   return {
     ...jestConfig,
@@ -24,3 +28,5 @@ export default async () => {
     ],
   };
 };
+
+export default makeJestConfig;
