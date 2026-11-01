@@ -123,7 +123,7 @@ export function convertOpenApiSpecToAiTools(
 
       tools[operationId] = tool({
         description,
-        parameters: jsonSchema({
+        inputSchema: jsonSchema({
           type: "object",
           properties,
           required,

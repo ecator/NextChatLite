@@ -240,6 +240,8 @@ export function getMessageImages(message: RequestMessage): string[] {
   for (const c of message.content) {
     if (c.type === "image_url") {
       urls.push(c.image_url?.url ?? "");
+    } else if ((c as any).type === "image") {
+      urls.push((c as any).image ?? "");
     }
   }
   return urls;

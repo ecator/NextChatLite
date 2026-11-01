@@ -2,11 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import {
   streamText,
+  isStepCount,
+  createUIMessageStreamResponse,
+  toUIMessageStream,
   extractReasoningMiddleware,
   wrapLanguageModel,
-  LanguageModel,
 } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import { createAzure } from "@ai-sdk/azure";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createVertex } from "@ai-sdk/google-vertex";
@@ -21,9 +25,17 @@ export const chatApiPayloadSchema = z.object({
           z.string(),
           z.array(
             z.object({
-              type: z.enum(["text", "image"]),
+              type: z.enum(["text", "image", "image_url"]),
               text: z.string().optional(),
               image: z.string().optional(),
+              image_url: z
+                .union([
+                  z.string(),
+                  z.object({
+                    url: z.string(),
+                  }),
+                ])
+                .optional(),
             }),
           ),
         ]),
@@ -31,7 +43,7 @@ export const chatApiPayloadSchema = z.object({
     )
     .min(1, "messages must be a non-empty array"),
   model: z.string().min(1, "model must be a non-empty string"),
-  provider: z.string().optional(),
+  provider: z.string().min(1, "provider must be a non-empty string"),
   env: z.array(z.string()).optional(),
   npm: z.string().optional(),
   api: z.string().optional(),
@@ -44,7 +56,7 @@ export const chatApiPayloadSchema = z.object({
       reasoningConfig: z
         .object({
           thinkingLevel: z
-            .enum(["minimal", "low", "medium", "high", "none"])
+            .enum(["minimal", "low", "medium", "high"])
             .optional(),
           thinkingBudget: z.number().positive().optional(),
         })
@@ -55,8 +67,11 @@ export const chatApiPayloadSchema = z.object({
     .object({
       apiKey: z.string().optional(),
       baseUrl: z.string().optional(),
+      apiVersion: z.string().optional(),
     })
+    .passthrough()
     .optional(),
+  providerOptions: z.record(z.any()).optional(),
   pluginIds: z.array(z.string()).optional(),
   plugins: z.array(z.any()).optional(),
 });
@@ -96,7 +111,14 @@ export function sanitizeError(errorMsg: string, secretKey?: string): string {
   return sanitized;
 }
 
-export function createLanguageModel(payload: ChatApiPayload): LanguageModel {
+export function formatErrorMessage(err: unknown, secretKey?: string): string {
+  const message = err instanceof Error ? err.message : String(err);
+  return sanitizeError(message, secretKey);
+}
+
+export type LanguageModelV4 = ReturnType<typeof wrapLanguageModel>;
+
+export function createLanguageModel(payload: ChatApiPayload): LanguageModelV4 {
   const custom = payload.customConfig;
   const normalizedUrl = normalizeBaseUrl(payload.api || custom?.baseUrl);
   const providerLower = (payload.provider || "").toLowerCase();
@@ -122,7 +144,18 @@ export function createLanguageModel(payload: ChatApiPayload): LanguageModel {
 
   // Fallback to common provider env keys if not found
   if (!apiKey) {
-    if (providerLower.includes("google") || providerLower.includes("gemini")) {
+    if (providerLower.includes("azure")) {
+      apiKey =
+        payload.providerOptions?.azureApiKey ||
+        payload.providerOptions?.azure?.apiKey ||
+        process.env.AZURE_API_KEY ||
+        process.env.AZURE_OPENAI_API_KEY ||
+        process.env.OPENAI_API_KEY ||
+        "";
+    } else if (
+      providerLower.includes("google") ||
+      providerLower.includes("gemini")
+    ) {
       apiKey =
         process.env.GOOGLE_API_KEY ||
         process.env.GOOGLE_GENERATIVE_AI_API_KEY ||
@@ -162,7 +195,9 @@ export function createLanguageModel(payload: ChatApiPayload): LanguageModel {
   // 2. Identify target package name
   let npmPackage = payload.npm?.trim();
   if (!npmPackage) {
-    if (providerLower === "google" || providerLower.includes("gemini")) {
+    if (providerLower === "azure" || providerLower.includes("azure")) {
+      npmPackage = "@ai-sdk/azure";
+    } else if (providerLower === "google" || providerLower.includes("gemini")) {
       npmPackage = "@ai-sdk/google";
     } else if (
       providerLower === "anthropic" ||
@@ -178,7 +213,7 @@ export function createLanguageModel(payload: ChatApiPayload): LanguageModel {
     }
   }
 
-  let model: LanguageModel | undefined;
+  let model: LanguageModelV4 | undefined;
 
   // 3. Dispatch to preset or dynamically loaded package
   if (npmPackage === "@ai-sdk/google") {
@@ -197,12 +232,10 @@ export function createLanguageModel(payload: ChatApiPayload): LanguageModel {
           ? { includeThoughts: true }
           : undefined;
 
-    return (googleProvider as any)(payload.model, {
+    model = (googleProvider as any)(payload.model, {
       thinkingConfig,
-    });
-  }
-
-  if (npmPackage === "@ai-sdk/anthropic") {
+    }) as LanguageModelV4;
+  } else if (npmPackage === "@ai-sdk/anthropic") {
     const baseURL = normalizedUrl || "https://api.anthropic.com/v1";
     const anthropicProvider = createAnthropic({ apiKey, baseURL });
 
@@ -212,24 +245,52 @@ export function createLanguageModel(payload: ChatApiPayload): LanguageModel {
         ? { type: "enabled" as const, budgetTokens: budget }
         : undefined;
 
-    return (anthropicProvider as any)(payload.model, {
+    model = (anthropicProvider as any)(payload.model, {
       thinking,
-    });
-  }
-
-  if (npmPackage === "@ai-sdk/openai") {
+    }) as LanguageModelV4;
+  } else if (npmPackage === "@ai-sdk/openai") {
     const baseURL = normalizedUrl || "https://api.openai.com/v1";
     const openaiProvider = createOpenAI({ apiKey, baseURL });
+    model = openaiProvider.chat(payload.model as any) as LanguageModelV4;
+  } else if (npmPackage === "@ai-sdk/azure") {
+    const azureUrl =
+      payload.providerOptions?.azureUrl ||
+      payload.providerOptions?.azure?.baseURL ||
+      payload.providerOptions?.azure?.baseUrl ||
+      normalizedUrl ||
+      process.env.AZURE_URL ||
+      process.env.AZURE_OPENAI_ENDPOINT ||
+      process.env.AZURE_ENDPOINT;
 
-    let reasoningEffort: "low" | "medium" | "high" | undefined;
-    const level = payload.modelConfig?.reasoningConfig?.thinkingLevel;
-    if (level === "low" || level === "minimal") reasoningEffort = "low";
-    else if (level === "medium") reasoningEffort = "medium";
-    else if (level === "high") reasoningEffort = "high";
+    const resourceName =
+      payload.providerOptions?.azureResourceName ||
+      payload.providerOptions?.azure?.resourceName ||
+      (!azureUrl ? process.env.AZURE_RESOURCE_NAME : undefined);
 
-    model = openaiProvider(payload.model as any, {
-      reasoningEffort,
+    const apiVersion =
+      payload.providerOptions?.azureApiVersion ||
+      payload.providerOptions?.azure?.apiVersion ||
+      (payload.customConfig as any)?.apiVersion ||
+      process.env.AZURE_API_VERSION ||
+      "2024-08-01-preview";
+
+    const azureApiKey =
+      apiKey ||
+      payload.providerOptions?.azureApiKey ||
+      payload.providerOptions?.azure?.apiKey ||
+      process.env.AZURE_API_KEY ||
+      process.env.AZURE_OPENAI_API_KEY ||
+      "dummy-key";
+
+    const azureProvider = createAzure({
+      apiKey: azureApiKey,
+      baseURL: azureUrl || undefined,
+      resourceName: resourceName || undefined,
+      apiVersion,
+      useDeploymentBasedUrls: true,
     });
+
+    model = azureProvider.chat(payload.model) as LanguageModelV4;
   } else if (npmPackage === "@ai-sdk/openai-compatible") {
     let fallbackBaseUrl = "http://127.0.0.1:11434/v1";
     if (providerLower.includes("deepseek")) {
@@ -254,14 +315,13 @@ export function createLanguageModel(payload: ChatApiPayload): LanguageModel {
     }
 
     const baseURL = normalizedUrl || fallbackBaseUrl;
-    const compatibleProvider = createOpenAI({
+    const compatibleProvider = createOpenAICompatible({
       name: payload.provider || "openai-compatible",
       apiKey: apiKey || "dummy-key",
       baseURL,
-      compatibility: "compatible",
     });
 
-    model = compatibleProvider(payload.model as any) as any;
+    model = compatibleProvider.chatModel(payload.model) as LanguageModelV4;
   } else if (npmPackage === "@ai-sdk/google-vertex") {
     const vertexProvider = createVertex({
       baseURL: normalizedUrl,
@@ -275,7 +335,7 @@ export function createLanguageModel(payload: ChatApiPayload): LanguageModel {
         "us-central1",
     });
 
-    model = (vertexProvider as any)(payload.model);
+    model = (vertexProvider as any)(payload.model) as LanguageModelV4;
   } else {
     // Dynamic import/require for other third-party npm packages
     try {
@@ -287,11 +347,15 @@ export function createLanguageModel(payload: ChatApiPayload): LanguageModel {
         Object.values(mod).find((val) => typeof val === "function");
       if (factory && typeof factory === "function") {
         const customProvider = factory({
-          apiKey,
+          apiKey: apiKey || "dummy-key",
           baseURL: normalizedUrl,
           name: payload.provider,
         });
-        model = customProvider(payload.model);
+        if (typeof customProvider.chatModel === "function") {
+          model = customProvider.chatModel(payload.model) as LanguageModelV4;
+        } else if (typeof customProvider === "function") {
+          model = customProvider(payload.model) as LanguageModelV4;
+        }
       }
     } catch (e) {
       console.warn(
@@ -302,13 +366,12 @@ export function createLanguageModel(payload: ChatApiPayload): LanguageModel {
 
     if (!model) {
       // Fallback to OpenAI compatible
-      const fallbackProvider = createOpenAI({
-        apiKey,
-        baseURL: normalizedUrl || "https://api.openai.com/v1",
-        compatibility: "compatible",
+      const fallbackProvider = createOpenAICompatible({
         name: payload.provider || "custom",
+        apiKey: apiKey || "dummy-key",
+        baseURL: normalizedUrl || "https://api.openai.com/v1",
       });
-      model = fallbackProvider(payload.model as any);
+      model = fallbackProvider.chatModel(payload.model) as LanguageModelV4;
     }
   }
 
@@ -358,30 +421,66 @@ export async function POST(req: NextRequest) {
           if (part.type === "text") {
             return { type: "text" as const, text: part.text || "" };
           }
-          return { type: "image" as const, image: part.image || "" };
+          let imageUrl = part.image || "";
+          if (!imageUrl && part.image_url) {
+            imageUrl =
+              typeof part.image_url === "string"
+                ? part.image_url
+                : part.image_url.url || "";
+          }
+          if (
+            imageUrl &&
+            !imageUrl.startsWith("data:") &&
+            !imageUrl.startsWith("http://") &&
+            !imageUrl.startsWith("https://")
+          ) {
+            const mime = imageUrl.startsWith("iVBOR")
+              ? "image/png"
+              : imageUrl.startsWith("R0lGOD")
+                ? "image/gif"
+                : imageUrl.startsWith("UklGR")
+                  ? "image/webp"
+                  : "image/jpeg";
+            imageUrl = `data:${mime};base64,${imageUrl}`;
+          }
+          return { type: "image" as const, image: imageUrl };
         }),
       };
     });
+
+    const thinkingLevel = payload.modelConfig?.reasoningConfig?.thinkingLevel;
+    let reasoningEffort: "low" | "medium" | "high" | undefined;
+    if (thinkingLevel === "low" || thinkingLevel === "minimal")
+      reasoningEffort = "low";
+    else if (thinkingLevel === "medium") reasoningEffort = "medium";
+    else if (thinkingLevel === "high") reasoningEffort = "high";
+
+    const providerOptions = {
+      ...payload.providerOptions,
+      ...(reasoningEffort ? { openai: { reasoningEffort } } : {}),
+    };
 
     const result = streamText({
       model,
       messages: coreMessages as any,
       tools: Object.keys(tools).length > 0 ? tools : undefined,
-      maxSteps: 5,
+      // maxSteps: 5 (migrated to stopWhen: isStepCount(5) for AI SDK v7)
+      stopWhen: isStepCount(5),
+      allowSystemInMessages: true,
       temperature: payload.modelConfig?.temperature,
       topP: payload.modelConfig?.top_p,
-      maxTokens: payload.modelConfig?.max_tokens,
+      maxOutputTokens: payload.modelConfig?.max_tokens,
+      providerOptions,
       abortSignal: req.signal,
     });
 
-    return result.toDataStreamResponse({
-      sendReasoning: true,
-      sendUsage: true,
-      getErrorMessage: (err) =>
-        sanitizeError(
-          err instanceof Error ? err.message : String(err),
-          secretKey,
-        ),
+    // AI SDK v7 UI Message Stream Response (migrated from result.toDataStreamResponse)
+    return createUIMessageStreamResponse({
+      stream: toUIMessageStream({
+        stream: result.stream,
+        sendReasoning: true,
+        onError: (err) => formatErrorMessage(err, secretKey),
+      }),
     });
   } catch (err: any) {
     console.error("[Chat Route Error]", err);

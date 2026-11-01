@@ -6,6 +6,7 @@ import type { MultimodalContent, RequestMessage } from "../client/api";
 import { ChatControllerPool } from "../client/controller";
 import { showToast } from "../components/ui-lib";
 import {
+  CACHE_URL_PREFIX,
   DEFAULT_INPUT_TEMPLATE,
   DEFAULT_MODELS,
   DEFAULT_SYSTEM_TEMPLATE,
@@ -16,6 +17,7 @@ import {
   StoreKey,
   SUMMARIZE_MODEL,
 } from "../constant";
+import { cacheImageToBase64Image } from "@/utils/chat";
 import Locale, { getLang } from "../locales";
 import { prettyObject } from "../utils/format";
 import { createPersistStore } from "../utils/store";
@@ -27,7 +29,7 @@ import { createEmptyMask, Mask } from "./mask";
 import { usePluginStore } from "./plugin";
 import { useModelStore } from "./models";
 
-import { processDataStream } from "ai";
+import { processDataStream } from "@/utils/chat-stream";
 
 const localStorage = safeLocalStorage();
 
@@ -430,30 +432,47 @@ export const useChatStore = createPersistStore(
           ]);
         });
 
-        const mappedMessages = sendMessages.map((m) => {
-          if (typeof m.content === "string") {
-            return { role: m.role, content: m.content };
-          }
-          if (Array.isArray(m.content)) {
-            return {
-              role: m.role,
-              content: m.content.map((part: any) => {
-                if (typeof part === "string")
-                  return { type: "text" as const, text: part };
-                if (part.type === "text")
-                  return { type: "text" as const, text: part.text || "" };
-                if (part.type === "image" || part.type === "image_url") {
-                  return {
-                    type: "image" as const,
-                    image: part.image || part.image_url?.url || "",
-                  };
-                }
-                return { type: "text" as const, text: JSON.stringify(part) };
-              }),
-            };
-          }
-          return { role: m.role, content: String(m.content) };
-        });
+        const mappedMessages = await Promise.all(
+          sendMessages.map(async (m) => {
+            if (typeof m.content === "string") {
+              return { role: m.role, content: m.content };
+            }
+            if (Array.isArray(m.content)) {
+              const parts = await Promise.all(
+                m.content.map(async (part: any) => {
+                  if (typeof part === "string")
+                    return { type: "text" as const, text: part };
+                  if (part.type === "text")
+                    return { type: "text" as const, text: part.text || "" };
+                  if (part.type === "image" || part.type === "image_url") {
+                    let img = part.image || part.image_url?.url || "";
+                    if (
+                      img &&
+                      typeof window !== "undefined" &&
+                      img.includes(CACHE_URL_PREFIX)
+                    ) {
+                      try {
+                        img = await cacheImageToBase64Image(img);
+                      } catch (err) {
+                        console.error(
+                          "[chat] cacheImageToBase64Image error:",
+                          err,
+                        );
+                      }
+                    }
+                    return {
+                      type: "image" as const,
+                      image: img,
+                    };
+                  }
+                  return { type: "text" as const, text: JSON.stringify(part) };
+                }),
+              );
+              return { role: m.role, content: parts };
+            }
+            return { role: m.role, content: String(m.content) };
+          }),
+        );
 
         const pluginStore = usePluginStore.getState();
         const activePlugins = (session.mask.plugin || [])

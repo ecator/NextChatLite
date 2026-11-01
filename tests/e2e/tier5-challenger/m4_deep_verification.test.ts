@@ -1,7 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { encodeDataStreamChunk } from "../fixtures/mock_chat_streams";
-import { processDataStream } from "ai";
+import { processDataStream } from "../../../src/utils/chat-stream";
 
 interface MockChatMessage {
   id: string;
@@ -25,7 +25,11 @@ class MockChatControllerPool {
     return `${sessionId},${messageId}`;
   }
 
-  static addController(sessionId: string, messageId: string | number, controller: AbortController) {
+  static addController(
+    sessionId: string,
+    messageId: string | number,
+    controller: AbortController,
+  ) {
     const key = this.key(sessionId, messageId);
     this.controllers[key] = controller;
     return key;
@@ -50,7 +54,10 @@ class MockChatControllerPool {
 class MockChatStreamConsumer {
   messages: MockChatMessage[] = [];
 
-  async consumeStream(stream: ReadableStream<Uint8Array>, abortSignal?: AbortSignal) {
+  async consumeStream(
+    stream: ReadableStream<Uint8Array>,
+    abortSignal?: AbortSignal,
+  ) {
     const botMessage: MockChatMessage = {
       id: "bot_" + Math.random().toString(36).substring(2, 9),
       role: "assistant",
@@ -79,14 +86,22 @@ class MockChatStreamConsumer {
             id: call.toolCallId,
             function: {
               name: call.toolName,
-              arguments: typeof call.args === "string" ? call.args : JSON.stringify(call.args),
+              arguments:
+                typeof call.args === "string"
+                  ? call.args
+                  : JSON.stringify(call.args),
             },
           });
         },
         onToolResultPart: (res) => {
           botMessage.tools = botMessage.tools || [];
-          const existing = botMessage.tools.find((t) => t.id === res.toolCallId);
-          const resultStr = typeof res.result === "string" ? res.result : JSON.stringify(res.result);
+          const existing = botMessage.tools.find(
+            (t) => t.id === res.toolCallId,
+          );
+          const resultStr =
+            typeof res.result === "string"
+              ? res.result
+              : JSON.stringify(res.result);
           if (existing) {
             existing.content = resultStr;
             existing.isError = false;
@@ -108,7 +123,11 @@ class MockChatStreamConsumer {
       });
     } catch (err: any) {
       botMessage.streaming = false;
-      if (abortSignal?.aborted || err.name === "AbortError" || err.message?.includes("aborted")) {
+      if (
+        abortSignal?.aborted ||
+        err.name === "AbortError" ||
+        err.message?.includes("aborted")
+      ) {
         // Cleanly handled client abort
       } else {
         botMessage.isError = true;
@@ -144,40 +163,64 @@ describe("Milestone 4 Deep Store Verification & Client Streaming Integration", (
       customStore: Record<string, { apiKey: string; url: string }>,
     ) {
       const p = (provider || "").toLowerCase();
-      if (p.includes("google") || p.includes("gemini")) return customStore.google;
-      if (p.includes("anthropic") || p.includes("claude")) return customStore.anthropic;
+      if (p.includes("google") || p.includes("gemini"))
+        return customStore.google;
+      if (p.includes("anthropic") || p.includes("claude"))
+        return customStore.anthropic;
       if (p.includes("deepseek")) return customStore.deepseek;
       if (p.includes("moonshot")) return customStore.moonshot;
       if (p.includes("siliconflow")) return customStore.siliconflow;
       if (p.includes("xai")) return customStore.xai;
-      if (p.includes("chatglm") || p.includes("glm")) return customStore.chatglm;
+      if (p.includes("chatglm") || p.includes("glm"))
+        return customStore.chatglm;
       if (p.includes("302")) return customStore.ai302;
       return customStore.openai;
     }
 
     const customStore = {
       google: { apiKey: "key-google", url: "https://google.custom.com" },
-      anthropic: { apiKey: "key-anthropic", url: "https://anthropic.custom.com" },
+      anthropic: {
+        apiKey: "key-anthropic",
+        url: "https://anthropic.custom.com",
+      },
       openai: { apiKey: "key-openai", url: "https://openai.custom.com" },
       deepseek: { apiKey: "key-deepseek", url: "https://deepseek.custom.com" },
       moonshot: { apiKey: "key-moonshot", url: "https://moonshot.custom.com" },
-      siliconflow: { apiKey: "key-siliconflow", url: "https://siliconflow.custom.com" },
+      siliconflow: {
+        apiKey: "key-siliconflow",
+        url: "https://siliconflow.custom.com",
+      },
       xai: { apiKey: "key-xai", url: "https://xai.custom.com" },
       chatglm: { apiKey: "key-chatglm", url: "https://chatglm.custom.com" },
       ai302: { apiKey: "key-302", url: "https://302.custom.com" },
     };
 
-    assert.strictEqual(resolveProviderKeyAndUrl("gemini-3-pro", customStore).apiKey, "key-google");
-    assert.strictEqual(resolveProviderKeyAndUrl("claude-3-7-sonnet", customStore).apiKey, "key-anthropic");
-    assert.strictEqual(resolveProviderKeyAndUrl("deepseek-r1", customStore).apiKey, "key-deepseek");
-    assert.strictEqual(resolveProviderKeyAndUrl("gpt-4o", customStore).apiKey, "key-openai");
+    assert.strictEqual(
+      resolveProviderKeyAndUrl("gemini-3-pro", customStore).apiKey,
+      "key-google",
+    );
+    assert.strictEqual(
+      resolveProviderKeyAndUrl("claude-3-7-sonnet", customStore).apiKey,
+      "key-anthropic",
+    );
+    assert.strictEqual(
+      resolveProviderKeyAndUrl("deepseek-r1", customStore).apiKey,
+      "key-deepseek",
+    );
+    assert.strictEqual(
+      resolveProviderKeyAndUrl("gpt-4o", customStore).apiKey,
+      "key-openai",
+    );
   });
 
   it("4.3 consumes AI SDK streaming response with discrete reasoning and content", async () => {
     const streamBody = [
       encodeDataStreamChunk("g", "Thinking deeply about quantum physics..."),
       encodeDataStreamChunk("0", "Quantum superposition states that "),
-      encodeDataStreamChunk("0", "a system exists in all possible states simultaneously."),
+      encodeDataStreamChunk(
+        "0",
+        "a system exists in all possible states simultaneously.",
+      ),
       encodeDataStreamChunk("d", { finishReason: "stop" }),
     ].join("");
 
@@ -233,7 +276,10 @@ describe("Milestone 4 Deep Store Verification & Client Streaming Integration", (
     assert.strictEqual(botMsg.tools?.length, 1);
     assert.strictEqual(botMsg.tools?.[0].id, "call_calc_99");
     assert.strictEqual(botMsg.tools?.[0].function?.name, "calculator");
-    assert.strictEqual(botMsg.tools?.[0].content, JSON.stringify({ value: 144 }));
+    assert.strictEqual(
+      botMsg.tools?.[0].content,
+      JSON.stringify({ value: 144 }),
+    );
     assert.strictEqual(botMsg.content, "12 times 12 is 144.");
     assert.strictEqual(botMsg.streaming, false);
   });
@@ -276,7 +322,9 @@ describe("Milestone 4 Deep Store Verification & Client Streaming Integration", (
         if (counter === 2) {
           abortController.abort();
         }
-        controller.enqueue(encoder.encode(encodeDataStreamChunk("0", `Text part ${counter} `)));
+        controller.enqueue(
+          encoder.encode(encodeDataStreamChunk("0", `Text part ${counter} `)),
+        );
       },
     });
 

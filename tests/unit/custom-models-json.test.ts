@@ -141,7 +141,7 @@ describe("Custom models.json Catalog and Backend Integration", () => {
     expect(vertexModel.modelId).toBe("gemini-2.5-flash");
   });
 
-  it("creates models with AI SDK 4 specificationVersion 'v1' that work with streamText (e.g. gemma4:12b)", () => {
+  it("creates models with AI SDK specificationVersion 'v4' that work with streamText (e.g. gemma4:12b)", () => {
     const gemmaModel = createLanguageModel({
       messages: [{ role: "user", content: "Hello" }],
       model: "gemma4:12b",
@@ -154,7 +154,7 @@ describe("Custom models.json Catalog and Backend Integration", () => {
     });
 
     expect(gemmaModel).toBeDefined();
-    expect(gemmaModel.specificationVersion).toBe("v1");
+    expect(gemmaModel.specificationVersion).toBe("v4");
     expect(() => {
       streamText({
         model: gemmaModel,
@@ -173,7 +173,7 @@ describe("Custom models.json Catalog and Backend Integration", () => {
     });
 
     expect(vertexModel).toBeDefined();
-    expect(vertexModel.specificationVersion).toBe("v1");
+    expect(vertexModel.specificationVersion).toBe("v4");
     expect(() => {
       streamText({
         model: vertexModel,

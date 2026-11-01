@@ -1,8 +1,4 @@
-import {
-  CACHE_URL_PREFIX,
-  UPLOAD_URL,
-  REQUEST_TIMEOUT_MS,
-} from "@/constant";
+import { CACHE_URL_PREFIX, REQUEST_TIMEOUT_MS } from "@/constant";
 import { MultimodalContent, RequestMessage } from "@/client/api";
 import Locale from "@/locales";
 import { EventStreamContentType, fetchEventSource } from "./sse";
@@ -137,35 +133,28 @@ export function base64Image2Blob(base64Data: string, contentType: string) {
   return new Blob([byteArray], { type: contentType });
 }
 
+export function fileToDataUrl(file: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 export function uploadImage(file: Blob): Promise<string> {
-  if (!window._SW_ENABLED) {
-    // if serviceWorker register error, using compressImage
-    return compressImage(file, 256 * 1024);
-  }
-  const body = new FormData();
-  body.append("file", file);
-  return fetch(UPLOAD_URL, {
-    method: "post",
-    body,
-    mode: "cors",
-    credentials: "include",
-  })
-    .then((res) => res.json())
-    .then((res) => {
-      // console.log("res", res);
-      if (res?.code == 0 && res?.data) {
-        return res?.data;
-      }
-      throw Error(`upload Error: ${res?.msg}`);
-    });
+  return compressImage(file, 256 * 1024).catch(() => fileToDataUrl(file));
 }
 
 export function removeImage(imageUrl: string) {
+  if (imageUrl.startsWith("data:")) {
+    return Promise.resolve();
+  }
   return fetch(imageUrl, {
     method: "DELETE",
     mode: "cors",
     credentials: "include",
-  });
+  }).catch(() => {});
 }
 
 export function stream(

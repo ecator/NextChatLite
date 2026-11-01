@@ -17,6 +17,15 @@ declare global {
       NEXTCHATLITE_TITLE?: string;
       NEXTCHATLITE_SUBTITLE?: string;
 
+      // Azure OpenAI environment variables
+      AZURE_API_KEY?: string;
+      AZURE_OPENAI_API_KEY?: string;
+      AZURE_URL?: string;
+      AZURE_OPENAI_ENDPOINT?: string;
+      AZURE_ENDPOINT?: string;
+      AZURE_RESOURCE_NAME?: string;
+      AZURE_API_VERSION?: string;
+
       [key: string]: string | undefined;
     }
   }

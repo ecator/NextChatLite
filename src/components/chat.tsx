@@ -1725,9 +1725,7 @@ function InnerChat() {
                             {message.reasoning && (
                               <ThinkingBlock
                                 reasoning={message.reasoning}
-                                streaming={
-                                  message.streaming && !message.isError
-                                }
+                                streaming={message.streaming}
                                 duration={message.reasoningDuration}
                               />
                             )}
