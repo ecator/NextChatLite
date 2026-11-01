@@ -2,6 +2,7 @@ import { BuiltinMask } from "./typing";
 
 export const TW_MASKS: BuiltinMask[] = [
   {
+    id: "tw-text-to-pic",
     avatar: "1f5bc-fe0f",
     name: "以文搜圖",
     context: [
@@ -47,6 +48,7 @@ export const TW_MASKS: BuiltinMask[] = [
     createdAt: 1688899480510,
   },
   {
+    id: "tw-writer",
     avatar: "1f638",
     name: "文案寫手",
     context: [
@@ -73,6 +75,7 @@ export const TW_MASKS: BuiltinMask[] = [
     createdAt: 1688899480511,
   },
   {
+    id: "tw-ml",
     avatar: "1f978",
     name: "機器學習",
     context: [
@@ -99,6 +102,7 @@ export const TW_MASKS: BuiltinMask[] = [
     createdAt: 1688899480512,
   },
   {
+    id: "tw-work",
     avatar: "1f69b",
     name: "後勤工作",
     context: [
@@ -125,6 +129,7 @@ export const TW_MASKS: BuiltinMask[] = [
     createdAt: 1688899480513,
   },
   {
+    id: "tw-cons",
     avatar: "1f469-200d-1f4bc",
     name: "職業顧問",
     context: [
@@ -151,6 +156,7 @@ export const TW_MASKS: BuiltinMask[] = [
     createdAt: 1688899480514,
   },
   {
+    id: "tw-trans",
     avatar: "1f9d1-200d-1f3eb",
     name: "英專寫手",
     context: [
@@ -177,6 +183,7 @@ export const TW_MASKS: BuiltinMask[] = [
     createdAt: 1688899480524,
   },
   {
+    id: "tw-lang",
     avatar: "1f4da",
     name: "語言檢測器",
     context: [
@@ -203,6 +210,7 @@ export const TW_MASKS: BuiltinMask[] = [
     createdAt: 1688899480525,
   },
   {
+    id: "tw-red-book",
     avatar: "1f4d5",
     name: "小紅書寫手",
     context: [
@@ -229,6 +237,7 @@ export const TW_MASKS: BuiltinMask[] = [
     createdAt: 1688899480534,
   },
   {
+    id: "tw-cv",
     avatar: "1f4d1",
     name: "簡歷寫手",
     context: [
@@ -261,6 +270,7 @@ export const TW_MASKS: BuiltinMask[] = [
     createdAt: 1688899480536,
   },
   {
+    id: "tw-doctor",
     avatar: "1f469-200d-2695-fe0f",
     name: "心理醫生",
     context: [
@@ -287,6 +297,7 @@ export const TW_MASKS: BuiltinMask[] = [
     createdAt: 1688899480536,
   },
   {
+    id: "tw-idea",
     avatar: "1f4b8",
     name: "創業點子王",
     context: [
@@ -320,6 +331,7 @@ export const TW_MASKS: BuiltinMask[] = [
     createdAt: 1688899480536,
   },
   {
+    id: "tw-net",
     avatar: "270d-fe0f",
     name: "網際網路寫手",
     context: [
@@ -353,6 +365,7 @@ export const TW_MASKS: BuiltinMask[] = [
     createdAt: 1688899480537,
   },
   {
+    id: "tw-mentor",
     avatar: "1f63e",
     name: "心靈導師",
     context: [
@@ -411,6 +424,7 @@ export const TW_MASKS: BuiltinMask[] = [
     createdAt: 1688899480537,
   },
   {
+    id: "tw-jb",
     avatar: "1f513",
     name: "越獄模式 [Jailbreak]",
     context: [

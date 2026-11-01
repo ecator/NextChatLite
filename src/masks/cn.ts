@@ -2,6 +2,7 @@ import { BuiltinMask } from "./typing";
 
 export const CN_MASKS: BuiltinMask[] = [
   {
+    id: "cn-text-to-pic",
     avatar: "1f5bc-fe0f",
     name: "AI文生图",
     context: [
@@ -47,6 +48,7 @@ export const CN_MASKS: BuiltinMask[] = [
     createdAt: 1688899480510,
   },
   {
+    id: "cn-writer",
     avatar: "1f638",
     name: "文案写手",
     context: [
@@ -73,6 +75,7 @@ export const CN_MASKS: BuiltinMask[] = [
     createdAt: 1688899480511,
   },
   {
+    id: "cn-ml",
     avatar: "1f978",
     name: "机器学习",
     context: [
@@ -99,6 +102,7 @@ export const CN_MASKS: BuiltinMask[] = [
     createdAt: 1688899480512,
   },
   {
+    id: "cn-work",
     avatar: "1f69b",
     name: "后勤工作",
     context: [
@@ -125,6 +129,7 @@ export const CN_MASKS: BuiltinMask[] = [
     createdAt: 1688899480513,
   },
   {
+    id: "cn-cons",
     avatar: "1f469-200d-1f4bc",
     name: "职业顾问",
     context: [
@@ -151,6 +156,7 @@ export const CN_MASKS: BuiltinMask[] = [
     createdAt: 1688899480514,
   },
   {
+    id: "cn-trans",
     avatar: "1f9d1-200d-1f3eb",
     name: "英专写手",
     context: [
@@ -177,6 +183,7 @@ export const CN_MASKS: BuiltinMask[] = [
     createdAt: 1688899480524,
   },
   {
+    id: "cn-lang",
     avatar: "1f4da",
     name: "语言检测器",
     context: [
@@ -203,6 +210,7 @@ export const CN_MASKS: BuiltinMask[] = [
     createdAt: 1688899480525,
   },
   {
+    id: "cn-red-book",
     avatar: "1f4d5",
     name: "小红书写手",
     context: [
@@ -229,6 +237,7 @@ export const CN_MASKS: BuiltinMask[] = [
     createdAt: 1688899480534,
   },
   {
+    id: "cn-cv",
     avatar: "1f4d1",
     name: "简历写手",
     context: [
@@ -261,6 +270,7 @@ export const CN_MASKS: BuiltinMask[] = [
     createdAt: 1688899480536,
   },
   {
+    id: "cn-doctor",
     avatar: "1f469-200d-2695-fe0f",
     name: "心理医生",
     context: [
@@ -287,6 +297,7 @@ export const CN_MASKS: BuiltinMask[] = [
     createdAt: 1688899480536,
   },
   {
+    id: "cn-idea",
     avatar: "1f4b8",
     name: "创业点子王",
     context: [
@@ -320,6 +331,7 @@ export const CN_MASKS: BuiltinMask[] = [
     createdAt: 1688899480536,
   },
   {
+    id: "cn-net",
     avatar: "270d-fe0f",
     name: "互联网写手",
     context: [
@@ -353,6 +365,7 @@ export const CN_MASKS: BuiltinMask[] = [
     createdAt: 1688899480537,
   },
   {
+    id: "cn-mentor",
     avatar: "1f63e",
     name: "心灵导师",
     context: [
@@ -411,6 +424,7 @@ export const CN_MASKS: BuiltinMask[] = [
     createdAt: 1688899480537,
   },
   {
+    id: "cn-jb",
     avatar: "1f513",
     name: "越狱模式 [Jailbreak]",
     context: [
