@@ -1,4 +1,4 @@
-import defaultModelsJson from "../../public/models.json";
+import defaultProvidersJson from "../../public/providers.json";
 
 declare global {
   namespace NodeJS {
@@ -47,7 +47,7 @@ export function getDefaultModel(): string {
   const providerMap = new Map<string, string>();
 
   try {
-    const rawData: any = defaultModelsJson;
+    const rawData: any = defaultProvidersJson;
     let providers: any[] = [];
     if (Array.isArray(rawData)) {
       providers = rawData;
@@ -81,7 +81,7 @@ export function getDefaultModel(): string {
     }
   } catch (e) {
     console.error(
-      "[Server Config] failed to resolve default model from models.json",
+      "[Server Config] failed to resolve default model from providers.json",
       e,
     );
   }

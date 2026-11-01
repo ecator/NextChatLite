@@ -25,7 +25,7 @@
 - **Next.js 16 & React 19**: App Router architecture with server rendering, edge runtime routes, and optimized client state.
 - **Vercel AI SDK Core**: Unified multi-provider chat streaming across OpenAI, Google Gemini, Anthropic, and custom endpoints.
 - **Gemini 3 Thinking Signatures**: First-class support for reasoning process streams, thinking budget controls, and collapsible reasoning UI blocks.
-- **Model Catalog**: Model specifications, SDK packages, and multimodal capability discovery configured via `public/models.json`.
+- **Model Catalog**: Model specifications, SDK packages, and multimodal capability discovery configured via `public/providers.json`.
 - **OpenAPI Plugin Execution**: Dynamic OpenAPI 3.x tool calling integrated directly into the chat streaming lifecycle.
 - **Privacy-First**: API keys are securely resolved server-side from environment variables without exposing custom keys to the browser.
 - **Global Localization**: 20 end-user UI translations (English, Simplified Chinese, Traditional Chinese, Japanese, Korean, Spanish, French, German, and more).
@@ -84,20 +84,20 @@ pnpm test:e2e
 
 You can configure NextChatLite via environment variables in `.env.local` or container settings:
 
-| Variable                | Description                                                                |
-| ----------------------- | -------------------------------------------------------------------------- |
-| `GOOGLE_API_KEY`        | Server-side Google Gemini API key (or as defined in `public/models.json`)  |
-| `OPENAI_API_KEY`        | Server-side OpenAI API key (or as defined in `public/models.json`)         |
-| `ANTHROPIC_API_KEY`     | Server-side Anthropic API key (or as defined in `public/models.json`)      |
-| `DEEPSEEK_API_KEY`      | Server-side DeepSeek API key (or as defined in `public/models.json`)       |
-| `PROXY_URL`             | Outbound network proxy for server-side requests                            |
-| `DEFAULT_MODEL`         | Default model for new conversations in `provider/model` format             |
-| `NEXTCHATLITE_TITLE`    | Custom title for sidebar header and document.title (default: NextChatLite) |
-| `NEXTCHATLITE_SUBTITLE` | Custom subtitle for sidebar header (default: Build your own AI assistant.) |
+| Variable                | Description                                                                  |
+| ----------------------- | ---------------------------------------------------------------------------- |
+| `GOOGLE_API_KEY`        | Server-side Google Gemini API key (or as defined in `public/providers.json`) |
+| `OPENAI_API_KEY`        | Server-side OpenAI API key (or as defined in `public/providers.json`)        |
+| `ANTHROPIC_API_KEY`     | Server-side Anthropic API key (or as defined in `public/providers.json`)     |
+| `DEEPSEEK_API_KEY`      | Server-side DeepSeek API key (or as defined in `public/providers.json`)      |
+| `PROXY_URL`             | Outbound network proxy for server-side requests                              |
+| `DEFAULT_MODEL`         | Default model for new conversations in `provider/model` format               |
+| `NEXTCHATLITE_TITLE`    | Custom title for sidebar header and document.title (default: NextChatLite)   |
+| `NEXTCHATLITE_SUBTITLE` | Custom subtitle for sidebar header (default: Build your own AI assistant.)   |
 
-### Model Configuration (`public/models.json`)
+### Provider & Model Configuration (`public/providers.json`)
 
-All models, providers, and capabilities are configured centrally in [`public/models.json`](./public/models.json). Each provider defines:
+All models, providers, and capabilities are configured centrally in [`public/providers.json`](./public/providers.json). Each provider defines:
 
 - `env`: Environment variable names read by the server in real-time to obtain the API key.
 - `npm`: SDK package used (e.g. `@ai-sdk/google`, `@ai-sdk/openai-compatible`, `@ai-sdk/anthropic`, `@ai-sdk/google-vertex`).

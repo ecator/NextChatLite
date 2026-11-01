@@ -1,0 +1,237 @@
+[
+  {
+    "id": "google",
+    "env": ["GOOGLE_API_KEY", "GOOGLE_GENERATIVE_AI_API_KEY", "GEMINI_API_KEY"],
+    "npm": "@ai-sdk/google",
+    "name": "Google",
+    "doc": "https://ai.google.dev/gemini-api/docs/models",
+    "models": {
+      "gemini-3.5-flash": {
+        "id": "gemini-3.5-flash",
+        "name": "Gemini 3.5 Flash",
+        "description": "Fast Gemini model balancing multimodal reasoning, tool use, and cost",
+        "family": "gemini-flash",
+        "attachment": true,
+        "reasoning": true,
+        "reasoning_options": [
+          {
+            "type": "effort",
+            "values": ["minimal", "low", "medium", "high"]
+          }
+        ],
+        "tool_call": true,
+        "structured_output": true,
+        "temperature": true,
+        "knowledge": "2025-01",
+        "release_date": "2026-05-19",
+        "last_updated": "2026-05-19",
+        "modalities": {
+          "input": ["text", "image", "video", "audio", "pdf"],
+          "output": ["text"]
+        },
+        "open_weights": false,
+        "limit": {
+          "context": 1048576,
+          "output": 65536
+        },
+        "cost": {
+          "input": 1.5,
+          "output": 9,
+          "cache_read": 0.15,
+          "input_audio": 1.5
+        }
+      },
+      "gemini-3.1-flash-lite": {
+        "id": "gemini-3.1-flash-lite",
+        "name": "Gemini 3.1 Flash Lite",
+        "description": "Low-latency Gemini model for high-volume multimodal and agent workloads",
+        "family": "gemini-flash-lite",
+        "attachment": true,
+        "reasoning": true,
+        "reasoning_options": [
+          {
+            "type": "effort",
+            "values": ["minimal", "low", "medium", "high"]
+          }
+        ],
+        "tool_call": true,
+        "structured_output": true,
+        "temperature": true,
+        "knowledge": "2025-01",
+        "release_date": "2026-05-07",
+        "last_updated": "2026-05-07",
+        "modalities": {
+          "input": ["text", "image", "video", "audio", "pdf"],
+          "output": ["text"]
+        },
+        "open_weights": false,
+        "limit": {
+          "context": 1048576,
+          "output": 65536
+        },
+        "cost": {
+          "input": 0.25,
+          "output": 1.5,
+          "cache_read": 0.025,
+          "input_audio": 0.5
+        }
+      }
+    }
+  },
+  {
+    "id": "openai",
+    "env": ["OPENAI_API_KEY"],
+    "npm": "@ai-sdk/openai-compatible",
+    "api": "http://127.0.0.1:11434/v1",
+    "name": "OpenAI",
+    "doc": "https://platform.openai.com/docs/models",
+    "models": {
+      "gpt-5-mini": {
+        "id": "gpt-5-mini",
+        "name": "GPT-5 Mini",
+        "description": "Small GPT-5 for responsive agents, coding help, and everyday automation",
+        "family": "gpt-mini",
+        "attachment": true,
+        "reasoning": true,
+        "reasoning_options": [
+          {
+            "type": "effort",
+            "values": ["minimal", "low", "medium", "high"]
+          }
+        ],
+        "tool_call": true,
+        "structured_output": true,
+        "temperature": false,
+        "knowledge": "2024-05-30",
+        "release_date": "2025-08-07",
+        "last_updated": "2025-08-07",
+        "modalities": {
+          "input": ["text", "image"],
+          "output": ["text"]
+        },
+        "open_weights": false,
+        "limit": {
+          "context": 400000,
+          "input": 272000,
+          "output": 128000
+        },
+        "experimental": {
+          "modes": {
+            "fast": {
+              "cost": {
+                "input": 0.45,
+                "output": 3.6,
+                "cache_read": 0.045
+              },
+              "provider": {
+                "body": {
+                  "service_tier": "priority"
+                }
+              }
+            },
+            "flex": {
+              "cost": {
+                "input": 0.125,
+                "output": 1,
+                "cache_read": 0.0125
+              },
+              "provider": {
+                "body": {
+                  "service_tier": "flex"
+                }
+              }
+            }
+          }
+        },
+        "cost": {
+          "input": 0.25,
+          "output": 2,
+          "cache_read": 0.025
+        }
+      },
+      "gpt-5.1": {
+        "id": "gpt-5.1",
+        "name": "GPT-5.1",
+        "description": "Sharper GPT-5 generation for coding, product work, and tool-assisted tasks",
+        "family": "gpt",
+        "attachment": true,
+        "reasoning": true,
+        "reasoning_options": [
+          {
+            "type": "effort",
+            "values": ["none", "low", "medium", "high"]
+          }
+        ],
+        "tool_call": true,
+        "structured_output": true,
+        "temperature": true,
+        "knowledge": "2024-09-30",
+        "release_date": "2025-11-13",
+        "last_updated": "2025-11-13",
+        "modalities": {
+          "input": ["text", "image"],
+          "output": ["text"]
+        },
+        "open_weights": false,
+        "limit": {
+          "context": 400000,
+          "input": 272000,
+          "output": 128000
+        },
+        "experimental": {
+          "modes": {
+            "fast": {
+              "cost": {
+                "input": 2.5,
+                "output": 20,
+                "cache_read": 0.25
+              },
+              "provider": {
+                "body": {
+                  "service_tier": "priority"
+                }
+              }
+            },
+            "flex": {
+              "cost": {
+                "input": 0.625,
+                "output": 5,
+                "cache_read": 0.0625
+              },
+              "provider": {
+                "body": {
+                  "service_tier": "flex"
+                }
+              }
+            }
+          }
+        },
+        "cost": {
+          "input": 1.25,
+          "output": 10,
+          "cache_read": 0.125
+        }
+      },
+      "gemma4:12b": {
+        "id": "gemma4:12b",
+        "name": "Gemma 4 12B",
+        "description": "Google Gemma open weight model for efficient chat and multimodal understanding",
+        "family": "gemma",
+        "attachment": true,
+        "reasoning": false,
+        "tool_call": true,
+        "structured_output": true,
+        "temperature": true,
+        "modalities": {
+          "input": ["text", "image"],
+          "output": ["text"]
+        },
+        "open_weights": true,
+        "limit": {
+          "context": 131072,
+          "output": 8192
+        }
+      }
+    }
+  }
+]

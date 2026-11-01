@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import snapshot from "@opencode-ai/models/snapshot";
-import defaultModelsJson from "../../public/models.json";
+import defaultProvidersJson from "../../public/providers.json";
 
 export interface ModelMetadata {
   id: string;
@@ -232,7 +232,7 @@ export function parseModelsDevCatalog(
   const result: Record<string, ModelMetadata> = {};
   if (!rawPayload || typeof rawPayload !== "object") return result;
 
-  // Case 0: Array of providers (like public/models.json)
+  // Case 0: Array of providers (like public/providers.json)
   if (Array.isArray(rawPayload)) {
     for (const providerObj of rawPayload) {
       if (!providerObj || typeof providerObj !== "object") continue;
@@ -374,7 +374,7 @@ export function parseModelsDevCatalog(
 
 const initialCatalog = {
   ...parseModelsDevCatalog(snapshot),
-  ...parseModelsDevCatalog(defaultModelsJson),
+  ...parseModelsDevCatalog(defaultProvidersJson),
 };
 
 export interface ModelStoreState {
@@ -506,7 +506,7 @@ export const useModelStore = create<ModelStore>((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const res = await fetch(`/models.json?t=${Date.now()}`, {
+      const res = await fetch(`/providers.json?t=${Date.now()}`, {
         cache: "no-store",
         headers: {
           "Cache-Control": "no-cache",
@@ -514,7 +514,7 @@ export const useModelStore = create<ModelStore>((set, get) => ({
         },
       });
       if (!res.ok) {
-        throw new Error(`Failed to load /models.json: HTTP ${res.status}`);
+        throw new Error(`Failed to load /providers.json: HTTP ${res.status}`);
       }
       const rawCatalog = await res.json();
       const parsed = parseModelsDevCatalog(rawCatalog);
@@ -529,8 +529,8 @@ export const useModelStore = create<ModelStore>((set, get) => ({
         throw new Error("Parsed models catalog is empty");
       }
     } catch (err: any) {
-      console.error("[ModelStore] Failed to load /models.json:", err);
-      const fallbackParsed = parseModelsDevCatalog(defaultModelsJson);
+      console.error("[ModelStore] Failed to load /providers.json:", err);
+      const fallbackParsed = parseModelsDevCatalog(defaultProvidersJson);
       set({
         models:
           Object.keys(fallbackParsed).length > 0

@@ -1,5 +1,5 @@
 import { LLMModel } from "../client/api";
-import defaultModelsJson from "../../public/models.json";
+import defaultProvidersJson from "../../public/providers.json";
 import { getModelProvider } from "../utils/model";
 import { getClientConfig } from "../config/client";
 import {
@@ -46,7 +46,7 @@ function getInitialModelAndProvider(): {
   }
 
   try {
-    const rawData: any = defaultModelsJson;
+    const rawData: any = defaultProvidersJson;
     const providers = Array.isArray(rawData)
       ? rawData
       : Object.values(rawData || {});
