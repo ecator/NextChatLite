@@ -55,15 +55,16 @@ src/
 
 Always use `pnpm` commands:
 
-| Command        | Action                                         |
-| -------------- | ---------------------------------------------- |
-| `pnpm install` | Install all dependencies with frozen lockfile  |
-| `pnpm dev`     | Run local development server with mask watcher |
-| `pnpm build`   | Compile Next.js production build               |
-| `pnpm start`   | Run production server                          |
-| `pnpm lint`    | Run ESLint across codebase                     |
-| `pnpm test`    | Run Jest test suite in watch mode              |
-| `pnpm test:ci` | Run Jest test suite in CI mode                 |
+| Command           | Action                                         |
+| ----------------- | ---------------------------------------------- |
+| `pnpm install`    | Install all dependencies with frozen lockfile  |
+| `pnpm dev`        | Run local development server with mask watcher |
+| `pnpm build`      | Compile Next.js production build               |
+| `pnpm start`      | Run production server                          |
+| `pnpm lint`       | Run ESLint across codebase                     |
+| `pnpm test`       | Run Jest test suite                            |
+| `pnpm test:watch` | Run Jest test suite in watch mode              |
+| `pnpm test:ci`    | Run Jest test suite in CI mode                 |
 
 ---
 
