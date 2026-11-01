@@ -107,7 +107,7 @@ export const DEFAULT_CONFIG = {
     max_tokens: 8192,
     presence_penalty: 0,
     frequency_penalty: 0,
-    sendMemory: true,
+    sendMemory: false,
     historyMessageCount: 20,
     compressMessageLengthThreshold: 8000,
     compressModel: "",
@@ -192,7 +192,7 @@ export const useAppConfig = createPersistStore(
   }),
   {
     name: StoreKey.Config,
-    version: 4.2,
+    version: 4.3,
 
     merge(persistedState: any, currentState: any) {
       const state = persistedState as ChatConfig | undefined;
@@ -258,6 +258,10 @@ export const useAppConfig = createPersistStore(
           state.modelConfig.providerName =
             DEFAULT_CONFIG.modelConfig.providerName;
         }
+      }
+
+      if (version < 4.3) {
+        state.modelConfig.sendMemory = false;
       }
 
       if (!isModelInModelsJson(state.modelConfig?.model)) {

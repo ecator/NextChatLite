@@ -1141,7 +1141,7 @@ export const useChatStore = createPersistStore(
   },
   {
     name: StoreKey.Chat,
-    version: 3.4,
+    version: 3.5,
     migrate(persistedState: any, version: number) {
       const state = persistedState as any;
       const newState = JSON.parse(
@@ -1215,6 +1215,14 @@ export const useChatStore = createPersistStore(
             s.mask.modelConfig.model = DEFAULT_CONFIG.modelConfig.model;
             s.mask.modelConfig.providerName =
               DEFAULT_CONFIG.modelConfig.providerName;
+          }
+        });
+      }
+
+      if (version < 3.5) {
+        newState.sessions.forEach((s) => {
+          if (s.mask.syncGlobalConfig) {
+            s.mask.modelConfig.sendMemory = false;
           }
         });
       }
