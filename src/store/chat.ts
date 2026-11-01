@@ -6,6 +6,7 @@ import type { MultimodalContent, RequestMessage } from "../client/api";
 import { ChatControllerPool } from "../client/controller";
 import { showToast } from "../components/ui-lib";
 import {
+  ApiPath,
   CACHE_URL_PREFIX,
   DEFAULT_INPUT_TEMPLATE,
   DEFAULT_MODELS,
@@ -561,7 +562,7 @@ export const useChatStore = createPersistStore(
         (async () => {
           let reasoningStartTime: number | undefined = undefined;
           try {
-            const res = await fetch("/api/chat", {
+            const res = await fetch(ApiPath.Chat, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(payload),
@@ -927,7 +928,7 @@ export const useChatStore = createPersistStore(
             modelInfo: topicMeta,
           };
 
-          fetch("/api/chat", {
+          fetch(ApiPath.Chat, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(topicPayload),
@@ -1012,7 +1013,7 @@ export const useChatStore = createPersistStore(
             modelConfig: modelcfg,
           };
 
-          fetch("/api/chat", {
+          fetch(ApiPath.Chat, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(memoryPayload),

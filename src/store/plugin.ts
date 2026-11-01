@@ -1,5 +1,5 @@
 import OpenAPIClientAxios from "openapi-client-axios";
-import { StoreKey } from "../constant";
+import { ApiPath, StoreKey } from "../constant";
 import { nanoid } from "nanoid";
 import { createPersistStore } from "../utils/store";
 import yaml from "js-yaml";
@@ -51,7 +51,7 @@ export const FunctionToolService = {
     const authLocation = plugin?.authLocation || "header";
     const definition = yaml.load(plugin.content) as any;
     const serverURL = definition?.servers?.[0]?.url;
-    const baseURL = "/api/proxy";
+    const baseURL = ApiPath.Proxy;
     const headers: Record<string, string | undefined> = {
       "X-Base-URL": serverURL,
     };

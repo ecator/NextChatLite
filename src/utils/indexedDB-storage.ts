@@ -44,13 +44,31 @@ function safeLocalStorage(): {
 
 const localStorage = safeLocalStorage();
 
+const LEGACY_STORAGE_KEYS: Record<string, string> = {
+  "nextchat-lite-chat": "nextchat-lite-store",
+  "nextchat-lite-access": "access-control",
+  "nextchat-lite-config": "app-config",
+  "nextchat-lite-mask": "mask-store",
+  "nextchat-lite-prompt": "prompt-store",
+  "nextchat-lite-sync": "sync",
+  "nextchat-lite-models": "models-dev-store",
+};
+
 class IndexedDBStorage implements StateStorage {
   public async getItem(name: string): Promise<string | null> {
     try {
-      const value = (await get(name)) || localStorage.getItem(name);
+      let value = (await get(name)) || localStorage.getItem(name);
+      if (!value && LEGACY_STORAGE_KEYS[name]) {
+        const legacyKey = LEGACY_STORAGE_KEYS[name];
+        value = (await get(legacyKey)) || localStorage.getItem(legacyKey);
+      }
       return value;
     } catch (error) {
-      return localStorage.getItem(name);
+      let value = localStorage.getItem(name);
+      if (!value && LEGACY_STORAGE_KEYS[name]) {
+        value = localStorage.getItem(LEGACY_STORAGE_KEYS[name]);
+      }
+      return value;
     }
   }
 

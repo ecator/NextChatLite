@@ -29,35 +29,20 @@ let fetchState = 0; // 0 not fetch, 1 fetching, 2 done
 
 const isApp = getClientConfig()?.buildMode === "export";
 
-const DEFAULT_OPENAI_URL = isApp ? OPENAI_BASE_URL : ApiPath.OpenAI;
-
-const DEFAULT_GOOGLE_URL = isApp ? GEMINI_BASE_URL : ApiPath.Google;
-
-const DEFAULT_ANTHROPIC_URL = isApp ? ANTHROPIC_BASE_URL : ApiPath.Anthropic;
-
-const DEFAULT_BAIDU_URL = isApp ? BAIDU_BASE_URL : ApiPath.Baidu;
-
-const DEFAULT_BYTEDANCE_URL = isApp ? BYTEDANCE_BASE_URL : ApiPath.ByteDance;
-
-const DEFAULT_ALIBABA_URL = isApp ? ALIBABA_BASE_URL : ApiPath.Alibaba;
-
-const DEFAULT_TENCENT_URL = isApp ? TENCENT_BASE_URL : ApiPath.Tencent;
-
-const DEFAULT_MOONSHOT_URL = isApp ? MOONSHOT_BASE_URL : ApiPath.Moonshot;
-
-const DEFAULT_IFLYTEK_URL = isApp ? IFLYTEK_BASE_URL : ApiPath.Iflytek;
-
-const DEFAULT_DEEPSEEK_URL = isApp ? DEEPSEEK_BASE_URL : ApiPath.DeepSeek;
-
-const DEFAULT_XAI_URL = isApp ? XAI_BASE_URL : ApiPath.XAI;
-
-const DEFAULT_CHATGLM_URL = isApp ? CHATGLM_BASE_URL : ApiPath.ChatGLM;
-
-const DEFAULT_SILICONFLOW_URL = isApp
-  ? SILICONFLOW_BASE_URL
-  : ApiPath.SiliconFlow;
-
-const DEFAULT_AI302_URL = isApp ? AI302_BASE_URL : ApiPath["302.AI"];
+const DEFAULT_OPENAI_URL = OPENAI_BASE_URL;
+const DEFAULT_GOOGLE_URL = GEMINI_BASE_URL;
+const DEFAULT_ANTHROPIC_URL = ANTHROPIC_BASE_URL;
+const DEFAULT_BAIDU_URL = BAIDU_BASE_URL;
+const DEFAULT_BYTEDANCE_URL = BYTEDANCE_BASE_URL;
+const DEFAULT_ALIBABA_URL = ALIBABA_BASE_URL;
+const DEFAULT_TENCENT_URL = TENCENT_BASE_URL;
+const DEFAULT_MOONSHOT_URL = MOONSHOT_BASE_URL;
+const DEFAULT_IFLYTEK_URL = IFLYTEK_BASE_URL;
+const DEFAULT_DEEPSEEK_URL = DEEPSEEK_BASE_URL;
+const DEFAULT_XAI_URL = XAI_BASE_URL;
+const DEFAULT_CHATGLM_URL = CHATGLM_BASE_URL;
+const DEFAULT_SILICONFLOW_URL = SILICONFLOW_BASE_URL;
+const DEFAULT_AI302_URL = AI302_BASE_URL;
 
 const DEFAULT_ACCESS_STATE = {
   accessCode: "",
@@ -249,7 +234,7 @@ export const useAccessStore = createPersistStore(
     fetch() {
       if (fetchState > 0 || getClientConfig()?.buildMode === "export") return;
       fetchState = 1;
-      fetch("/api/config", {
+      fetch(ApiPath.Config, {
         method: "post",
         body: null,
         headers: {

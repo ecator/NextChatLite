@@ -16,9 +16,9 @@ import GithubIcon from "../icons/github.svg";
 import LoadingButtonIcon from "../icons/loading.svg";
 import ReloadButtonIcon from "../icons/reload.svg";
 import Locale from "../locales";
-import { Modal, showToast } from "./ui-lib";
+import { Modal } from "./ui-lib";
 import { copyToClipboard, downloadAs } from "../utils";
-import { Path, ApiPath, REPO_URL } from "@/constant";
+import { Path, REPO_URL } from "@/constant";
 import { Loading } from "./home";
 import styles from "./artifacts.module.scss";
 
@@ -124,23 +124,7 @@ export function ArtifactsShareButton({
     () => [location.origin, "#", Path.Artifacts, "/", name].join(""),
     [name],
   );
-  const upload = (code: string) =>
-    id
-      ? Promise.resolve({ id })
-      : fetch(ApiPath.Artifacts, {
-          method: "POST",
-          body: code,
-        })
-          .then((res) => res.json())
-          .then(({ id }) => {
-            if (id) {
-              return { id };
-            }
-            throw Error();
-          })
-          .catch((e) => {
-            showToast(Locale.Export.Artifacts.Error);
-          });
+  const upload = (code: string) => Promise.resolve({ id: id || nanoid(10) });
   return (
     <>
       <div className="window-action-button" style={style}>
@@ -210,20 +194,7 @@ export function Artifacts() {
   const previewRef = useRef<HTMLPreviewHandler>(null);
 
   useEffect(() => {
-    if (id) {
-      fetch(`${ApiPath.Artifacts}?id=${id}`)
-        .then((res) => {
-          if (res.status > 300) {
-            throw Error("can not get content");
-          }
-          return res;
-        })
-        .then((res) => res.text())
-        .then(setCode)
-        .catch((e) => {
-          showToast(Locale.Export.Artifacts.Error);
-        });
-    }
+    setLoading(false);
   }, [id]);
 
   return (

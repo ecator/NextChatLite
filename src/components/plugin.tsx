@@ -1,7 +1,7 @@
 import { useDebouncedCallback } from "use-debounce";
 import OpenAPIClientAxios from "openapi-client-axios";
 import yaml from "js-yaml";
-import { PLUGINS_REPO_URL } from "../constant";
+import { ApiPath, PLUGINS_REPO_URL } from "../constant";
 import { IconButton } from "./button";
 import { ErrorBoundary } from "./error";
 
@@ -93,7 +93,7 @@ export function PluginPage() {
     fetch(loadUrl)
       .catch((e) => {
         const p = new URL(loadUrl);
-        return fetch(`/api/proxy/${p.pathname}?${p.search}`, {
+        return fetch(`${ApiPath.Proxy}/${p.pathname}?${p.search}`, {
           headers: {
             "X-Base-URL": p.origin,
           },
