@@ -72,24 +72,26 @@ function EditPromptModal(props: { id: string; onClose: () => void }) {
             value={prompt.title}
             readOnly={!prompt.isUser}
             className={styles["edit-prompt-title"]}
-            onInput={(e) =>
+            onInput={(e) => {
+              if (!prompt.isUser) return;
               promptStore.updatePrompt(
                 props.id,
                 (prompt) => (prompt.title = e.currentTarget.value),
-              )
-            }
+              );
+            }}
           ></input>
           <Input
             value={prompt.content}
             readOnly={!prompt.isUser}
             className={styles["edit-prompt-content"]}
             rows={10}
-            onInput={(e) =>
+            onInput={(e) => {
+              if (!prompt.isUser) return;
               promptStore.updatePrompt(
                 props.id,
                 (prompt) => (prompt.content = e.currentTarget.value),
-              )
-            }
+              );
+            }}
           ></Input>
         </div>
       </Modal>
@@ -100,7 +102,10 @@ function EditPromptModal(props: { id: string; onClose: () => void }) {
 function UserPromptModal(props: { onClose?: () => void }) {
   const promptStore = usePromptStore();
   const userPrompts = promptStore.getUserPrompts();
-  const builtinPrompts = SearchService.builtinPrompts;
+  const builtinPrompts =
+    promptStore.builtinPrompts.length > 0
+      ? promptStore.builtinPrompts
+      : SearchService.builtinPrompts;
   const allPrompts = userPrompts.concat(builtinPrompts);
   const [searchInput, setSearchInput] = useState("");
   const [searchPrompts, setSearchPrompts] = useState<Prompt[]>([]);
@@ -151,7 +156,10 @@ function UserPromptModal(props: { onClose?: () => void }) {
 
           <div className={styles["user-prompt-list"]}>
             {prompts.map((v, _) => (
-              <div className={styles["user-prompt-item"]} key={v.id ?? v.title}>
+              <div
+                className={styles["user-prompt-item"]}
+                key={`${v.isUser ? "user" : "builtin"}_${v.id ?? ""}_${_}`}
+              >
                 <div className={styles["user-prompt-header"]}>
                   <div className={styles["user-prompt-title"]}>{v.title}</div>
                   <div className={styles["user-prompt-content"] + " one-line"}>
@@ -299,7 +307,10 @@ export function Settings() {
   const currentVersion = clientConfig?.version;
 
   const promptStore = usePromptStore();
-  const builtinCount = SearchService.count.builtin;
+  const builtinCount =
+    promptStore.builtinPrompts.length > 0
+      ? promptStore.builtinPrompts.length
+      : SearchService.count.builtin;
   const customCount = promptStore.getUserPrompts().length ?? 0;
   const [shouldShowPromptModal, setShowPromptModal] = useState(false);
 

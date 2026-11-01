@@ -13,7 +13,8 @@ export const BUILTIN_MASK_STORE = {
     return this.masks[id] as Mask | undefined;
   },
   add(m: BuiltinMask) {
-    const mask = { ...m, id: this.buildinId++, builtin: true };
+    const id = String(m.id || this.buildinId++);
+    const mask = { ...m, id, builtin: true };
     this.masks[mask.id] = mask;
     return mask;
   },
@@ -21,9 +22,18 @@ export const BUILTIN_MASK_STORE = {
 
 export const BUILTIN_MASKS: BuiltinMask[] = [];
 
-if (typeof window != "undefined") {
-  // run in browser skip in next server
-  fetch("/masks.json")
+let fetchPromise: Promise<BuiltinMask[]> | null = null;
+
+export function fetchBuiltinMasks(): Promise<BuiltinMask[]> {
+  if (typeof window === "undefined") {
+    return Promise.resolve([]);
+  }
+  if (fetchPromise) {
+    return fetchPromise;
+  }
+
+  fetchPromise = fetch("./masks.json")
+    .catch(() => fetch("/masks.json"))
     .then((res) => res.json())
     .catch((error) => {
       console.error("[Fetch] failed to fetch masks", error);
@@ -31,8 +41,19 @@ if (typeof window != "undefined") {
     })
     .then((masks) => {
       const { cn = [], tw = [], en = [] } = masks;
-      return [...cn, ...tw, ...en].map((m) => {
-        BUILTIN_MASKS.push(BUILTIN_MASK_STORE.add(m));
+      const all = [...cn, ...tw, ...en];
+      all.forEach((m) => {
+        if (!BUILTIN_MASK_STORE.masks[String(m.id)]) {
+          const added = BUILTIN_MASK_STORE.add(m);
+          BUILTIN_MASKS.push(added);
+        }
       });
+      return BUILTIN_MASKS;
     });
+
+  return fetchPromise;
+}
+
+if (typeof window !== "undefined") {
+  fetchBuiltinMasks();
 }

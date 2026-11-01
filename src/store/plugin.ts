@@ -164,7 +164,10 @@ export const createEmptyPlugin = () =>
 
 export const DEFAULT_PLUGIN_STATE = {
   plugins: {} as Record<string, Plugin>,
+  builtinPlugins: {} as Record<string, Plugin>,
 };
+
+export type PluginState = typeof DEFAULT_PLUGIN_STATE;
 
 export const usePluginStore = createPersistStore(
   { ...DEFAULT_PLUGIN_STATE },
@@ -186,9 +189,12 @@ export const usePluginStore = createPersistStore(
       return plugins[id];
     },
     updatePlugin(id: string, updater: (plugin: Plugin) => void) {
+      // Server-fetched plugins cannot be modified
+      if (get().builtinPlugins[id]) return;
       const plugins = get().plugins;
       const plugin = plugins[id];
-      if (!plugin) return;
+      if (!plugin || plugin.builtin) return;
+
       const updatePlugin = { ...plugin };
       updater(updatePlugin);
       plugins[id] = updatePlugin;
@@ -197,17 +203,20 @@ export const usePluginStore = createPersistStore(
       get().markUpdate();
     },
     delete(id: string) {
+      // Server-fetched plugins cannot be deleted
+      if (get().builtinPlugins[id]) return;
       const plugins = get().plugins;
+      if (!plugins[id] || plugins[id].builtin) return;
+
       delete plugins[id];
       set(() => ({ plugins }));
       get().markUpdate();
     },
 
     getAsTools(ids: string[]) {
-      const plugins = get().plugins;
       const selected = (ids || [])
-        .map((id) => plugins[id])
-        .filter((i) => i)
+        .map((id) => get().get(id))
+        .filter((i): i is Plugin => Boolean(i))
         .map((p) => FunctionToolService.add(p));
       return [
         // @ts-ignore
@@ -216,53 +225,117 @@ export const usePluginStore = createPersistStore(
       ];
     },
     get(id?: string) {
-      return get().plugins[id ?? 1145141919810];
+      if (!id) return undefined;
+      return get().plugins[id] ?? get().builtinPlugins[id];
     },
     getAll() {
-      return Object.values(get().plugins).sort(
+      const userPlugins = Object.values(get().plugins)
+        .filter((p) => !p.builtin)
+        .sort((a, b) => b.createdAt - a.createdAt);
+      const serverPlugins = Object.values(get().builtinPlugins).sort(
         (a, b) => b.createdAt - a.createdAt,
       );
+      // Return both local and server plugins merged together (even if they have the same name)
+      return userPlugins.concat(serverPlugins);
     },
-  }),
-  {
-    name: StoreKey.Plugin,
-    version: 1,
-    onRehydrateStorage(state) {
-      // Skip store rehydration on server side
+    async fetchServerPlugins() {
       if (typeof window === "undefined") {
         return;
       }
 
-      fetch("./plugins.json")
-        .then((res) => res.json())
-        .then((res) => {
-          Promise.all(
-            res.map((item: any) =>
-              // skip get schema
-              state.get(item.id)
-                ? item
-                : fetch(item.schema)
-                    .then((res) => res.text())
-                    .then((content) => ({
-                      ...item,
-                      content,
-                    }))
-                    .catch((e) => item),
-            ),
-          ).then((builtinPlugins: any) => {
-            builtinPlugins
-              .filter((item: any) => item?.content)
-              .forEach((item: any) => {
-                const plugin = state.create(item);
-                state.updatePlugin(plugin.id, (plugin) => {
-                  const tool = FunctionToolService.add(plugin, true);
-                  plugin.title = tool.api.definition.info.title;
-                  plugin.version = tool.api.definition.info.version;
-                  plugin.builtin = true;
-                });
-              });
-          });
+      try {
+        const res = await fetch("./plugins.json")
+          .catch(() => fetch("/plugins.json"))
+          .then((r) => r.json());
+
+        const builtinPlugins: Record<string, Plugin> = {};
+        await Promise.all(
+          res.map(async (item: any) => {
+            let content = "";
+            try {
+              const schemaRes = await fetch(item.schema);
+              content = await schemaRes.text();
+            } catch (e) {
+              console.error("[Plugin] fetch schema failed", item.schema, e);
+            }
+
+            const id = item.id || nanoid();
+            const plugin: Plugin = {
+              id,
+              title: item.name || item.title || id,
+              version: "1.0.0",
+              content,
+              builtin: true,
+              createdAt: 0,
+            };
+
+            if (content) {
+              try {
+                const tool = FunctionToolService.add(plugin, true);
+                plugin.title = tool.api.definition?.info?.title || plugin.title;
+                plugin.version =
+                  tool.api.definition?.info?.version || plugin.version;
+              } catch (e) {}
+            }
+
+            builtinPlugins[id] = plugin;
+          }),
+        );
+
+        set(() => ({ builtinPlugins }));
+      } catch (e) {
+        console.error("[Plugin] fetchServerPlugins failed", e);
+      }
+    },
+  }),
+  {
+    name: StoreKey.Plugin,
+    version: 2,
+
+    // Only persist local user plugins, never server plugins
+    partialize: (state) => ({
+      plugins: Object.fromEntries(
+        Object.entries(state.plugins).filter(([_, p]) => !p.builtin),
+      ),
+    }),
+
+    onRehydrateStorage(state) {
+      if (typeof window === "undefined") {
+        return;
+      }
+
+      // Purge any legacy builtin plugins from storage
+      if (state?.plugins) {
+        let changed = false;
+        Object.keys(state.plugins).forEach((key) => {
+          if (state.plugins[key]?.builtin) {
+            delete state.plugins[key];
+            changed = true;
+          }
         });
+        if (changed) {
+          state.markUpdate();
+        }
+      }
+
+      state?.fetchServerPlugins();
+    },
+
+    migrate(state, version) {
+      const newState = JSON.parse(
+        JSON.stringify(state),
+      ) as typeof DEFAULT_PLUGIN_STATE;
+
+      // Purge any legacy builtin plugins
+      if (newState.plugins) {
+        Object.keys(newState.plugins).forEach((key) => {
+          if (newState.plugins[key]?.builtin) {
+            delete newState.plugins[key];
+          }
+        });
+      }
+
+      return newState as any;
     },
   },
 );

@@ -23,9 +23,6 @@ export const SearchService = {
   builtinPrompts: [] as Prompt[],
 
   init(builtinPrompts: Prompt[], userPrompts: Prompt[]) {
-    if (this.ready) {
-      return;
-    }
     this.allPrompts = userPrompts.concat(builtinPrompts);
     this.builtinPrompts = builtinPrompts.slice();
     this.builtinEngine.setCollection(builtinPrompts);
@@ -48,11 +45,16 @@ export const SearchService = {
   },
 };
 
+export const DEFAULT_PROMPT_STATE = {
+  counter: 0,
+  prompts: {} as Record<string, Prompt>,
+  builtinPrompts: [] as Prompt[],
+};
+
+export type PromptState = typeof DEFAULT_PROMPT_STATE;
+
 export const usePromptStore = createPersistStore(
-  {
-    counter: 0,
-    prompts: {} as Record<string, Prompt>,
-  },
+  { ...DEFAULT_PROMPT_STATE },
 
   (set, get) => ({
     add(prompt: Prompt) {
@@ -62,9 +64,12 @@ export const usePromptStore = createPersistStore(
       prompt.createdAt = Date.now();
       prompts[prompt.id] = prompt;
 
+      SearchService.add(prompt);
+
       set(() => ({
         prompts: prompts,
       }));
+      get().markUpdate();
 
       return prompt.id!;
     },
@@ -73,14 +78,21 @@ export const usePromptStore = createPersistStore(
       const targetPrompt = get().prompts[id];
 
       if (!targetPrompt) {
-        return SearchService.builtinPrompts.find((v) => v.id === id);
+        return (
+          get().builtinPrompts.find((v) => v.id === id) ??
+          SearchService.builtinPrompts.find((v) => v.id === id)
+        );
       }
 
       return targetPrompt;
     },
 
     remove(id: string) {
+      // Server-fetched prompts cannot be deleted
+      if (get().builtinPrompts.some((v) => v.id === id)) return;
       const prompts = get().prompts;
+      if (!prompts[id] || !prompts[id].isUser) return;
+
       delete prompts[id];
 
       Object.entries(prompts).some(([key, prompt]) => {
@@ -97,93 +109,144 @@ export const usePromptStore = createPersistStore(
         prompts,
         counter: get().counter + 1,
       }));
+      get().markUpdate();
     },
 
     getUserPrompts() {
-      const userPrompts = Object.values(get().prompts ?? {});
+      const userPrompts = Object.values(get().prompts ?? {}).filter(
+        (p) => p.isUser,
+      );
       userPrompts.sort((a, b) =>
         b.id && a.id ? b.createdAt - a.createdAt : 0,
       );
       return userPrompts;
     },
 
+    getAll() {
+      // Return both user prompts and server prompts merged together (even if same title)
+      return get().getUserPrompts().concat(get().builtinPrompts);
+    },
+
     updatePrompt(id: string, updater: (prompt: Prompt) => void) {
-      const prompt = get().prompts[id] ?? {
-        title: "",
-        content: "",
-        id,
-      };
+      // Server-fetched prompts cannot be modified
+      if (get().builtinPrompts.some((v) => v.id === id)) return;
+      const prompts = get().prompts;
+      const prompt = prompts[id];
+      if (!prompt || !prompt.isUser) return;
 
       SearchService.remove(id);
-      updater(prompt);
-      const prompts = get().prompts;
-      prompts[id] = prompt;
+      const updatedPrompt = { ...prompt };
+      updater(updatedPrompt);
+      prompts[id] = updatedPrompt;
       set(() => ({ prompts }));
-      SearchService.add(prompt);
+      SearchService.add(updatedPrompt);
+      get().markUpdate();
     },
 
     search(text: string) {
       if (text.length === 0) {
-        // return all rompts
-        return this.getUserPrompts().concat(SearchService.builtinPrompts);
+        return get().getAll();
       }
       return SearchService.search(text) as Prompt[];
+    },
+
+    async fetchServerPrompts() {
+      if (typeof window === "undefined") {
+        return;
+      }
+
+      const PROMPT_URL = "./prompts.json";
+      type PromptList = Array<[string, string]>;
+
+      try {
+        const res = await fetch(PROMPT_URL)
+          .catch(() => fetch("/prompts.json"))
+          .then((r) => r.json());
+
+        let fetchPrompts = [res.en, res.tw, res.cn];
+        if (getLang() === "cn") {
+          fetchPrompts = fetchPrompts.reverse();
+        }
+
+        const builtinPrompts: Prompt[] = [];
+        fetchPrompts.forEach((promptList: PromptList) => {
+          if (Array.isArray(promptList)) {
+            promptList.forEach(([title, content], index) => {
+              if (title && content) {
+                builtinPrompts.push({
+                  id: `builtin_${builtinPrompts.length}`,
+                  title,
+                  content,
+                  createdAt: 0,
+                  isUser: false,
+                });
+              }
+            });
+          }
+        });
+
+        const userPrompts = get().getUserPrompts() ?? [];
+        SearchService.count.builtin = builtinPrompts.length;
+        SearchService.init(builtinPrompts, userPrompts);
+        set(() => ({ builtinPrompts }));
+      } catch (e) {
+        console.error("[Prompt] fetchServerPrompts failed", e);
+      }
     },
   }),
   {
     name: StoreKey.Prompt,
-    version: 3,
+    version: 3.1,
+
+    // Only persist local user prompts and counter, never server prompts
+    partialize: (state) => ({
+      counter: state.counter,
+      prompts: Object.fromEntries(
+        Object.entries(state.prompts).filter(([_, p]) => p.isUser),
+      ),
+    }),
+
+    onRehydrateStorage(state) {
+      if (typeof window === "undefined") {
+        return;
+      }
+
+      // Purge any legacy non-user prompts from storage
+      if (state?.prompts) {
+        let changed = false;
+        Object.keys(state.prompts).forEach((key) => {
+          if (!state.prompts[key]?.isUser) {
+            delete state.prompts[key];
+            changed = true;
+          }
+        });
+        if (changed) {
+          state.markUpdate();
+        }
+      }
+
+      state?.fetchServerPrompts();
+    },
 
     migrate(state, version) {
-      const newState = JSON.parse(JSON.stringify(state)) as {
-        prompts: Record<string, Prompt>;
-      };
+      const newState = JSON.parse(
+        JSON.stringify(state),
+      ) as typeof DEFAULT_PROMPT_STATE;
+
+      // Purge any legacy non-user prompts
+      if (newState.prompts) {
+        Object.keys(newState.prompts).forEach((key) => {
+          if (!newState.prompts[key]?.isUser) {
+            delete newState.prompts[key];
+          }
+        });
+      }
 
       if (version < 3) {
         Object.values(newState.prompts).forEach((p) => (p.id = nanoid()));
       }
 
       return newState as any;
-    },
-
-    onRehydrateStorage(state) {
-      // Skip store rehydration on server side
-      if (typeof window === "undefined") {
-        return;
-      }
-
-      const PROMPT_URL = "./prompts.json";
-
-      type PromptList = Array<[string, string]>;
-
-      fetch(PROMPT_URL)
-        .then((res) => res.json())
-        .then((res) => {
-          let fetchPrompts = [res.en, res.tw, res.cn];
-          if (getLang() === "cn") {
-            fetchPrompts = fetchPrompts.reverse();
-          }
-          const builtinPrompts = fetchPrompts.map((promptList: PromptList) => {
-            return promptList.map(
-              ([title, content]) =>
-                ({
-                  id: nanoid(),
-                  title,
-                  content,
-                  createdAt: Date.now(),
-                }) as Prompt,
-            );
-          });
-
-          const userPrompts = usePromptStore.getState().getUserPrompts() ?? [];
-
-          const allPromptsForSearch = builtinPrompts
-            .reduce((pre, cur) => pre.concat(cur), [])
-            .filter((v) => !!v.title && !!v.content);
-          SearchService.count.builtin =
-            res.en.length + res.cn.length + res.tw.length;
-          SearchService.init(allPromptsForSearch, userPrompts);
-        });
     },
   },
 );

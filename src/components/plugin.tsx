@@ -9,6 +9,7 @@ import styles from "./mask.module.scss";
 import pluginStyles from "./plugin.module.scss";
 
 import EditIcon from "../icons/edit.svg";
+import EyeIcon from "../icons/eye.svg";
 import AddIcon from "../icons/add.svg";
 import CloseIcon from "../icons/close.svg";
 import DeleteIcon from "../icons/delete.svg";
@@ -43,8 +44,8 @@ export function PluginPage() {
   const onSearch = (text: string) => {
     setSearchText(text);
     if (text.length > 0) {
-      const result = allPlugins.filter(
-        (m) => m?.title.toLowerCase().includes(text.toLowerCase()),
+      const result = allPlugins.filter((m) =>
+        m?.title.toLowerCase().includes(text.toLowerCase()),
       );
       setSearchPlugins(result);
     } else {
@@ -58,6 +59,7 @@ export function PluginPage() {
   const closePluginModal = () => setEditingPluginId(undefined);
 
   const onChangePlugin = useDebouncedCallback((editingPlugin, e) => {
+    if (!editingPlugin || editingPlugin.builtin) return;
     const content = e.target.innerText;
     try {
       const api = new OpenAPIClientAxios({
@@ -86,7 +88,8 @@ export function PluginPage() {
   }, 100).bind(null, editingPlugin);
 
   const [loadUrl, setLoadUrl] = useState<string>("");
-  const loadFromUrl = (loadUrl: string) =>
+  const loadFromUrl = (loadUrl: string) => {
+    if (!editingPlugin || editingPlugin.builtin) return;
     fetch(loadUrl)
       .catch((e) => {
         const p = new URL(loadUrl);
@@ -115,6 +118,7 @@ export function PluginPage() {
       .catch((e) => {
         showToast(Locale.Plugin.EditModal.Error);
       });
+  };
 
   return (
     <ErrorBoundary>
@@ -193,7 +197,10 @@ export function PluginPage() {
               </div>
             )}
             {plugins.map((m) => (
-              <div className={styles["mask-item"]} key={m.id}>
+              <div
+                className={styles["mask-item"]}
+                key={`${m.builtin ? "builtin" : "user"}_${m.id}`}
+              >
                 <div className={styles["mask-header"]}>
                   <div className={styles["mask-icon"]}></div>
                   <div className={styles["mask-title"]}>
@@ -208,11 +215,19 @@ export function PluginPage() {
                   </div>
                 </div>
                 <div className={styles["mask-actions"]}>
-                  <IconButton
-                    icon={<EditIcon />}
-                    text={Locale.Plugin.Item.Edit}
-                    onClick={() => setEditingPluginId(m.id)}
-                  />
+                  {m.builtin ? (
+                    <IconButton
+                      icon={<EyeIcon />}
+                      text={Locale.Mask.Item.View}
+                      onClick={() => setEditingPluginId(m.id)}
+                    />
+                  ) : (
+                    <IconButton
+                      icon={<EditIcon />}
+                      text={Locale.Plugin.Item.Edit}
+                      onClick={() => setEditingPluginId(m.id)}
+                    />
+                  )}
                   {!m.builtin && (
                     <IconButton
                       icon={<DeleteIcon />}
@@ -251,6 +266,7 @@ export function PluginPage() {
             <List>
               <ListItem title={Locale.Plugin.EditModal.Auth}>
                 <select
+                  disabled={editingPlugin.builtin}
                   value={editingPlugin?.authType}
                   onChange={(e) => {
                     pluginStore.updatePlugin(editingPlugin.id, (plugin) => {
@@ -269,6 +285,7 @@ export function PluginPage() {
               ) && (
                 <ListItem title={Locale.Plugin.Auth.Location}>
                   <select
+                    disabled={editingPlugin.builtin}
                     value={editingPlugin?.authLocation}
                     onChange={(e) => {
                       pluginStore.updatePlugin(editingPlugin.id, (plugin) => {
@@ -292,6 +309,7 @@ export function PluginPage() {
                 <ListItem title={Locale.Plugin.Auth.CustomHeader}>
                   <input
                     type="text"
+                    readOnly={editingPlugin.builtin}
                     value={editingPlugin?.authHeader}
                     onChange={(e) => {
                       pluginStore.updatePlugin(editingPlugin.id, (plugin) => {
@@ -307,6 +325,7 @@ export function PluginPage() {
                 <ListItem title={Locale.Plugin.Auth.Token}>
                   <PasswordInput
                     type="text"
+                    readOnly={editingPlugin.builtin}
                     value={editingPlugin?.authToken}
                     onChange={(e) => {
                       pluginStore.updatePlugin(editingPlugin.id, (plugin) => {
@@ -318,21 +337,23 @@ export function PluginPage() {
               )}
             </List>
             <List>
-              <ListItem title={Locale.Plugin.EditModal.Content}>
-                <div className={pluginStyles["plugin-schema"]}>
-                  <input
-                    type="text"
-                    style={{ minWidth: 200 }}
-                    onInput={(e) => setLoadUrl(e.currentTarget.value)}
-                  ></input>
-                  <IconButton
-                    icon={<ReloadIcon />}
-                    text={Locale.Plugin.EditModal.Load}
-                    bordered
-                    onClick={() => loadFromUrl(loadUrl)}
-                  />
-                </div>
-              </ListItem>
+              {!editingPlugin.builtin && (
+                <ListItem title={Locale.Plugin.EditModal.Content}>
+                  <div className={pluginStyles["plugin-schema"]}>
+                    <input
+                      type="text"
+                      style={{ minWidth: 200 }}
+                      onInput={(e) => setLoadUrl(e.currentTarget.value)}
+                    ></input>
+                    <IconButton
+                      icon={<ReloadIcon />}
+                      text={Locale.Plugin.EditModal.Load}
+                      bordered
+                      onClick={() => loadFromUrl(loadUrl)}
+                    />
+                  </div>
+                </ListItem>
+              )}
               <ListItem
                 subTitle={
                   <div
@@ -344,7 +365,7 @@ export function PluginPage() {
                   >
                     <pre>
                       <code
-                        contentEditable={true}
+                        contentEditable={!editingPlugin.builtin}
                         dangerouslySetInnerHTML={{
                           __html: editingPlugin.content,
                         }}

@@ -42,8 +42,16 @@ const LocalStateGetters = {
   [StoreKey.Chat]: () => getNonFunctionFileds(useChatStore.getState()),
   [StoreKey.Access]: () => getNonFunctionFileds(useAccessStore.getState()),
   [StoreKey.Config]: () => getNonFunctionFileds(useAppConfig.getState()),
-  [StoreKey.Mask]: () => getNonFunctionFileds(useMaskStore.getState()),
-  [StoreKey.Prompt]: () => getNonFunctionFileds(usePromptStore.getState()),
+  [StoreKey.Mask]: () => {
+    const state = { ...getNonFunctionFileds(useMaskStore.getState()) };
+    delete (state as any).builtinMasks;
+    return state;
+  },
+  [StoreKey.Prompt]: () => {
+    const state = { ...getNonFunctionFileds(usePromptStore.getState()) };
+    delete (state as any).builtinPrompts;
+    return state;
+  },
 } as const;
 
 export type AppState = {

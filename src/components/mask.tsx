@@ -47,7 +47,6 @@ import {
 import { Updater } from "../typing";
 import { ModelConfigList } from "./model-config";
 import { FileName, Path } from "../constant";
-import { BUILTIN_MASK_STORE } from "../masks";
 import {
   DragDropContext,
   Droppable,
@@ -82,12 +81,17 @@ export function MaskConfig(props: {
 }) {
   const [showPicker, setShowPicker] = useState(false);
 
+  const updateMask = (updater: (mask: Mask) => void) => {
+    if (props.readonly) return;
+    props.updateMask(updater);
+  };
+
   const updateConfig = (updater: (config: ModelConfig) => void) => {
     if (props.readonly) return;
 
     const config = { ...props.mask.modelConfig };
     updater(config);
-    props.updateMask((mask) => {
+    updateMask((mask) => {
       mask.modelConfig = config;
       // if user changed current session mask, it will disable auto sync
       mask.syncGlobalConfig = false;
@@ -105,10 +109,12 @@ export function MaskConfig(props: {
     <>
       <ContextPrompts
         context={props.mask.context}
+        readonly={props.readonly}
         updateContext={(updater) => {
+          if (props.readonly) return;
           const context = props.mask.context.slice();
           updater(context);
-          props.updateMask((mask) => (mask.context = context));
+          updateMask((mask) => (mask.context = context));
         }}
       />
 
@@ -118,19 +124,19 @@ export function MaskConfig(props: {
             content={
               <AvatarPicker
                 onEmojiClick={(emoji) => {
-                  props.updateMask((mask) => (mask.avatar = emoji));
+                  updateMask((mask) => (mask.avatar = emoji));
                   setShowPicker(false);
                 }}
               ></AvatarPicker>
             }
-            open={showPicker}
+            open={!props.readonly && showPicker}
             onClose={() => setShowPicker(false)}
           >
             <div
               tabIndex={0}
               aria-label={Locale.Mask.Config.Avatar}
-              onClick={() => setShowPicker(true)}
-              style={{ cursor: "pointer" }}
+              onClick={() => !props.readonly && setShowPicker(true)}
+              style={{ cursor: props.readonly ? "default" : "pointer" }}
             >
               <MaskAvatar
                 avatar={props.mask.avatar}
@@ -143,9 +149,10 @@ export function MaskConfig(props: {
           <input
             aria-label={Locale.Mask.Config.Name}
             type="text"
+            readOnly={props.readonly}
             value={props.mask.name}
             onInput={(e) =>
-              props.updateMask((mask) => {
+              updateMask((mask) => {
                 mask.name = e.currentTarget.value;
               })
             }
@@ -158,9 +165,10 @@ export function MaskConfig(props: {
           <input
             aria-label={Locale.Mask.Config.HideContext.Title}
             type="checkbox"
+            disabled={props.readonly}
             checked={props.mask.hideContext}
             onChange={(e) => {
-              props.updateMask((mask) => {
+              updateMask((mask) => {
                 mask.hideContext = e.currentTarget.checked;
               });
             }}
@@ -175,9 +183,10 @@ export function MaskConfig(props: {
             <input
               aria-label={Locale.Mask.Config.Artifacts.Title}
               type="checkbox"
+              disabled={props.readonly}
               checked={props.mask.enableArtifacts !== false}
               onChange={(e) => {
-                props.updateMask((mask) => {
+                updateMask((mask) => {
                   mask.enableArtifacts = e.currentTarget.checked;
                 });
               }}
@@ -192,9 +201,10 @@ export function MaskConfig(props: {
             <input
               aria-label={Locale.Mask.Config.CodeFold.Title}
               type="checkbox"
+              disabled={props.readonly}
               checked={props.mask.enableCodeFold !== false}
               onChange={(e) => {
-                props.updateMask((mask) => {
+                updateMask((mask) => {
                   mask.enableCodeFold = e.currentTarget.checked;
                 });
               }}
@@ -224,6 +234,7 @@ export function MaskConfig(props: {
             <input
               aria-label={Locale.Mask.Config.Sync.Title}
               type="checkbox"
+              disabled={props.readonly}
               checked={props.mask.syncGlobalConfig}
               onChange={async (e) => {
                 const checked = e.currentTarget.checked;
@@ -231,12 +242,12 @@ export function MaskConfig(props: {
                   checked &&
                   (await showConfirm(Locale.Mask.Config.Sync.Confirm))
                 ) {
-                  props.updateMask((mask) => {
+                  updateMask((mask) => {
                     mask.syncGlobalConfig = checked;
                     mask.modelConfig = { ...globalConfig.modelConfig };
                   });
                 } else if (!checked) {
-                  props.updateMask((mask) => {
+                  updateMask((mask) => {
                     mask.syncGlobalConfig = checked;
                   });
                 }
@@ -260,6 +271,7 @@ export function MaskConfig(props: {
 function ContextPromptItem(props: {
   index: number;
   prompt: ChatMessage;
+  readonly?: boolean;
   update: (prompt: ChatMessage) => void;
   remove: () => void;
 }) {
@@ -269,11 +281,14 @@ function ContextPromptItem(props: {
     <div className={chatStyle["context-prompt-row"]}>
       {!focusingInput && (
         <>
-          <div className={chatStyle["context-drag"]}>
-            <DragIcon />
-          </div>
+          {!props.readonly && (
+            <div className={chatStyle["context-drag"]}>
+              <DragIcon />
+            </div>
+          )}
           <Select
             value={props.prompt.role}
+            disabled={props.readonly}
             className={chatStyle["context-role"]}
             onChange={(e) =>
               props.update({
@@ -293,9 +308,10 @@ function ContextPromptItem(props: {
       <Input
         value={getMessageTextContent(props.prompt)}
         type="text"
+        readOnly={props.readonly}
         className={chatStyle["context-content"]}
         rows={focusingInput ? 5 : 1}
-        onFocus={() => setFocusingInput(true)}
+        onFocus={() => !props.readonly && setFocusingInput(true)}
         onBlur={() => {
           setFocusingInput(false);
           // If the selection is not removed when the user loses focus, some
@@ -309,7 +325,7 @@ function ContextPromptItem(props: {
           })
         }
       />
-      {!focusingInput && (
+      {!focusingInput && !props.readonly && (
         <IconButton
           icon={<DeleteIcon />}
           className={chatStyle["context-delete-button"]}
@@ -323,19 +339,23 @@ function ContextPromptItem(props: {
 
 export function ContextPrompts(props: {
   context: ChatMessage[];
+  readonly?: boolean;
   updateContext: (updater: (context: ChatMessage[]) => void) => void;
 }) {
   const context = props.context;
 
   const addContextPrompt = (prompt: ChatMessage, i: number) => {
+    if (props.readonly) return;
     props.updateContext((context) => context.splice(i, 0, prompt));
   };
 
   const removeContextPrompt = (i: number) => {
+    if (props.readonly) return;
     props.updateContext((context) => context.splice(i, 1));
   };
 
   const updateContextPrompt = (i: number, prompt: ChatMessage) => {
+    if (props.readonly) return;
     props.updateContext((context) => {
       const images = getMessageImages(context[i]);
       context[i] = prompt;
@@ -351,7 +371,7 @@ export function ContextPrompts(props: {
   };
 
   const onDragEnd: OnDragEndResponder = (result) => {
-    if (!result.destination) {
+    if (props.readonly || !result.destination) {
       return;
     }
     const newContext = reorder(
@@ -376,6 +396,7 @@ export function ContextPrompts(props: {
                     draggableId={c.id || i.toString()}
                     index={i}
                     key={c.id}
+                    isDragDisabled={props.readonly}
                   >
                     {(provided) => (
                       <div
@@ -386,24 +407,27 @@ export function ContextPrompts(props: {
                         <ContextPromptItem
                           index={i}
                           prompt={c}
+                          readonly={props.readonly}
                           update={(prompt) => updateContextPrompt(i, prompt)}
                           remove={() => removeContextPrompt(i)}
                         />
-                        <div
-                          className={chatStyle["context-prompt-insert"]}
-                          onClick={() => {
-                            addContextPrompt(
-                              createMessage({
-                                role: "user",
-                                content: "",
-                                date: new Date().toLocaleString(),
-                              }),
-                              i + 1,
-                            );
-                          }}
-                        >
-                          <AddIcon />
-                        </div>
+                        {!props.readonly && (
+                          <div
+                            className={chatStyle["context-prompt-insert"]}
+                            onClick={() => {
+                              addContextPrompt(
+                                createMessage({
+                                  role: "user",
+                                  content: "",
+                                  date: new Date().toLocaleString(),
+                                }),
+                                i + 1,
+                              );
+                            }}
+                          >
+                            <AddIcon />
+                          </div>
+                        )}
                       </div>
                     )}
                   </Draggable>
@@ -414,7 +438,7 @@ export function ContextPrompts(props: {
           </Droppable>
         </DragDropContext>
 
-        {props.context.length === 0 && (
+        {props.context.length === 0 && !props.readonly && (
           <div className={chatStyle["context-prompt-row"]}>
             <IconButton
               icon={<AddIcon />}
@@ -469,8 +493,7 @@ export function MaskPage() {
   };
 
   const [editingMaskId, setEditingMaskId] = useState<string | undefined>();
-  const editingMask =
-    maskStore.get(editingMaskId) ?? BUILTIN_MASK_STORE.get(editingMaskId);
+  const editingMask = maskStore.get(editingMaskId);
   const closeMaskModal = () => setEditingMaskId(undefined);
 
   const downloadAll = () => {
@@ -582,7 +605,10 @@ export function MaskPage() {
 
           <div>
             {masks.map((m) => (
-              <div className={styles["mask-item"]} key={m.id}>
+              <div
+                className={styles["mask-item"]}
+                key={`${m.builtin ? "builtin" : "user"}_${m.id}`}
+              >
                 <div className={styles["mask-header"]}>
                   <div className={styles["mask-icon"]}>
                     <MaskAvatar avatar={m.avatar} model={m.modelConfig.model} />
