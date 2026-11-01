@@ -11,6 +11,7 @@
     "start": "next start",
     "lint": "eslint src tests",
     "prompts": "node ./scripts/fetch-prompts.mjs",
+    "providers": "node ./scripts/fetch-providers.mjs",
     "prepare": "husky",
     "test": "jest",
     "test:watch": "jest --watch",
