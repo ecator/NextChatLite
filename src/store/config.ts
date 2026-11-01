@@ -1,4 +1,6 @@
 import { LLMModel } from "../client/api";
+import defaultModelsJson from "../../public/models.json";
+import { getModelProvider } from "../utils/model";
 import { getClientConfig } from "../config/client";
 import {
   DEFAULT_INPUT_TEMPLATE,
@@ -27,6 +29,50 @@ export enum Theme {
 
 const config = getClientConfig();
 
+function getInitialModelAndProvider(): {
+  model: ModelType;
+  providerName: ServiceProvider;
+} {
+  const config = getClientConfig();
+  const rawDefault = (config?.defaultModel || "").trim();
+  if (rawDefault) {
+    const [m, p] = getModelProvider(rawDefault);
+    if (m) {
+      return {
+        model: m as ModelType,
+        providerName: (p || "Google") as ServiceProvider,
+      };
+    }
+  }
+
+  try {
+    const rawData: any = defaultModelsJson;
+    const providers = Array.isArray(rawData)
+      ? rawData
+      : Object.values(rawData || {});
+    if (providers.length > 0) {
+      const p = providers[0];
+      const pName = p.name || p.id || "Google";
+      const modelKeys = p.models ? Object.keys(p.models) : [];
+      if (modelKeys.length > 0) {
+        return {
+          model: modelKeys[0] as ModelType,
+          providerName: pName as ServiceProvider,
+        };
+      }
+    }
+  } catch (e) {
+    // fallback
+  }
+
+  return {
+    model: "gemini-3.5-flash" as ModelType,
+    providerName: "Google" as ServiceProvider,
+  };
+}
+
+const initialModel = getInitialModelAndProvider();
+
 export const DEFAULT_CONFIG = {
   lastUpdate: Date.now(), // timestamp, to merge state
 
@@ -53,8 +99,8 @@ export const DEFAULT_CONFIG = {
   models: DEFAULT_MODELS as any as LLMModel[],
 
   modelConfig: {
-    model: "gpt-4o-mini" as ModelType,
-    providerName: "OpenAI" as ServiceProvider,
+    model: initialModel.model,
+    providerName: initialModel.providerName,
     temperature: 0.5,
     top_p: 1,
     max_tokens: 4000,
@@ -145,7 +191,7 @@ export const useAppConfig = createPersistStore(
   }),
   {
     name: StoreKey.Config,
-    version: 4.1,
+    version: 4.2,
 
     merge(persistedState, currentState) {
       const state = persistedState as ChatConfig | undefined;
@@ -203,6 +249,14 @@ export const useAppConfig = createPersistStore(
           DEFAULT_CONFIG.modelConfig.compressModel;
         state.modelConfig.compressProviderName =
           DEFAULT_CONFIG.modelConfig.compressProviderName;
+      }
+
+      if (version < 4.2) {
+        if (state.modelConfig.model === "gpt-4o-mini") {
+          state.modelConfig.model = DEFAULT_CONFIG.modelConfig.model;
+          state.modelConfig.providerName =
+            DEFAULT_CONFIG.modelConfig.providerName;
+        }
       }
 
       return state as any;

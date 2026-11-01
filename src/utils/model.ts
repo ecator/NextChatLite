@@ -44,8 +44,18 @@ const sortModelTable = (models: ReturnType<typeof collectModels>) =>
  * @returns [model, provider] tuple, if no `@` char found, provider is undefined
  */
 export function getModelProvider(modelWithProvider: string): [string, string?] {
-  const [model, provider] = modelWithProvider.split(/@(?!.*@)/);
-  return [model, provider];
+  if (!modelWithProvider) return ["", undefined];
+  if (modelWithProvider.includes("@")) {
+    const [model, provider] = modelWithProvider.split(/@(?!.*@)/);
+    return [model, provider];
+  }
+  if (modelWithProvider.includes("/")) {
+    const parts = modelWithProvider.split("/");
+    const provider = parts[0];
+    const model = parts.slice(1).join("/");
+    return [model, provider];
+  }
+  return [modelWithProvider, undefined];
 }
 
 export function collectModelTable(
@@ -142,16 +152,20 @@ export function collectModelTableWithDefaultModel(
 ) {
   let modelTable = collectModelTable(models, customModels);
   if (defaultModel && defaultModel !== "") {
-    if (defaultModel.includes("@")) {
-      if (defaultModel in modelTable) {
-        modelTable[defaultModel].isDefault = true;
-      }
+    const [targetModel, targetProvider] = getModelProvider(defaultModel);
+    if (defaultModel in modelTable) {
+      modelTable[defaultModel].isDefault = true;
     } else {
       for (const key of Object.keys(modelTable)) {
-        if (
-          modelTable[key].available &&
-          getModelProvider(key)[0] == defaultModel
-        ) {
+        if (!modelTable[key].available) continue;
+        const [mName, mProvider] = getModelProvider(key);
+        const nameMatches =
+          mName.toLowerCase() === targetModel.toLowerCase() ||
+          key.toLowerCase() === defaultModel.toLowerCase();
+        const providerMatches =
+          !targetProvider ||
+          mProvider?.toLowerCase() === targetProvider.toLowerCase();
+        if (nameMatches && providerMatches) {
           modelTable[key].isDefault = true;
           break;
         }

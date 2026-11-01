@@ -1,5 +1,6 @@
 import packageJson from "../../package.json";
 import { DEFAULT_INPUT_TEMPLATE } from "../constant";
+import { getDefaultModel } from "./server";
 
 export const getBuildConfig = () => {
   if (typeof process === "undefined") {
@@ -44,6 +45,7 @@ export const getBuildConfig = () => {
     ...commitInfo,
     buildMode,
     isApp,
+    defaultModel: getDefaultModel(),
     template: process.env.DEFAULT_INPUT_TEMPLATE ?? DEFAULT_INPUT_TEMPLATE,
     title: process.env.NEXTCHATLITE_TITLE || "NextChatLite",
     subTitle:

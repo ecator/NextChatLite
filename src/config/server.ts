@@ -90,6 +90,11 @@ export function getDefaultModel(): string {
     return firstModel;
   }
 
+  if (defaultModel.includes("@")) {
+    const [m, p] = defaultModel.split(/@(?!.*@)/);
+    return `${p}/${m}`;
+  }
+
   if (defaultModel.includes("/")) {
     return defaultModel;
   }

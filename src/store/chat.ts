@@ -308,6 +308,7 @@ export const useChatStore = createPersistStore(
           currentSessionIndex: 0,
           sessions: [session].concat(state.sessions),
         }));
+        get().markUpdate();
       },
 
       nextSession(delta: number) {
@@ -1017,11 +1018,14 @@ export const useChatStore = createPersistStore(
         targetSession: ChatSession,
         updater: (session: ChatSession) => void,
       ) {
-        const sessions = get().sessions;
+        const sessions = [...get().sessions];
         const index = sessions.findIndex((s) => s.id === targetSession.id);
         if (index < 0) return;
-        updater(sessions[index]);
+        const session = { ...sessions[index] };
+        updater(session);
+        sessions[index] = session;
         set(() => ({ sessions }));
+        get().markUpdate();
       },
       async clearAllData() {
         await indexedDBStorage.clear();
@@ -1039,7 +1043,7 @@ export const useChatStore = createPersistStore(
   },
   {
     name: StoreKey.Chat,
-    version: 3.3,
+    version: 3.4,
     migrate(persistedState, version) {
       const state = persistedState as any;
       const newState = JSON.parse(
@@ -1101,6 +1105,19 @@ export const useChatStore = createPersistStore(
           const config = useAppConfig.getState();
           s.mask.modelConfig.compressModel = "";
           s.mask.modelConfig.compressProviderName = "";
+        });
+      }
+
+      if (version < 3.4) {
+        newState.sessions.forEach((s) => {
+          if (
+            s.mask.modelConfig.model === "gpt-4o-mini" &&
+            s.messages.length === 0
+          ) {
+            s.mask.modelConfig.model = DEFAULT_CONFIG.modelConfig.model;
+            s.mask.modelConfig.providerName =
+              DEFAULT_CONFIG.modelConfig.providerName;
+          }
         });
       }
 

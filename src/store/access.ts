@@ -260,8 +260,24 @@ export const useAccessStore = createPersistStore(
           const defaultModel = res.defaultModel ?? "";
           if (defaultModel !== "") {
             const [model, providerName] = getModelProvider(defaultModel);
-            DEFAULT_CONFIG.modelConfig.model = model;
-            DEFAULT_CONFIG.modelConfig.providerName = providerName as any;
+            if (model) {
+              DEFAULT_CONFIG.modelConfig.model = model as any;
+              if (providerName) {
+                DEFAULT_CONFIG.modelConfig.providerName = providerName as any;
+              }
+              const currentConfig = useAppConfig.getState();
+              if (
+                !currentConfig.modelConfig.model ||
+                currentConfig.modelConfig.model === "gpt-4o-mini"
+              ) {
+                currentConfig.update((cfg) => {
+                  cfg.modelConfig.model = model as any;
+                  if (providerName) {
+                    cfg.modelConfig.providerName = providerName as any;
+                  }
+                });
+              }
+            }
           }
 
           return res;

@@ -546,6 +546,11 @@ export function ChatActions(props: {
         session.mask.modelConfig.providerName = nextModel?.provider
           ?.providerName as ServiceProvider;
       });
+      config.update((cfg) => {
+        cfg.modelConfig.model = nextModel.name;
+        cfg.modelConfig.providerName = nextModel?.provider
+          ?.providerName as ServiceProvider;
+      });
       showToast(
         nextModel?.provider?.providerName == "ByteDance"
           ? nextModel.displayName
@@ -643,16 +648,28 @@ export function ChatActions(props: {
             currentProvider={currentProviderName}
             onClose={() => setShowModelSelector(false)}
             onSelect={(modelId, providerName, modelMeta) => {
+              const targetProvider = (modelMeta?.providerName ||
+                modelMeta?.provider ||
+                providerName) as ServiceProvider;
               chatStore.updateTargetSession(session, (session) => {
                 session.mask.modelConfig.model = modelId as ModelType;
-                session.mask.modelConfig.providerName =
-                  providerName as ServiceProvider;
+                session.mask.modelConfig.providerName = targetProvider;
                 session.mask.syncGlobalConfig = false;
                 if (
                   modelMeta?.outputLimit &&
                   session.mask.modelConfig.max_tokens > modelMeta.outputLimit
                 ) {
                   session.mask.modelConfig.max_tokens = modelMeta.outputLimit;
+                }
+              });
+              config.update((cfg) => {
+                cfg.modelConfig.model = modelId as ModelType;
+                cfg.modelConfig.providerName = targetProvider;
+                if (
+                  modelMeta?.outputLimit &&
+                  cfg.modelConfig.max_tokens > modelMeta.outputLimit
+                ) {
+                  cfg.modelConfig.max_tokens = modelMeta.outputLimit;
                 }
               });
               showToast(modelMeta?.name || modelId);
