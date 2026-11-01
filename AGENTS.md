@@ -8,7 +8,7 @@ Welcome to the **NextChatLite** repository. This document outlines the project a
 
 NextChatLite is a modern, web-only AI chat application engineered with:
 
-- **Framework**: Next.js 16 (App Router, Server Components, Edge Route Handlers) & React 19.
+- **Framework**: Next.js 16 (App Router, Server Components, Node.js Route Handlers) & React 19.
 - **State Management**: Zustand v5 with local storage persistence.
 - **AI Streaming Layer**: Vercel AI SDK (`ai`, `@ai-sdk/openai`, `@ai-sdk/google`, `@ai-sdk/anthropic`, `@ai-sdk/react`).
 - **Dynamic Model Catalog**: Live model specifications and capabilities fetched from [models.dev](https://models.dev) via `@opencode-ai/models`.

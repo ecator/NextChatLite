@@ -22,7 +22,7 @@
 
 ## Key Features
 
-- **Next.js 16 & React 19**: App Router architecture with server rendering, edge runtime routes, and optimized client state.
+- **Next.js 16 & React 19**: App Router architecture with server rendering, Node.js runtime routes, and optimized client state.
 - **Vercel AI SDK Core**: Unified multi-provider chat streaming across OpenAI, Google Gemini, Anthropic, and custom endpoints.
 - **Gemini 3 Thinking Signatures**: First-class support for reasoning process streams, thinking budget controls, and collapsible reasoning UI blocks.
 - **Model Catalog**: Model specifications, SDK packages, and multimodal capability discovery configured via `public/providers.json`.
