@@ -1,47 +1,29 @@
 import { useMemo } from "react";
-import { useAccessStore, useAppConfig } from "../store";
+import { useAccessStore } from "../store";
 import { useModelStore } from "../store/models";
-import { collectModelsWithDefaultModel, getModelProvider } from "./model";
+import { getModelProvider } from "./model";
 
 export function useAllModels() {
   const accessStore = useAccessStore();
-  const configStore = useAppConfig();
   const modelStore = useModelStore();
 
   const models = useMemo(() => {
-    const baseModels = collectModelsWithDefaultModel(
-      configStore.models,
-      configStore.customModels,
-      accessStore.defaultModel,
-    );
-
+    // Frontend model selection only presents models present in /providers.json
     const catalogModels = modelStore.getAllModels();
-    const existing = new Set(
-      baseModels.map((m) => `${m.name}@${m.provider?.id}`),
-    );
 
-    const extraModels = [];
-    for (const cm of catalogModels) {
-      const key = `${cm.id}@${cm.provider}`;
-      if (!existing.has(key)) {
-        existing.add(key);
-        extraModels.push({
-          name: cm.id,
-          displayName: cm.name || cm.id,
-          available: true,
-          sorted: 10,
-          provider: {
-            id: cm.provider,
-            providerName: cm.providerName || cm.provider,
-            providerType: cm.provider,
-            sorted: 1,
-          },
-          isDefault: false,
-        });
-      }
-    }
-
-    const all = [...extraModels, ...baseModels];
+    const all = catalogModels.map((cm, idx) => ({
+      name: cm.id,
+      displayName: cm.name || cm.id,
+      available: true,
+      sorted: idx,
+      provider: {
+        id: cm.provider,
+        providerName: cm.providerName || cm.provider,
+        providerType: cm.provider,
+        sorted: 1,
+      },
+      isDefault: false,
+    }));
 
     const rawDefault = accessStore.defaultModel?.trim() || "";
     if (rawDefault) {
@@ -72,12 +54,7 @@ export function useAllModels() {
     }
 
     return all;
-  }, [
-    accessStore.defaultModel,
-    configStore.customModels,
-    configStore.models,
-    modelStore,
-  ]);
+  }, [accessStore.defaultModel, modelStore.models]);
 
   return models;
 }

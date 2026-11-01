@@ -7,6 +7,7 @@ export const DEFAULT_TOPIC = Locale.Store.DefaultTopic;
 import { ModelConfig, useAppConfig } from "./config";
 import { StoreKey } from "../constant";
 import { createPersistStore } from "../utils/store";
+import { validateModelOrFallback } from "./models";
 
 export type Mask = {
   id: string;
@@ -34,13 +35,21 @@ export type MaskState = typeof DEFAULT_MASK_STATE;
 
 export const DEFAULT_MASK_AVATAR = "gpt-bot";
 export function createEmptyMask(): Mask {
+  const globalModelConfig = { ...useAppConfig.getState().modelConfig };
+  const validated = validateModelOrFallback(
+    globalModelConfig.model,
+    globalModelConfig.providerName,
+  );
+  globalModelConfig.model = validated.model as any;
+  globalModelConfig.providerName = validated.providerName as any;
+
   return {
     id: nanoid(),
     avatar: DEFAULT_MASK_AVATAR,
     name: DEFAULT_TOPIC,
     context: [],
     syncGlobalConfig: true, // use global config as default
-    modelConfig: { ...useAppConfig.getState().modelConfig },
+    modelConfig: globalModelConfig,
     lang: getLang(),
     builtin: false,
     createdAt: Date.now(),
@@ -55,12 +64,21 @@ export const useMaskStore = createPersistStore(
     create(mask?: Partial<Mask>) {
       const masks = get().masks;
       const id = nanoid();
-      masks[id] = {
+      const newMask: Mask = {
         ...createEmptyMask(),
         ...mask,
         id,
         builtin: false,
       };
+
+      const validated = validateModelOrFallback(
+        newMask.modelConfig.model,
+        newMask.modelConfig.providerName,
+      );
+      newMask.modelConfig.model = validated.model as any;
+      newMask.modelConfig.providerName = validated.providerName as any;
+
+      masks[id] = newMask;
 
       set(() => ({ masks }));
       get().markUpdate();
@@ -76,6 +94,13 @@ export const useMaskStore = createPersistStore(
 
       const updateMask = { ...mask };
       updater(updateMask);
+      const validated = validateModelOrFallback(
+        updateMask.modelConfig.model,
+        updateMask.modelConfig.providerName,
+      );
+      updateMask.modelConfig.model = validated.model as any;
+      updateMask.modelConfig.providerName = validated.providerName as any;
+
       masks[id] = updateMask;
       set(() => ({ masks }));
       get().markUpdate();
@@ -138,14 +163,22 @@ export const useMaskStore = createPersistStore(
         const builtinMasks: Record<string, Mask> = {};
         const config = useAppConfig.getState();
         builtinList.forEach((m) => {
+          const mergedConfig = {
+            ...config.modelConfig,
+            ...m.modelConfig,
+          };
+          const validated = validateModelOrFallback(
+            mergedConfig.model,
+            mergedConfig.providerName,
+          );
+          mergedConfig.model = validated.model as any;
+          mergedConfig.providerName = validated.providerName as any;
+
           builtinMasks[String(m.id)] = {
             ...m,
             id: String(m.id),
             builtin: true,
-            modelConfig: {
-              ...config.modelConfig,
-              ...m.modelConfig,
-            },
+            modelConfig: mergedConfig,
           } as Mask;
         });
         set(() => ({ builtinMasks }));

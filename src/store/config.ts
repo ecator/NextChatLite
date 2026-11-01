@@ -1,6 +1,7 @@
 import { LLMModel } from "../client/api";
 import defaultProvidersJson from "../../public/providers.json";
 import { getModelProvider } from "../utils/model";
+import { isModelInModelsJson, validateModelOrFallback } from "./models";
 import { getClientConfig } from "../config/client";
 import {
   DEFAULT_INPUT_TEMPLATE,
@@ -257,6 +258,16 @@ export const useAppConfig = createPersistStore(
           state.modelConfig.providerName =
             DEFAULT_CONFIG.modelConfig.providerName;
         }
+      }
+
+      if (!isModelInModelsJson(state.modelConfig?.model)) {
+        const validated = validateModelOrFallback(
+          state.modelConfig?.model,
+          state.modelConfig?.providerName,
+        );
+        state.modelConfig.model = validated.model as ModelType;
+        state.modelConfig.providerName =
+          validated.providerName as ServiceProvider;
       }
 
       return state as any;

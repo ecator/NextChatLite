@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { ServiceProvider } from "@/constant";
 import { ModalConfigValidator, ModelConfig } from "../store";
 import { useModelStore } from "../store/models";
@@ -17,13 +18,40 @@ export function ModelConfigList(props: {
 }) {
   const allModels = useAllModels();
   const modelStore = useModelStore();
-  const currentModelMeta = modelStore.getModel(props.modelConfig.model);
+
+  const currentModelExists = allModels.some(
+    (m) =>
+      m.name.toLowerCase() === props.modelConfig.model.toLowerCase() ||
+      `${m.provider?.id}/${m.name}`.toLowerCase() ===
+        props.modelConfig.model.toLowerCase(),
+  );
+  const defaultModelItem = allModels.find((m) => m.isDefault) || allModels[0];
+  const activeModel = currentModelExists
+    ? props.modelConfig.model
+    : defaultModelItem?.name || props.modelConfig.model;
+  const activeProviderName = currentModelExists
+    ? props.modelConfig?.providerName
+    : (defaultModelItem?.provider?.providerName as ServiceProvider) ||
+      props.modelConfig?.providerName;
+
+  useEffect(() => {
+    if (allModels.length === 0) return;
+    if (!currentModelExists && defaultModelItem) {
+      props.updateConfig((config) => {
+        config.model = defaultModelItem.name as any;
+        config.providerName = (defaultModelItem.provider?.providerName ||
+          defaultModelItem.provider?.id) as ServiceProvider;
+      });
+    }
+  }, [allModels, currentModelExists, defaultModelItem, props.updateConfig]);
+
+  const currentModelMeta = modelStore.getModel(activeModel);
 
   const groupModels = groupBy(
     allModels.filter((v) => v.available),
     "provider.providerName",
   );
-  const value = `${props.modelConfig.model}@${props.modelConfig?.providerName}`;
+  const value = `${activeModel}@${activeProviderName}`;
   const compressModelValue = `${props.modelConfig.compressModel}@${props.modelConfig?.compressProviderName}`;
 
   const maxOutputLimit = currentModelMeta?.outputLimit || 512000;

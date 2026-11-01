@@ -372,10 +372,9 @@ export function parseModelsDevCatalog(
   return result;
 }
 
-const initialCatalog = {
-  ...parseModelsDevCatalog(snapshot),
-  ...parseModelsDevCatalog(defaultProvidersJson),
-};
+const defaultProvidersCatalog = parseModelsDevCatalog(defaultProvidersJson);
+const snapshotCatalog = parseModelsDevCatalog(snapshot);
+const initialCatalog = defaultProvidersCatalog;
 
 export interface ModelStoreState {
   models: Record<string, ModelMetadata>;
@@ -394,6 +393,51 @@ export interface ModelStore extends ModelStoreState {
   reset: () => void;
 }
 
+function resolveFromCatalog(
+  catalog: Record<string, ModelMetadata>,
+  modelId: string,
+): ModelMetadata | undefined {
+  if (!modelId || !catalog) return undefined;
+
+  // 1. Direct key match
+  if (catalog[modelId]) return catalog[modelId];
+
+  // 2. Direct key lowercase match
+  const lowerId = modelId.toLowerCase().trim();
+  if (catalog[lowerId]) return catalog[lowerId];
+
+  // 3. Match by id or name property
+  const all = Object.values(catalog);
+  let found = all.find(
+    (m) =>
+      m.id === modelId ||
+      m.id.toLowerCase() === lowerId ||
+      m.name === modelId ||
+      m.name.toLowerCase() === lowerId,
+  );
+  if (found) return found;
+
+  // 4. If modelId has slash (e.g. google/gemini-3-pro), try short id (gemini-3-pro)
+  if (modelId.includes("/")) {
+    const shortId = modelId.split("/")[1];
+    if (catalog[shortId]) return catalog[shortId];
+    found = all.find(
+      (m) => m.id === shortId || m.id.toLowerCase() === shortId.toLowerCase(),
+    );
+    if (found) return found;
+  }
+
+  // 5. If modelId does not have slash (e.g. gemini-3-pro), try matching suffix
+  found = all.find(
+    (m) =>
+      m.id.toLowerCase().endsWith("/" + lowerId) ||
+      m.name.toLowerCase().endsWith("/" + lowerId),
+  );
+  if (found) return found;
+
+  return undefined;
+}
+
 export const useModelStore = create<ModelStore>((set, get) => ({
   models: initialCatalog,
   loading: false,
@@ -403,45 +447,12 @@ export const useModelStore = create<ModelStore>((set, get) => ({
   getModel(modelId: string): ModelMetadata | undefined {
     if (!modelId || typeof modelId !== "string") return undefined;
     const state = get();
-    const models = state.models;
+    // 1. First search in configured /providers.json models
+    const configured = resolveFromCatalog(state.models, modelId);
+    if (configured) return configured;
 
-    // 1. Direct key match
-    if (models[modelId]) return models[modelId];
-
-    // 2. Direct key lowercase match
-    const lowerId = modelId.toLowerCase().trim();
-    if (models[lowerId]) return models[lowerId];
-
-    // 3. Match by id or name property
-    const all = Object.values(models);
-    let found = all.find(
-      (m) =>
-        m.id === modelId ||
-        m.id.toLowerCase() === lowerId ||
-        m.name === modelId ||
-        m.name.toLowerCase() === lowerId,
-    );
-    if (found) return found;
-
-    // 4. If modelId has slash (e.g. google/gemini-3-pro), try short id (gemini-3-pro)
-    if (modelId.includes("/")) {
-      const shortId = modelId.split("/")[1];
-      if (models[shortId]) return models[shortId];
-      found = all.find(
-        (m) => m.id === shortId || m.id.toLowerCase() === shortId.toLowerCase(),
-      );
-      if (found) return found;
-    }
-
-    // 5. If modelId does not have slash (e.g. gemini-3-pro), try matching suffix
-    found = all.find(
-      (m) =>
-        m.id.toLowerCase().endsWith("/" + lowerId) ||
-        m.name.toLowerCase().endsWith("/" + lowerId),
-    );
-    if (found) return found;
-
-    return undefined;
+    // 2. Fallback to snapshot catalog for model metadata lookup
+    return resolveFromCatalog(snapshotCatalog, modelId);
   },
 
   getProviderModels(provider: string): ModelMetadata[] {
@@ -530,7 +541,7 @@ export const useModelStore = create<ModelStore>((set, get) => ({
       }
     } catch (err: any) {
       console.error("[ModelStore] Failed to load /providers.json:", err);
-      const fallbackParsed = parseModelsDevCatalog(defaultProvidersJson);
+      const fallbackParsed = defaultProvidersCatalog;
       set({
         models:
           Object.keys(fallbackParsed).length > 0
@@ -551,3 +562,101 @@ export const useModelStore = create<ModelStore>((set, get) => ({
     });
   },
 }));
+
+export function isModelInProvidersJson(
+  modelId: string,
+  customModels?: Record<string, ModelMetadata>,
+): boolean {
+  if (!modelId || typeof modelId !== "string") return false;
+  const models = customModels || useModelStore.getState().models;
+  const cleanId = modelId.includes("@")
+    ? modelId.split(/@(?!.*@)/)[0]
+    : modelId;
+  const lowerId = cleanId.toLowerCase().trim();
+
+  // 1. Direct key match
+  if (models[cleanId] || models[lowerId]) return true;
+
+  // 2. Short ID match if cleanId contains slash (e.g. google/gemini-3.5-flash)
+  if (cleanId.includes("/")) {
+    const shortId = cleanId.split("/")[1];
+    if (models[shortId] || models[shortId.toLowerCase()]) return true;
+  }
+
+  // 3. Match against values in catalog
+  const all = Object.values(models);
+  return all.some((m) => {
+    const mIdLower = m.id.toLowerCase();
+    const mNameLower = m.name.toLowerCase();
+    const fullLower = `${m.provider}/${m.id}`.toLowerCase();
+    return (
+      mIdLower === lowerId ||
+      mNameLower === lowerId ||
+      fullLower === lowerId ||
+      (lowerId.includes("/") && lowerId.split("/")[1] === mIdLower)
+    );
+  });
+}
+
+export const isModelInModelsJson = isModelInProvidersJson;
+
+export function resolveDefaultModel(defaultModelCandidate?: string): {
+  model: string;
+  providerName: string;
+} {
+  const store = useModelStore.getState();
+  const all = store.getAllModels();
+
+  let rawDefault = (defaultModelCandidate || "").trim();
+  if (!rawDefault && typeof window !== "undefined") {
+    try {
+      const { useAccessStore } = require("./access");
+      rawDefault = (useAccessStore.getState().defaultModel || "").trim();
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  if (rawDefault && isModelInProvidersJson(rawDefault, store.models)) {
+    const meta = store.getModel(rawDefault);
+    if (meta) {
+      return {
+        model: meta.id,
+        providerName: meta.providerName || meta.provider || "Google",
+      };
+    }
+  }
+
+  if (all.length > 0) {
+    const first = all[0];
+    return {
+      model: first.id,
+      providerName: first.providerName || first.provider || "Google",
+    };
+  }
+
+  return {
+    model: "gemini-3.5-flash",
+    providerName: "Google",
+  };
+}
+
+export function validateModelOrFallback(
+  model?: string,
+  providerName?: string,
+  defaultModelCandidate?: string,
+): {
+  model: string;
+  providerName: string;
+} {
+  if (model && isModelInProvidersJson(model)) {
+    const meta = useModelStore.getState().getModel(model);
+    return {
+      model: meta?.id || model,
+      providerName:
+        meta?.providerName || meta?.provider || providerName || "Google",
+    };
+  }
+
+  return resolveDefaultModel(defaultModelCandidate);
+}

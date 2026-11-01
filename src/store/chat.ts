@@ -27,7 +27,11 @@ import { useAccessStore } from "./access";
 import { collectModelsWithDefaultModel } from "../utils/model";
 import { createEmptyMask, Mask } from "./mask";
 import { usePluginStore } from "./plugin";
-import { useModelStore } from "./models";
+import {
+  isModelInModelsJson,
+  useModelStore,
+  validateModelOrFallback,
+} from "./models";
 
 import { processDataStream } from "@/utils/chat-stream";
 
@@ -106,6 +110,15 @@ export const BOT_HELLO: ChatMessage = createMessage({
 });
 
 function createEmptySession(): ChatSession {
+  const emptyMask = createEmptyMask();
+  const validated = validateModelOrFallback(
+    emptyMask.modelConfig.model,
+    emptyMask.modelConfig.providerName,
+  );
+  emptyMask.modelConfig.model = validated.model as ModelType;
+  emptyMask.modelConfig.providerName =
+    validated.providerName as ServiceProvider;
+
   return {
     id: nanoid(),
     topic: DEFAULT_TOPIC,
@@ -119,7 +132,7 @@ function createEmptySession(): ChatSession {
     lastUpdate: Date.now(),
     lastSummarizeIndex: 0,
 
-    mask: createEmptyMask(),
+    mask: emptyMask,
   };
 }
 
@@ -304,6 +317,14 @@ export const useChatStore = createPersistStore(
           session.topic = mask.name;
         }
 
+        const validated = validateModelOrFallback(
+          session.mask.modelConfig.model,
+          session.mask.modelConfig.providerName,
+        );
+        session.mask.modelConfig.model = validated.model as ModelType;
+        session.mask.modelConfig.providerName =
+          validated.providerName as ServiceProvider;
+
         set((state) => ({
           currentSessionIndex: 0,
           sessions: [session].concat(state.sessions),
@@ -371,6 +392,16 @@ export const useChatStore = createPersistStore(
         }
 
         const session = sessions[index];
+
+        if (session && !isModelInModelsJson(session.mask.modelConfig.model)) {
+          const validated = validateModelOrFallback(
+            session.mask.modelConfig.model,
+            session.mask.modelConfig.providerName,
+          );
+          session.mask.modelConfig.model = validated.model as ModelType;
+          session.mask.modelConfig.providerName =
+            validated.providerName as ServiceProvider;
+        }
 
         return session;
       },
@@ -1120,6 +1151,19 @@ export const useChatStore = createPersistStore(
           }
         });
       }
+
+      // Ensure all restored sessions only use valid models from /providers.json
+      newState.sessions.forEach((s) => {
+        if (!isModelInModelsJson(s.mask?.modelConfig?.model)) {
+          const validated = validateModelOrFallback(
+            s.mask?.modelConfig?.model,
+            s.mask?.modelConfig?.providerName,
+          );
+          s.mask.modelConfig.model = validated.model as ModelType;
+          s.mask.modelConfig.providerName =
+            validated.providerName as ServiceProvider;
+        }
+      });
 
       return newState as any;
     },

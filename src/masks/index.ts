@@ -1,4 +1,5 @@
 import { Mask } from "../store/mask";
+import { isModelInModelsJson, validateModelOrFallback } from "../store/models";
 
 import { type BuiltinMask } from "./typing";
 export { type BuiltinMask } from "./typing";
@@ -15,6 +16,17 @@ export const BUILTIN_MASK_STORE = {
   add(m: BuiltinMask) {
     const id = String(m.id || this.buildinId++);
     const mask = { ...m, id, builtin: true };
+    if (
+      mask.modelConfig?.model &&
+      !isModelInModelsJson(mask.modelConfig.model)
+    ) {
+      const validated = validateModelOrFallback(
+        mask.modelConfig.model,
+        mask.modelConfig.providerName,
+      );
+      mask.modelConfig.model = validated.model as any;
+      mask.modelConfig.providerName = validated.providerName as any;
+    }
     this.masks[mask.id] = mask;
     return mask;
   },

@@ -105,6 +105,7 @@ import { prettyObject } from "../utils/format";
 import { ExportMessageModal } from "./exporter";
 import { getClientConfig } from "../config/client";
 import { useAllModels } from "../utils/hooks";
+import { isModelInModelsJson } from "../store/models";
 import { MultimodalContent } from "../client/api";
 
 import { isEmpty } from "lodash-es";
@@ -540,11 +541,10 @@ export function ChatActions(props: {
   ]);
 
   useEffect(() => {
-    // if current model is not available
-    // switch to first available model
+    // if current model is not in /providers.json, switch to DEFAULT_MODEL
     const isUnavailableModel =
-      !models.some((m) => m.name === currentModel) &&
-      !useModelStore.getState().getModel(currentModel);
+      !isModelInModelsJson(currentModel) ||
+      !models.some((m) => m.name === currentModel);
     if (isUnavailableModel && models.length > 0) {
       // show next model to default model if exist
       const nextModel = models.find((model) => model.isDefault) || models[0];
@@ -566,7 +566,7 @@ export function ChatActions(props: {
         );
       }
     }
-  }, [currentModel, models, session.id]);
+  }, [allModels, currentModel, models, session]);
 
   return (
     <div className={styles["chat-input-actions"]}>
