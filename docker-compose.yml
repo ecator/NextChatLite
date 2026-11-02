@@ -1,8 +1,5 @@
-version: "3.9"
 services:
   nextchat-lite:
-    profiles: [ "no-proxy" ]
-    container_name: nextchat-lite
     image: nextchat-lite
     ports:
       - 3000:3000
@@ -11,23 +8,6 @@ services:
       - OPENAI_API_KEY=$OPENAI_API_KEY
       - ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY
       - DEEPSEEK_API_KEY=$DEEPSEEK_API_KEY
-      - NEXTCHATLITE_DEFAULT_MODEL=$NEXTCHATLITE_DEFAULT_MODEL
-      - NEXTCHATLITE_TITLE=$NEXTCHATLITE_TITLE
-      - NEXTCHATLITE_SUBTITLE=$NEXTCHATLITE_SUBTITLE
-      - NEXTCHATLITE_DEFAULT_INPUT_TEMPLATE=$NEXTCHATLITE_DEFAULT_INPUT_TEMPLATE
-
-  nextchat-lite-proxy:
-    profiles: [ "proxy" ]
-    container_name: nextchat-lite-proxy
-    image: nextchat-lite
-    ports:
-      - 3000:3000
-    environment:
-      - GOOGLE_API_KEY=$GOOGLE_API_KEY
-      - OPENAI_API_KEY=$OPENAI_API_KEY
-      - ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY
-      - DEEPSEEK_API_KEY=$DEEPSEEK_API_KEY
-      - PROXY_URL=$PROXY_URL
       - NEXTCHATLITE_DEFAULT_MODEL=$NEXTCHATLITE_DEFAULT_MODEL
       - NEXTCHATLITE_TITLE=$NEXTCHATLITE_TITLE
       - NEXTCHATLITE_SUBTITLE=$NEXTCHATLITE_SUBTITLE

@@ -3,8 +3,8 @@ import type { NextConfig } from "next";
 const mode = process.env.BUILD_MODE as NextConfig["output"];
 
 const nextConfig: NextConfig = {
+  output: mode ?? "standalone",
   agentRules: false,
-  ...(mode ? { output: mode } : {}),
   turbopack: {
     rules: {
       "*.svg": {
