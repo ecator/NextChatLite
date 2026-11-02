@@ -30,12 +30,15 @@ export type GetStoreState<T> = T extends { getState: () => infer U }
   ? NonFunctionFields<U>
   : never;
 
+// Resolve store setters lazily: this module participates in a circular import
+// with the stores, so reading `.setState` at module evaluation time can hit an
+// uninitialized store binding in production bundles.
 const LocalStateSetters = {
-  [StoreKey.Chat]: useChatStore.setState,
-  [StoreKey.Access]: useAccessStore.setState,
-  [StoreKey.Config]: useAppConfig.setState,
-  [StoreKey.Mask]: useMaskStore.setState,
-  [StoreKey.Prompt]: usePromptStore.setState,
+  [StoreKey.Chat]: (state: any) => useChatStore.setState(state),
+  [StoreKey.Access]: (state: any) => useAccessStore.setState(state),
+  [StoreKey.Config]: (state: any) => useAppConfig.setState(state),
+  [StoreKey.Mask]: (state: any) => useMaskStore.setState(state),
+  [StoreKey.Prompt]: (state: any) => usePromptStore.setState(state),
 } as const;
 
 const LocalStateGetters = {

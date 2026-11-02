@@ -2,6 +2,14 @@ import { create } from "zustand";
 import snapshot from "@opencode-ai/models/snapshot";
 import defaultProvidersJson from "../../public/providers.json";
 
+// Late-bound accessor for the server-provided default model. The access store
+// registers it on creation, which avoids a circular import (and a CommonJS
+// `require`, which breaks Turbopack production module merging).
+let defaultModelGetter: (() => string | undefined) | undefined;
+export function registerDefaultModelGetter(getter: () => string | undefined) {
+  defaultModelGetter = getter;
+}
+
 export interface ModelMetadata {
   id: string;
   name: string;
@@ -610,8 +618,7 @@ export function resolveDefaultModel(defaultModelCandidate?: string): {
   let rawDefault = (defaultModelCandidate || "").trim();
   if (!rawDefault && typeof window !== "undefined") {
     try {
-      const { useAccessStore } = require("./access");
-      rawDefault = (useAccessStore.getState().defaultModel || "").trim();
+      rawDefault = (defaultModelGetter?.() || "").trim();
     } catch (e) {
       // ignore
     }

@@ -24,6 +24,7 @@ import { createPersistStore } from "../utils/store";
 import { ensure } from "../utils/clone";
 import { DEFAULT_CONFIG, useAppConfig } from "./config";
 import { getModelProvider } from "../utils/model";
+import { registerDefaultModelGetter } from "./models";
 
 let fetchState = 0; // 0 not fetch, 1 fetching, 2 done
 
@@ -323,3 +324,5 @@ export const useAccessStore = createPersistStore(
     },
   },
 );
+
+registerDefaultModelGetter(() => useAccessStore.getState().defaultModel);
