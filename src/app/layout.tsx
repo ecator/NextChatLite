@@ -11,7 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const serverConfig = getServerSideConfig();
   return {
     title: serverConfig.title,
-    description: "Your personal ChatGPT Chat Bot.",
+    description: serverConfig.subTitle,
     appleWebApp: {
       title: serverConfig.title,
       statusBarStyle: "default",

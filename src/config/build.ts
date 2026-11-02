@@ -54,8 +54,7 @@ export const getBuildConfig = () => {
       process.env.NEXTCHATLITE_DEFAULT_SYSTEM_TEMPLATE ??
       DEFAULT_SYSTEM_TEMPLATE,
     title: process.env.NEXTCHATLITE_TITLE || "NextChatLite",
-    subTitle:
-      process.env.NEXTCHATLITE_SUBTITLE || "Build your own AI assistant.",
+    subTitle: process.env.NEXTCHATLITE_SUBTITLE || "Your own AI assistant.",
     helpUrl: process.env.NEXTCHATLITE_HELP_URL?.trim() || undefined,
   };
 };

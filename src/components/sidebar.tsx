@@ -177,7 +177,7 @@ export function SideBarHeader(props: {
 }) {
   const {
     title = "NextChatLite",
-    subTitle = "Build your own AI assistant.",
+    subTitle = "Your own AI assistant.",
     logo,
     children,
     shouldNarrow,
@@ -237,10 +237,7 @@ export function SideBar(props: { className?: string }) {
   const clientConfig = useMemo(() => getClientConfig(), []);
 
   const title = accessStore.title || clientConfig?.title || "NextChatLite";
-  const subTitle =
-    accessStore.subTitle ||
-    clientConfig?.subTitle ||
-    "Build your own AI assistant.";
+  const subTitle = accessStore.subTitle || clientConfig?.subTitle;
   const helpUrl = (accessStore.helpUrl || clientConfig?.helpUrl || "").trim();
 
   useEffect(() => {

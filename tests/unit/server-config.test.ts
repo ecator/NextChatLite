@@ -87,14 +87,14 @@ describe("NEXTCHATLITE_TITLE and NEXTCHATLITE_SUBTITLE config", () => {
     process.env = originalEnv;
   });
 
-  test("defaults title to NextChatLite and subTitle to Build your own AI assistant.", () => {
+  test("defaults title to NextChatLite and subTitle to Your own AI assistant.", () => {
     const serverConfig = getServerSideConfig();
     expect(serverConfig.title).toBe("NextChatLite");
-    expect(serverConfig.subTitle).toBe("Build your own AI assistant.");
+    expect(serverConfig.subTitle).toBe("Your own AI assistant.");
 
     const buildConfig = getBuildConfig();
     expect(buildConfig.title).toBe("NextChatLite");
-    expect(buildConfig.subTitle).toBe("Build your own AI assistant.");
+    expect(buildConfig.subTitle).toBe("Your own AI assistant.");
   });
 
   test("uses custom NEXTCHATLITE_TITLE and NEXTCHATLITE_SUBTITLE when provided", () => {
