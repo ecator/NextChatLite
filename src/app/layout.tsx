@@ -5,31 +5,34 @@ import { getClientConfig } from "@/config/client";
 import type { Metadata, Viewport } from "next";
 import { getServerSideConfig } from "@/config/server";
 
-const serverConfig = getServerSideConfig();
+export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: serverConfig.title,
-  description: "Your personal ChatGPT Chat Bot.",
-  appleWebApp: {
+export async function generateMetadata(): Promise<Metadata> {
+  const serverConfig = getServerSideConfig();
+  return {
     title: serverConfig.title,
-    statusBarStyle: "default",
-  },
-  icons: {
-    icon: [
-      {
-        url: "/favicon.svg",
-        type: "image/svg+xml",
-      },
-    ],
-    shortcut: ["/favicon.svg"],
-    apple: [
-      {
-        url: "/favicon.svg",
-        type: "image/svg+xml",
-      },
-    ],
-  },
-};
+    description: "Your personal ChatGPT Chat Bot.",
+    appleWebApp: {
+      title: serverConfig.title,
+      statusBarStyle: "default",
+    },
+    icons: {
+      icon: [
+        {
+          url: "/favicon.svg",
+          type: "image/svg+xml",
+        },
+      ],
+      shortcut: ["/favicon.svg"],
+      apple: [
+        {
+          url: "/favicon.svg",
+          type: "image/svg+xml",
+        },
+      ],
+    },
+  };
+}
 
 export const viewport: Viewport = {
   width: "device-width",
