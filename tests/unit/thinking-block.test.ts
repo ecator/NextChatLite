@@ -1,7 +1,40 @@
+import React from "react";
+import { render, screen, act } from "@testing-library/react";
+
+jest.mock("@/components/markdown", () => {
+  const MockMarkdownContent = ({ content }: { content: string }) =>
+    React.createElement("div", { "data-testid": "markdown-content" }, content);
+  MockMarkdownContent.displayName = "MockMarkdownContent";
+  return { MarkdownContent: MockMarkdownContent };
+});
+
+jest.mock("@/icons/brain.svg", () => {
+  const MockBrainIcon = () =>
+    React.createElement("svg", { "data-testid": "brain-icon" });
+  MockBrainIcon.displayName = "MockBrainIcon";
+  return MockBrainIcon;
+});
+jest.mock("@/icons/down.svg", () => {
+  const MockDownIcon = () => React.createElement("svg");
+  MockDownIcon.displayName = "MockDownIcon";
+  return MockDownIcon;
+});
+jest.mock("@/icons/copy.svg", () => {
+  const MockCopyIcon = () => React.createElement("svg");
+  MockCopyIcon.displayName = "MockCopyIcon";
+  return MockCopyIcon;
+});
+jest.mock("@/icons/confirm.svg", () => {
+  const MockConfirmIcon = () => React.createElement("svg");
+  MockConfirmIcon.displayName = "MockConfirmIcon";
+  return MockConfirmIcon;
+});
+
 import {
+  ThinkingBlock,
   formatThinkingDuration,
   extractPlainText,
-} from "@/utils/thinking";
+} from "@/components/chat/thinking-block";
 
 describe("ThinkingBlock Utilities", () => {
   describe("formatThinkingDuration", () => {
@@ -64,7 +97,9 @@ describe("ThinkingBlock Utilities", () => {
       expect(extractPlainText(inputWithLang)).toBe("const a = 1;");
 
       const inputWithoutLang = "```\nraw text inside code block\n```";
-      expect(extractPlainText(inputWithoutLang)).toBe("raw text inside code block");
+      expect(extractPlainText(inputWithoutLang)).toBe(
+        "raw text inside code block",
+      );
 
       const pythonInput = "```python\ndef run():\n    return True\n```";
       expect(extractPlainText(pythonInput)).toBe("def run():\n    return True");
@@ -88,7 +123,8 @@ describe("ThinkingBlock Utilities", () => {
     });
 
     test("handles massive reasoning chain efficiently without hanging", () => {
-      const chunk = "Step $k = 1$: compute formula.\n```ts\nconst k = 1;\n```\n";
+      const chunk =
+        "Step $k = 1$: compute formula.\n```ts\nconst k = 1;\n```\n";
       const huge = chunk.repeat(1000);
       const start = performance.now();
       const result = extractPlainText(huge);
@@ -97,6 +133,64 @@ describe("ThinkingBlock Utilities", () => {
       expect(elapsed).toBeLessThan(50);
       expect(result).not.toContain("```");
       expect(result).not.toContain("$");
+    });
+  });
+
+  describe("ThinkingBlock Component Streaming & Duration", () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    test("stops calculating thinking time when duration is provided even if streaming is true", () => {
+      const { rerender } = render(
+        React.createElement(ThinkingBlock, {
+          reasoning: "Thinking step...",
+          streaming: true,
+        }),
+      );
+
+      // Initially streaming without duration -> shows active thinking timer
+      expect(screen.getByText(/Thinking \(/)).toBeInTheDocument();
+
+      act(() => {
+        jest.advanceTimersByTime(2000);
+      });
+
+      // When formal output starts, reasoningDuration is set (e.g. 2500ms)
+      // Even though streaming remains true for the entire message, ThinkingBlock must stop ticking
+      rerender(
+        React.createElement(ThinkingBlock, {
+          reasoning: "Thinking step...",
+          streaming: true,
+          duration: 2500,
+        }),
+      );
+
+      expect(screen.getByText("Thought for 2.5s")).toBeInTheDocument();
+
+      // Advance time by 10 seconds during formal output
+      act(() => {
+        jest.advanceTimersByTime(10000);
+      });
+
+      // Duration should remain 2.5s and NOT include formal output time
+      expect(screen.getByText("Thought for 2.5s")).toBeInTheDocument();
+    });
+
+    test("initializes directly with fixed duration when duration is provided", () => {
+      render(
+        React.createElement(ThinkingBlock, {
+          reasoning: "Pre-existing reasoning",
+          streaming: true,
+          duration: 4200,
+        }),
+      );
+
+      expect(screen.getByText("Thought for 4.2s")).toBeInTheDocument();
     });
   });
 });

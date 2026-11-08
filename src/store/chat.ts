@@ -578,6 +578,7 @@ export const useChatStore = createPersistStore(
 
         (async () => {
           let reasoningStartTime: number | undefined = undefined;
+          let accumulatedReasoningDuration = 0;
           try {
             const res = await fetch(ApiPath.Chat, {
               method: "POST",
@@ -601,13 +602,11 @@ export const useChatStore = createPersistStore(
               onTextPart: (textDelta) => {
                 botMessage.streaming = true;
                 botMessage.content += textDelta;
-                if (
-                  botMessage.reasoning &&
-                  botMessage.reasoningDuration === undefined &&
-                  reasoningStartTime !== undefined
-                ) {
-                  botMessage.reasoningDuration =
+                if (botMessage.reasoning && reasoningStartTime !== undefined) {
+                  accumulatedReasoningDuration +=
                     Date.now() - reasoningStartTime;
+                  botMessage.reasoningDuration = accumulatedReasoningDuration;
+                  reasoningStartTime = undefined;
                 }
                 get().updateTargetSession(session, (s) => {
                   s.messages = s.messages.concat();
@@ -626,6 +625,12 @@ export const useChatStore = createPersistStore(
               },
               onToolCallPart: (toolCall) => {
                 botMessage.streaming = true;
+                if (botMessage.reasoning && reasoningStartTime !== undefined) {
+                  accumulatedReasoningDuration +=
+                    Date.now() - reasoningStartTime;
+                  botMessage.reasoningDuration = accumulatedReasoningDuration;
+                  reasoningStartTime = undefined;
+                }
                 botMessage.tools = botMessage.tools || [];
                 botMessage.tools.push({
                   id: toolCall.toolCallId,
@@ -672,13 +677,11 @@ export const useChatStore = createPersistStore(
                 botMessage.content = botMessage.content
                   ? `${botMessage.content}\n\n${errText}`
                   : errText;
-                if (
-                  botMessage.reasoning &&
-                  botMessage.reasoningDuration === undefined &&
-                  reasoningStartTime !== undefined
-                ) {
-                  botMessage.reasoningDuration =
+                if (botMessage.reasoning && reasoningStartTime !== undefined) {
+                  accumulatedReasoningDuration +=
                     Date.now() - reasoningStartTime;
+                  botMessage.reasoningDuration = accumulatedReasoningDuration;
+                  reasoningStartTime = undefined;
                 }
                 botMessage.date = new Date().toLocaleString();
                 ChatControllerPool.remove(
@@ -691,13 +694,11 @@ export const useChatStore = createPersistStore(
               },
               onFinishMessagePart: () => {
                 botMessage.streaming = false;
-                if (
-                  botMessage.reasoning &&
-                  botMessage.reasoningDuration === undefined &&
-                  reasoningStartTime !== undefined
-                ) {
-                  botMessage.reasoningDuration =
+                if (botMessage.reasoning && reasoningStartTime !== undefined) {
+                  accumulatedReasoningDuration +=
                     Date.now() - reasoningStartTime;
+                  botMessage.reasoningDuration = accumulatedReasoningDuration;
+                  reasoningStartTime = undefined;
                 }
                 botMessage.date = new Date().toLocaleString();
                 ChatControllerPool.remove(
@@ -710,12 +711,10 @@ export const useChatStore = createPersistStore(
 
             if (botMessage.streaming) {
               botMessage.streaming = false;
-              if (
-                botMessage.reasoning &&
-                botMessage.reasoningDuration === undefined &&
-                reasoningStartTime !== undefined
-              ) {
-                botMessage.reasoningDuration = Date.now() - reasoningStartTime;
+              if (botMessage.reasoning && reasoningStartTime !== undefined) {
+                accumulatedReasoningDuration += Date.now() - reasoningStartTime;
+                botMessage.reasoningDuration = accumulatedReasoningDuration;
+                reasoningStartTime = undefined;
               }
               botMessage.date = botMessage.date || new Date().toLocaleString();
               ChatControllerPool.remove(
@@ -741,12 +740,10 @@ export const useChatStore = createPersistStore(
                 ? `${botMessage.content}\n\n${errText}`
                 : errText;
             }
-            if (
-              botMessage.reasoning &&
-              botMessage.reasoningDuration === undefined &&
-              reasoningStartTime !== undefined
-            ) {
-              botMessage.reasoningDuration = Date.now() - reasoningStartTime;
+            if (botMessage.reasoning && reasoningStartTime !== undefined) {
+              accumulatedReasoningDuration += Date.now() - reasoningStartTime;
+              botMessage.reasoningDuration = accumulatedReasoningDuration;
+              reasoningStartTime = undefined;
             }
             botMessage.date = botMessage.date || new Date().toLocaleString();
             ChatControllerPool.remove(

@@ -23,10 +23,13 @@ export interface ThinkingBlockProps {
 export function ThinkingBlock(props: ThinkingBlockProps) {
   const { reasoning, streaming = false, duration: initialDuration } = props;
 
+  // Active thinking streaming occurs when streaming is true AND final reasoning duration has not been finalized yet
+  const isStreaming = Boolean(streaming && initialDuration === undefined);
+
   const [copied, setCopied] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
     if (props.defaultCollapsed !== undefined) return props.defaultCollapsed;
-    return !streaming; // If streaming, default expanded; otherwise collapsed
+    return !isStreaming; // If streaming, default expanded; otherwise collapsed
   });
 
   const userInteractedRef = useRef<boolean>(false);
@@ -36,16 +39,16 @@ export function ThinkingBlock(props: ThinkingBlockProps) {
   );
   const currentLang = getLang();
 
-  // If initialDuration changes externally (e.g. hydrated from message), update elapsedMs
+  // If initialDuration changes externally (e.g. hydrated from message or stream ended), update elapsedMs
   useEffect(() => {
-    if (initialDuration !== undefined && !streaming) {
+    if (initialDuration !== undefined) {
       setElapsedMs(initialDuration);
     }
-  }, [initialDuration, streaming]);
+  }, [initialDuration]);
 
   // Handle live ticking timer during active streaming
   useEffect(() => {
-    if (!streaming) return;
+    if (!isStreaming) return;
 
     // Reset start time anchor
     startTimeRef.current = Date.now();
@@ -55,11 +58,11 @@ export function ThinkingBlock(props: ThinkingBlockProps) {
     }, 100);
 
     return () => clearInterval(timer);
-  }, [streaming]);
+  }, [isStreaming]);
 
   // Handle auto-collapse transition when streaming completes
   useEffect(() => {
-    if (!streaming) {
+    if (!isStreaming) {
       // Auto-collapse if user hasn't manually interacted (F16-3 & B16-4)
       if (!userInteractedRef.current) {
         setIsCollapsed(true);
@@ -70,7 +73,7 @@ export function ThinkingBlock(props: ThinkingBlockProps) {
         setIsCollapsed(false);
       }
     }
-  }, [streaming]);
+  }, [isStreaming]);
 
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -87,7 +90,7 @@ export function ThinkingBlock(props: ThinkingBlockProps) {
   };
 
   const durationLabel = useMemo(() => {
-    if (streaming) {
+    if (isStreaming) {
       const sec = (Math.max(0, elapsedMs) / 1000).toFixed(1);
       switch (currentLang) {
         case "cn":
@@ -102,7 +105,7 @@ export function ThinkingBlock(props: ThinkingBlockProps) {
       }
     }
     return formatThinkingDuration(elapsedMs, currentLang);
-  }, [streaming, elapsedMs, currentLang]);
+  }, [isStreaming, elapsedMs, currentLang]);
 
   // Boundary B16-3: Never render if reasoning is empty or whitespace-only
   if (!reasoning || reasoning.trim().length === 0) {
@@ -115,7 +118,7 @@ export function ThinkingBlock(props: ThinkingBlockProps) {
         styles["thinking-block"],
         {
           [styles["collapsed"]]: isCollapsed,
-          [styles["streaming"]]: streaming,
+          [styles["streaming"]]: isStreaming,
         },
         props.className,
       )}
@@ -137,7 +140,7 @@ export function ThinkingBlock(props: ThinkingBlockProps) {
           <span className={styles["thinking-icon"]}>
             <BrainIcon />
           </span>
-          {streaming && <span className={styles["thinking-pulse"]} />}
+          {isStreaming && <span className={styles["thinking-pulse"]} />}
           <span className={styles["thinking-label"]}>{durationLabel}</span>
         </div>
 
