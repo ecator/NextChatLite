@@ -235,6 +235,25 @@ const ar: PartialLocaleType = {
       SubTitle:
         "عندما يتجاوز طول الرسائل التاريخية غير المضغوطة هذه القيمة، سيتم الضغط",
     },
+    IncludeThinking: {
+      Title: "تضمين التفكير",
+      SubTitle:
+        "تضمين عملية التفكير والاستدلال للنموذج في الاستجابة وبثها إلى العميل",
+    },
+    ThinkingBudget: {
+      Title: "ميزانية التفكير (thinking_budget)",
+      SubTitle:
+        "الحد الأقصى لرموز التفكير المخصصة للاستدلال (0 = افتراضي/تلقائي)",
+    },
+    ThinkingLevel: {
+      Title: "مستوى التفكير (thinking_level)",
+      SubTitle: "مستوى شدة التفكير المنطقي للنماذج المدعومة",
+      Auto: "افتراضي / تلقائي",
+      Minimal: "أدنى (minimal)",
+      Low: "منخفض (low)",
+      Medium: "متوسط (medium)",
+      High: "مرتفع (high)",
+    },
 
     Usage: {
       Title: "التحقق من الرصيد",

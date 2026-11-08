@@ -407,4 +407,36 @@ describe("includeThinking feature and stream propagation", () => {
       expect(outboundBody.reasoning_effort).toBe("high");
     });
   });
+
+  describe("ThinkingLevel and ThinkingBudget i18n localization", () => {
+    test("locales define ThinkingLevel and ThinkingBudget in cn and en", () => {
+      const cn = require("@/locales/cn").default;
+      const en = require("@/locales/en").default;
+
+      expect(cn.Settings.ThinkingLevel.Title).toBe("思考强度 (thinking_level)");
+      expect(cn.Settings.ThinkingLevel.Auto).toBe("默认 / 自动");
+      expect(cn.Settings.ThinkingLevel.High).toBe("高 (high)");
+      expect(cn.Settings.ThinkingBudget.Title).toBe(
+        "思考预算 (thinking_budget)",
+      );
+
+      expect(en.Settings.ThinkingLevel.Title).toBe("Thinking Level");
+      expect(en.Settings.ThinkingLevel.Auto).toBe("Default / Auto");
+      expect(en.Settings.ThinkingLevel.High).toBe("High");
+      expect(en.Settings.ThinkingBudget.Title).toBe("Thinking Budget");
+    });
+
+    test("all 20 locale dictionaries have ThinkingLevel and ThinkingBudget", () => {
+      const { AllLangs } = require("@/locales");
+      expect(AllLangs.length).toBe(20);
+
+      for (const lang of AllLangs) {
+        const dict = require(`@/locales/${lang}`).default;
+        expect(dict.Settings?.ThinkingLevel).toBeDefined();
+        expect(dict.Settings?.ThinkingLevel?.Title).toBeTruthy();
+        expect(dict.Settings?.ThinkingBudget).toBeDefined();
+        expect(dict.Settings?.ThinkingBudget?.Title).toBeTruthy();
+      }
+    });
+  });
 });

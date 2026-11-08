@@ -238,6 +238,25 @@ const id: PartialLocaleType = {
       SubTitle:
         "Ketika pesan sejarah yang tidak terkompresi melebihi nilai ini, akan dikompresi",
     },
+    IncludeThinking: {
+      Title: "Sertakan Pemikiran",
+      SubTitle:
+        "Sertakan proses penalaran model dalam respons dan kirimkan ke klien",
+    },
+    ThinkingBudget: {
+      Title: "Anggaran Berpikir (thinking_budget)",
+      SubTitle:
+        "Batas token maksimum yang dialokasikan untuk penalaran (0 = bawaan/otomatis)",
+    },
+    ThinkingLevel: {
+      Title: "Tingkat Berpikir (thinking_level)",
+      SubTitle: "Tingkat intensitas penalaran untuk model yang mendukung",
+      Auto: "Bawaan / Otomatis",
+      Minimal: "Minimal",
+      Low: "Rendah",
+      Medium: "Sedang",
+      High: "Tinggi",
+    },
 
     Usage: {
       Title: "Cek Saldo",

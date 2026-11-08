@@ -253,6 +253,24 @@ const ko: PartialLocaleType = {
       Title: "히스토리 메시지 길이 압축 임계값",
       SubTitle: "압축되지 않은 히스토리 메시지가 이 값을 초과하면 압축 수행",
     },
+    IncludeThinking: {
+      Title: "사고 과정 포함",
+      SubTitle:
+        "응답에 모델의 사고 및 추론 과정을 포함하여 클라이언트에 스트리밍합니다",
+    },
+    ThinkingBudget: {
+      Title: "사고 예산 (thinking_budget)",
+      SubTitle: "추론에 할당된 최대 토큰 예산 (0 = 기본/자동)",
+    },
+    ThinkingLevel: {
+      Title: "사고 수준 (thinking_level)",
+      SubTitle: "사고 지원 모델의 추론 강도 수준",
+      Auto: "기본 / 자동",
+      Minimal: "최소 (minimal)",
+      Low: "낮음 (low)",
+      Medium: "중간 (medium)",
+      High: "높음 (high)",
+    },
 
     Usage: {
       Title: "잔액 조회",

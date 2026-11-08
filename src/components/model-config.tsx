@@ -188,11 +188,11 @@ export function ModelConfigList(props: {
           </ListItem>
           {currentModelMeta.reasoningType === "budget" ? (
             <ListItem
-              title="Thinking Budget"
-              subTitle="Max token budget allocated for reasoning (0 = default/auto)"
+              title={Locale.Settings.ThinkingBudget.Title}
+              subTitle={Locale.Settings.ThinkingBudget.SubTitle}
             >
               <input
-                aria-label="Thinking Budget"
+                aria-label={Locale.Settings.ThinkingBudget.Title}
                 type="number"
                 min={0}
                 max={65536}
@@ -208,11 +208,11 @@ export function ModelConfigList(props: {
             </ListItem>
           ) : (
             <ListItem
-              title="Thinking Level"
-              subTitle="Reasoning intensity level for thinking-capable models"
+              title={Locale.Settings.ThinkingLevel.Title}
+              subTitle={Locale.Settings.ThinkingLevel.SubTitle}
             >
               <Select
-                aria-label="Thinking Level"
+                aria-label={Locale.Settings.ThinkingLevel.Title}
                 value={props.modelConfig.thinkingLevel ?? "default"}
                 onChange={(e) => {
                   const val = e.currentTarget.value;
@@ -222,11 +222,19 @@ export function ModelConfigList(props: {
                   });
                 }}
               >
-                <option value="default">Default / Auto</option>
-                <option value="minimal">Minimal</option>
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
+                <option value="default">
+                  {Locale.Settings.ThinkingLevel.Auto}
+                </option>
+                <option value="minimal">
+                  {Locale.Settings.ThinkingLevel.Minimal}
+                </option>
+                <option value="low">{Locale.Settings.ThinkingLevel.Low}</option>
+                <option value="medium">
+                  {Locale.Settings.ThinkingLevel.Medium}
+                </option>
+                <option value="high">
+                  {Locale.Settings.ThinkingLevel.High}
+                </option>
               </Select>
             </ListItem>
           )}

@@ -244,6 +244,25 @@ const de: PartialLocaleType = {
       SubTitle:
         "Wenn die unkomprimierten historischen Nachrichten diesen Wert überschreiten, wird komprimiert",
     },
+    IncludeThinking: {
+      Title: "Denkprozess einbeziehen",
+      SubTitle:
+        "Denk- und Argumentationsprozess des Modells in die Antwort einbeziehen und an den Client senden",
+    },
+    ThinkingBudget: {
+      Title: "Denkbudget (thinking_budget)",
+      SubTitle:
+        "Maximales Token-Budget für logisches Denken (0 = Standard/Auto)",
+    },
+    ThinkingLevel: {
+      Title: "Denkintensität (thinking_level)",
+      SubTitle: "Denkintensitätsstufe für denkfähige Modelle",
+      Auto: "Standard / Auto",
+      Minimal: "Minimal",
+      Low: "Niedrig",
+      Medium: "Mittel",
+      High: "Hoch",
+    },
 
     Usage: {
       Title: "Guthabenabfrage",

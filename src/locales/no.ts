@@ -242,6 +242,25 @@ const no: PartialLocaleType = {
       SubTitle:
         "Når ukomprimerte historiske meldinger overskrider denne verdien, vil de bli komprimert",
     },
+    IncludeThinking: {
+      Title: "Inkluder tenking",
+      SubTitle:
+        "Inkluder modellens resonneringsprosess i svaret og strøm til klienten",
+    },
+    ThinkingBudget: {
+      Title: "Tenkebudsjett (thinking_budget)",
+      SubTitle:
+        "Maksimalt tokenbudsjett tildelt resonnering (0 = standard/auto)",
+    },
+    ThinkingLevel: {
+      Title: "Tenkenivå (thinking_level)",
+      SubTitle: "Resonneringsintensitet for tenkekompatible modeller",
+      Auto: "Standard / Auto",
+      Minimal: "Minimal",
+      Low: "Lav",
+      Medium: "Middels",
+      High: "Høy",
+    },
 
     Usage: {
       Title: "Saldoforespørsel",

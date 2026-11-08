@@ -248,6 +248,26 @@ const it: PartialLocaleType = {
       SubTitle:
         "Quando i messaggi storici non compressi superano questo valore, verranno compressi",
     },
+    IncludeThinking: {
+      Title: "Includi pensiero",
+      SubTitle:
+        "Includi il processo di ragionamento del modello nella risposta e trasmettilo al client",
+    },
+    ThinkingBudget: {
+      Title: "Budget di pensiero (thinking_budget)",
+      SubTitle:
+        "Budget massimo di token allocato per il ragionamento (0 = predefinito/auto)",
+    },
+    ThinkingLevel: {
+      Title: "Livello di pensiero (thinking_level)",
+      SubTitle:
+        "Livello di intensità del ragionamento per i modelli supportati",
+      Auto: "Predefinito / Auto",
+      Minimal: "Minimo",
+      Low: "Basso",
+      Medium: "Medio",
+      High: "Alto",
+    },
 
     Usage: {
       Title: "Verifica saldo",

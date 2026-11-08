@@ -236,6 +236,25 @@ const vi: PartialLocaleType = {
       SubTitle:
         "Khi tin nhắn lịch sử chưa nén vượt quá giá trị này, sẽ thực hiện nén",
     },
+    IncludeThinking: {
+      Title: "Bao gồm quá trình suy nghĩ",
+      SubTitle:
+        "Bao gồm quá trình suy luận của mô hình trong phản hồi và truyền tới ứng dụng",
+    },
+    ThinkingBudget: {
+      Title: "Ngân sách suy nghĩ (thinking_budget)",
+      SubTitle:
+        "Số token tối đa được phân bổ cho suy luận (0 = mặc định/tự động)",
+    },
+    ThinkingLevel: {
+      Title: "Cường độ suy nghĩ (thinking_level)",
+      SubTitle: "Mức độ suy luận cho các mô hình hỗ trợ suy nghĩ",
+      Auto: "Mặc định / Tự động",
+      Minimal: "Tối thiểu",
+      Low: "Thấp",
+      Medium: "Trung bình",
+      High: "Cao",
+    },
 
     Usage: {
       Title: "Tra cứu số dư",

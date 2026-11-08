@@ -240,7 +240,24 @@ const tw = {
     },
     CompressThreshold: {
       Title: "歷史訊息長度壓縮閾值",
-      SubTitle: "當未壓縮的歷史訊息超過該值時，將進行壓縮",
+      SubTitle: "當未壓縮的歷史訊息超過該值时，將進行壓縮",
+    },
+    IncludeThinking: {
+      Title: "包含思考過程",
+      SubTitle: "在回應中包含模型的思考推理過程並回傳給用戶端",
+    },
+    ThinkingBudget: {
+      Title: "思考預算 (thinking_budget)",
+      SubTitle: "分配給推理的最大 Token 預算（0 為預設/自動）",
+    },
+    ThinkingLevel: {
+      Title: "思考強度 (thinking_level)",
+      SubTitle: "支援思考模型的推理強度等級",
+      Auto: "預設 / 自動",
+      Minimal: "極簡 (minimal)",
+      Low: "低 (low)",
+      Medium: "中等 (medium)",
+      High: "高 (high)",
     },
 
     Usage: {

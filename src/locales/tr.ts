@@ -238,6 +238,25 @@ const tr: PartialLocaleType = {
       SubTitle:
         "Sıkıştırılmamış geçmiş mesaj bu değeri aştığında sıkıştırma yapılır",
     },
+    IncludeThinking: {
+      Title: "Düşünme Sürecini Dahil Et",
+      SubTitle:
+        "Modelin akıl yürütme sürecini yanıta dahil edin ve istemciye aktarın",
+    },
+    ThinkingBudget: {
+      Title: "Düşünme Bütçesi (thinking_budget)",
+      SubTitle:
+        "Akıl yürütme için ayrılan maksimum belirteç bütçesi (0 = varsayılan/otomatik)",
+    },
+    ThinkingLevel: {
+      Title: "Düşünme Seviyesi (thinking_level)",
+      SubTitle: "Düşünme yeteneğine sahip modeller için akıl yürütme yoğunluğu",
+      Auto: "Varsayılan / Otomatik",
+      Minimal: "En Az",
+      Low: "Düşük",
+      Medium: "Orta",
+      High: "Yüksek",
+    },
 
     Usage: {
       Title: "Bakiye Sorgulama",

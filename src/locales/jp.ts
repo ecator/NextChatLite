@@ -235,6 +235,24 @@ const jp: PartialLocaleType = {
       Title: "履歴メッセージの圧縮閾値",
       SubTitle: "未圧縮の履歴メッセージがこの値を超えた場合、圧縮が行われます",
     },
+    IncludeThinking: {
+      Title: "思考プロセスを含める",
+      SubTitle:
+        "レスポンスにモデルの思考・推論プロセスを含めてクライアントに送信します",
+    },
+    ThinkingBudget: {
+      Title: "思考予算 (thinking_budget)",
+      SubTitle: "推論に割り当てられる最大トークン予算（0 = デフォルト/自動）",
+    },
+    ThinkingLevel: {
+      Title: "思考レベル (thinking_level)",
+      SubTitle: "思考対応モデルの推論強度レベル",
+      Auto: "デフォルト / 自動",
+      Minimal: "最小 (minimal)",
+      Low: "低 (low)",
+      Medium: "中 (medium)",
+      High: "高 (high)",
+    },
 
     Usage: {
       Title: "残高確認",

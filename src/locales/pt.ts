@@ -236,6 +236,25 @@ const pt: PartialLocaleType = {
       SubTitle:
         "Irá comprimir se o comprimento das mensagens não comprimidas exceder o valor",
     },
+    IncludeThinking: {
+      Title: "Incluir pensamento",
+      SubTitle:
+        "Incluir o processo de raciocínio do modelo na resposta e transmitir ao cliente",
+    },
+    ThinkingBudget: {
+      Title: "Orçamento de pensamento (thinking_budget)",
+      SubTitle:
+        "Orçamento máximo de tokens alocado para raciocínio (0 = padrão/auto)",
+    },
+    ThinkingLevel: {
+      Title: "Nível de pensamento (thinking_level)",
+      SubTitle: "Nível de intensidade de raciocínio para modelos compatíveis",
+      Auto: "Padrão / Auto",
+      Minimal: "Mínimo",
+      Low: "Baixo",
+      Medium: "Médio",
+      High: "Alto",
+    },
 
     Usage: {
       Title: "Saldo da Conta",

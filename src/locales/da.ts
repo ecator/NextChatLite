@@ -252,6 +252,24 @@ const da: PartialLocaleType = {
       SubTitle:
         "Hvis chatten bliver for lang, vil den komprimeres efter dette antal tegn",
     },
+    IncludeThinking: {
+      Title: "Inkluder tankeproces",
+      SubTitle:
+        "Inkluder modellens ræsonneringsproces i svaret og stream til klienten",
+    },
+    ThinkingBudget: {
+      Title: "Tænkebudget (thinking_budget)",
+      SubTitle: "Maksimalt tokenbudget tildelt ræsonnement (0 = standard/auto)",
+    },
+    ThinkingLevel: {
+      Title: "Tænkeniveau (thinking_level)",
+      SubTitle: "Ræsonnementsniveau for understøttede modeller",
+      Auto: "Standard / Auto",
+      Minimal: "Minimal",
+      Low: "Lav",
+      Medium: "Mellem",
+      High: "Høj",
+    },
     Usage: {
       Title: "Brug og saldo",
       SubTitle(used: any, total: any) {

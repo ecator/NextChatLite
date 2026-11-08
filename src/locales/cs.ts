@@ -237,6 +237,24 @@ const cs: PartialLocaleType = {
       SubTitle:
         "Když nekomprimované historické zprávy překročí tuto hodnotu, dojde ke kompresi",
     },
+    IncludeThinking: {
+      Title: "Zahrnout uvažování",
+      SubTitle:
+        "Zahrnout proces uvažování modelu do odpovědi a streamovat klientovi",
+    },
+    ThinkingBudget: {
+      Title: "Rozpočet přemýšlení (thinking_budget)",
+      SubTitle: "Maximální počet tokenů přidělený uvažování (0 = výchozí/auto)",
+    },
+    ThinkingLevel: {
+      Title: "Úroveň přemýšlení (thinking_level)",
+      SubTitle: "Úroveň intenzity uvažování pro podporované modely",
+      Auto: "Výchozí / Auto",
+      Minimal: "Minimální",
+      Low: "Nízká",
+      Medium: "Střední",
+      High: "Vysoká",
+    },
 
     Usage: {
       Title: "Kontrola zůstatku",

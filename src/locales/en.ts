@@ -256,6 +256,19 @@ const en: LocaleType = {
       SubTitle:
         "Include model reasoning process in response and stream to client",
     },
+    ThinkingBudget: {
+      Title: "Thinking Budget",
+      SubTitle: "Max token budget allocated for reasoning (0 = default/auto)",
+    },
+    ThinkingLevel: {
+      Title: "Thinking Level",
+      SubTitle: "Reasoning intensity level for thinking-capable models",
+      Auto: "Default / Auto",
+      Minimal: "Minimal",
+      Low: "Low",
+      Medium: "Medium",
+      High: "High",
+    },
     CompressThreshold: {
       Title: "History Compression Threshold",
       SubTitle:

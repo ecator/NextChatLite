@@ -236,6 +236,25 @@ const sk: PartialLocaleType = {
       SubTitle:
         "Bude komprimované, ak dĺžka nekomprimovaných správ presiahne túto hodnotu",
     },
+    IncludeThinking: {
+      Title: "Zahrnúť premýšľanie",
+      SubTitle:
+        "Zahrnúť proces uvažovania modelu do odpovede a streamovať klientovi",
+    },
+    ThinkingBudget: {
+      Title: "Rozpočet premýšľania (thinking_budget)",
+      SubTitle:
+        "Maximálny počet tokenov pridelených uvažovaniu (0 = predvolené/auto)",
+    },
+    ThinkingLevel: {
+      Title: "Úroveň premýšľania (thinking_level)",
+      SubTitle: "Úroveň intenzity uvažovania pre podporované modely",
+      Auto: "Predvolené / Auto",
+      Minimal: "Minimálna",
+      Low: "Nízka",
+      Medium: "Stredná",
+      High: "Vysoká",
+    },
 
     Usage: {
       Title: "Stav účtu",

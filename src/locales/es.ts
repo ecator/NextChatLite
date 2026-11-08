@@ -247,6 +247,25 @@ const es: PartialLocaleType = {
       SubTitle:
         "Cuando los mensajes históricos no comprimidos superan este valor, se realizará la compresión",
     },
+    IncludeThinking: {
+      Title: "Incluir pensamiento",
+      SubTitle:
+        "Incluir el proceso de razonamiento del modelo en la respuesta y transmitirlo al cliente",
+    },
+    ThinkingBudget: {
+      Title: "Presupuesto de pensamiento (thinking_budget)",
+      SubTitle:
+        "Presupuesto máximo de tokens asignado al razonamiento (0 = predeterminado/auto)",
+    },
+    ThinkingLevel: {
+      Title: "Nivel de pensamiento (thinking_level)",
+      SubTitle: "Nivel de intensidad de razonamiento para modelos compatibles",
+      Auto: "Predeterminado / Auto",
+      Minimal: "Mínimo",
+      Low: "Bajo",
+      Medium: "Medio",
+      High: "Alto",
+    },
 
     Usage: {
       Title: "Consulta de saldo",

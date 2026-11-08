@@ -246,6 +246,26 @@ const fr: PartialLocaleType = {
       SubTitle:
         "Compresser les messages historiques lorsque leur longueur dépasse cette valeur",
     },
+    IncludeThinking: {
+      Title: "Inclure le raisonnement",
+      SubTitle:
+        "Inclure le processus de raisonnement du modèle dans la réponse et le transmettre au client",
+    },
+    ThinkingBudget: {
+      Title: "Budget de réflexion (thinking_budget)",
+      SubTitle:
+        "Budget de jetons maximal alloué au raisonnement (0 = défaut/auto)",
+    },
+    ThinkingLevel: {
+      Title: "Niveau de réflexion (thinking_level)",
+      SubTitle:
+        "Niveau d'intensité du raisonnement pour les modèles compatibles",
+      Auto: "Par défaut / Auto",
+      Minimal: "Minimal",
+      Low: "Faible",
+      Medium: "Moyen",
+      High: "Élevé",
+    },
 
     Usage: {
       Title: "Vérification du solde",

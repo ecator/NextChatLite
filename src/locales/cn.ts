@@ -256,6 +256,19 @@ const cn = {
       Title: "包含思考过程",
       SubTitle: "在响应中包含模型的思考推理过程并回传给客户端",
     },
+    ThinkingBudget: {
+      Title: "思考预算 (thinking_budget)",
+      SubTitle: "分配给推理的最大 Token 预算（0 为默认/自动）",
+    },
+    ThinkingLevel: {
+      Title: "思考强度 (thinking_level)",
+      SubTitle: "支持思考模型的推理强度等级",
+      Auto: "默认 / 自动",
+      Minimal: "极简 (minimal)",
+      Low: "低 (low)",
+      Medium: "中等 (medium)",
+      High: "高 (high)",
+    },
 
     Usage: {
       Title: "余额查询",
