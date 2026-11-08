@@ -13,36 +13,8 @@ export const getBuildConfig = () => {
   const isApp = false;
   const version = "v" + (packageJson.version || "2.16.1");
 
-  const commitInfo = (() => {
-    try {
-      if (typeof window === "undefined") {
-        const childProcess = require("child_process");
-        const commitDate: string = childProcess
-          .execSync('git log -1 --format="%at000" --date=unix')
-          .toString()
-          .trim();
-        const commitHash: string = childProcess
-          .execSync('git log --pretty=format:"%H" -n 1')
-          .toString()
-          .trim();
-
-        return { commitDate, commitHash };
-      }
-      return {
-        commitDate: "unknown",
-        commitHash: "unknown",
-      };
-    } catch (e) {
-      return {
-        commitDate: "unknown",
-        commitHash: "unknown",
-      };
-    }
-  })();
-
   return {
     version,
-    ...commitInfo,
     buildMode,
     isApp,
     defaultModel: getDefaultModel(),

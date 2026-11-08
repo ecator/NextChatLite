@@ -72,6 +72,14 @@ describe("getServerSideConfig - NEXTCHATLITE_DEFAULT_MODEL & DEFAULT_MODEL", () 
     expect((config as any).customModels).toBeUndefined();
     expect((config as any).visionModels).toBeUndefined();
   });
+
+  test("contains active build configuration without legacy git commit fields", () => {
+    const buildConfig = getBuildConfig();
+    expect(buildConfig).toHaveProperty("version");
+    expect(buildConfig).toHaveProperty("buildMode");
+    expect((buildConfig as any).commitDate).toBeUndefined();
+    expect((buildConfig as any).commitHash).toBeUndefined();
+  });
 });
 
 describe("NEXTCHATLITE_TITLE and NEXTCHATLITE_SUBTITLE config", () => {
