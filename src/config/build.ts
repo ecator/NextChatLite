@@ -11,7 +11,7 @@ export const getBuildConfig = () => {
 
   const buildMode = process.env.BUILD_MODE ?? "standalone";
   const isApp = false;
-  const version = "v" + (packageJson.version || "2.16.1");
+  const version = "v" + (packageJson.version || "3.0.0");
 
   return {
     version,
