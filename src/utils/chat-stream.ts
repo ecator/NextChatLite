@@ -49,14 +49,13 @@ export async function processDataStream(
   }
 
   let stream: ReadableStream<Uint8Array | string>;
-  if (typeof Response !== "undefined" && rawStream instanceof Response) {
-    if (!rawStream.body) {
-      onFinishMessagePart?.();
-      return;
-    }
-    stream = rawStream.body as ReadableStream<Uint8Array>;
-  } else {
+  if (typeof (rawStream as any)?.getReader === "function") {
     stream = rawStream as ReadableStream<Uint8Array | string>;
+  } else if ((rawStream as any)?.body) {
+    stream = (rawStream as any).body;
+  } else {
+    onFinishMessagePart?.();
+    return;
   }
 
   const reader = stream.getReader();
@@ -90,15 +89,31 @@ export async function processDataStream(
 
         switch (type) {
           case "text-delta": {
+            const reasoningDelta =
+              json.reasoning_content ?? json.reasoning ?? json.thought;
+            if (
+              typeof reasoningDelta === "string" &&
+              reasoningDelta.length > 0
+            ) {
+              onReasoningPart?.(reasoningDelta);
+            }
             const delta = json.delta ?? json.textDelta ?? json.text;
             if (typeof delta === "string") {
               onTextPart?.(delta);
             }
             break;
           }
-          case "reasoning-delta": {
+          case "reasoning-delta":
+          case "reasoning":
+          case "thought":
+          case "reasoning_content": {
             const delta =
-              json.delta ?? json.textDelta ?? json.reasoning ?? json.text;
+              json.delta ??
+              json.textDelta ??
+              json.reasoning ??
+              json.reasoning_content ??
+              json.text ??
+              json.thought;
             if (typeof delta === "string") {
               onReasoningPart?.(delta);
             }

@@ -562,6 +562,7 @@ export const useChatStore = createPersistStore(
             reasoningConfig: {
               thinkingLevel: modelConfig.thinkingLevel,
               thinkingBudget: modelConfig.thinkingBudget,
+              includeThinking: modelConfig.includeThinking ?? true,
             },
           },
           pluginIds: session.mask.plugin,

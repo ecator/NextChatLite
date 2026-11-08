@@ -252,6 +252,10 @@ const cn = {
       Title: "历史消息长度压缩阈值",
       SubTitle: "当未压缩的历史消息超过该值时，将进行压缩",
     },
+    IncludeThinking: {
+      Title: "包含思考过程",
+      SubTitle: "在响应中包含模型的思考推理过程并回传给客户端",
+    },
 
     Usage: {
       Title: "余额查询",

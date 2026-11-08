@@ -251,6 +251,11 @@ const en: LocaleType = {
       Title: "Attached Messages Count",
       SubTitle: "Number of sent messages attached per request",
     },
+    IncludeThinking: {
+      Title: "Include Thinking",
+      SubTitle:
+        "Include model reasoning process in response and stream to client",
+    },
     CompressThreshold: {
       Title: "History Compression Threshold",
       SubTitle:

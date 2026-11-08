@@ -59,6 +59,7 @@ export const chatApiPayloadSchema = z.object({
             .enum(["minimal", "low", "medium", "high"])
             .optional(),
           thinkingBudget: z.number().positive().optional(),
+          includeThinking: z.boolean().optional(),
         })
         .optional(),
     })
@@ -220,34 +221,11 @@ export function createLanguageModel(payload: ChatApiPayload): LanguageModelV4 {
     const baseURL =
       normalizedUrl || "https://generativelanguage.googleapis.com/v1beta";
     const googleProvider = createGoogleGenerativeAI({ apiKey, baseURL });
-
-    const thinkingBudget = payload.modelConfig?.reasoningConfig?.thinkingBudget;
-    const thinkingConfig =
-      thinkingBudget !== undefined && thinkingBudget > 0
-        ? {
-            thinkingBudget,
-            includeThoughts: true,
-          }
-        : payload.modelConfig?.reasoningConfig
-          ? { includeThoughts: true }
-          : undefined;
-
-    model = (googleProvider as any)(payload.model, {
-      thinkingConfig,
-    }) as LanguageModelV4;
+    model = (googleProvider as any)(payload.model) as LanguageModelV4;
   } else if (npmPackage === "@ai-sdk/anthropic") {
     const baseURL = normalizedUrl || "https://api.anthropic.com/v1";
     const anthropicProvider = createAnthropic({ apiKey, baseURL });
-
-    const budget = payload.modelConfig?.reasoningConfig?.thinkingBudget;
-    const thinking =
-      budget !== undefined && budget > 0
-        ? { type: "enabled" as const, budgetTokens: budget }
-        : undefined;
-
-    model = (anthropicProvider as any)(payload.model, {
-      thinking,
-    }) as LanguageModelV4;
+    model = (anthropicProvider as any)(payload.model) as LanguageModelV4;
   } else if (npmPackage === "@ai-sdk/openai") {
     const baseURL = normalizedUrl || "https://api.openai.com/v1";
     const openaiProvider = createOpenAI({ apiKey, baseURL });
@@ -376,14 +354,29 @@ export function createLanguageModel(payload: ChatApiPayload): LanguageModelV4 {
   }
 
   const modelNameLower = payload.model.toLowerCase();
+  const includeThinking =
+    payload.modelConfig?.reasoningConfig?.includeThinking ?? true;
   if (
-    modelNameLower.includes("r1") ||
-    modelNameLower.includes("reasoner") ||
-    modelNameLower.includes("deepseek-r1")
+    includeThinking &&
+    (npmPackage === "@ai-sdk/openai-compatible" ||
+      modelNameLower.includes("r1") ||
+      modelNameLower.includes("reasoner") ||
+      modelNameLower.includes("deepseek-r1") ||
+      modelNameLower.includes("qwq") ||
+      modelNameLower.includes("qwen3") ||
+      modelNameLower.includes("gemma"))
   ) {
+    const middlewares = [extractReasoningMiddleware({ tagName: "think" })];
+    if (modelNameLower.includes("gemma")) {
+      middlewares.push(
+        extractReasoningMiddleware({
+          tagName: { opening: "<|channel>thought\n", closing: "<channel|>" },
+        }),
+      );
+    }
     model = wrapLanguageModel({
       model: model!,
-      middleware: extractReasoningMiddleware({ tagName: "think" }),
+      middleware: middlewares,
     });
   }
 
@@ -460,16 +453,109 @@ export async function POST(req: NextRequest) {
       };
     });
 
-    const thinkingLevel = payload.modelConfig?.reasoningConfig?.thinkingLevel;
-    let reasoningEffort: "low" | "medium" | "high" | undefined;
-    if (thinkingLevel === "low" || thinkingLevel === "minimal")
+    const reasoningConfig = payload.modelConfig?.reasoningConfig;
+    const thinkingLevel = reasoningConfig?.thinkingLevel;
+    const thinkingBudget = reasoningConfig?.thinkingBudget;
+    const includeThinking = reasoningConfig?.includeThinking ?? true;
+
+    const modelNameLower = payload.model.toLowerCase();
+    const isReasoningModel = Boolean(
+      payload.modelInfo?.reasoning ||
+      (Array.isArray(payload.modelInfo?.reasoning_options) &&
+        payload.modelInfo.reasoning_options.length > 0) ||
+      thinkingLevel !== undefined ||
+      (thinkingBudget !== undefined && thinkingBudget > 0) ||
+      modelNameLower.includes("r1") ||
+      modelNameLower.includes("reasoner") ||
+      modelNameLower.includes("qwq") ||
+      modelNameLower.includes("qwen3") ||
+      modelNameLower.includes("gemma4") ||
+      modelNameLower.includes("gemini-2.5") ||
+      modelNameLower.includes("gemini-3") ||
+      modelNameLower.includes("claude-3-7") ||
+      modelNameLower.includes("claude-4") ||
+      modelNameLower.includes("claude-sonnet-4") ||
+      modelNameLower.includes("claude-opus-4") ||
+      modelNameLower.includes("o1") ||
+      modelNameLower.includes("o3") ||
+      modelNameLower.includes("o4") ||
+      modelNameLower.includes("gpt-5"),
+    );
+
+    let reasoningEffort: "none" | "low" | "medium" | "high" | undefined;
+    if (!includeThinking) {
+      if (isReasoningModel) {
+        reasoningEffort = "none";
+      }
+    } else if (thinkingLevel === "low" || thinkingLevel === "minimal") {
       reasoningEffort = "low";
-    else if (thinkingLevel === "medium") reasoningEffort = "medium";
-    else if (thinkingLevel === "high") reasoningEffort = "high";
+    } else if (thinkingLevel === "medium") {
+      reasoningEffort = "medium";
+    } else if (thinkingLevel === "high") {
+      reasoningEffort = "high";
+    } else if (isReasoningModel) {
+      reasoningEffort = "medium";
+    }
+
+    const reasoningOption:
+      "none" | "minimal" | "low" | "medium" | "high" | undefined =
+      !includeThinking
+        ? isReasoningModel
+          ? "none"
+          : undefined
+        : thinkingLevel
+          ? thinkingLevel
+          : isReasoningModel
+            ? "medium"
+            : undefined;
+
+    const isGemini25 = modelNameLower.includes("gemini-2.5");
+    const isGemini3 = modelNameLower.includes("gemini-3");
+    const googleThinkingConfig = {
+      ...(thinkingLevel && !isGemini25 ? { thinkingLevel } : {}),
+      ...(thinkingBudget !== undefined &&
+      thinkingBudget > 0 &&
+      !(isGemini3 && thinkingLevel)
+        ? { thinkingBudget }
+        : {}),
+      ...(!includeThinking && isGemini25 ? { thinkingBudget: 0 } : {}),
+      includeThoughts: includeThinking,
+    };
 
     const providerOptions = {
       ...payload.providerOptions,
-      ...(reasoningEffort ? { openai: { reasoningEffort } } : {}),
+      openai: {
+        ...(reasoningEffort ? { reasoningEffort } : {}),
+        ...payload.providerOptions?.openai,
+      },
+      google: {
+        thinkingConfig: googleThinkingConfig,
+        ...payload.providerOptions?.google,
+      },
+      googleVertex: {
+        thinkingConfig: googleThinkingConfig,
+        ...payload.providerOptions?.googleVertex,
+      },
+      anthropic: {
+        sendReasoning: includeThinking,
+        ...(includeThinking
+          ? thinkingBudget !== undefined && thinkingBudget > 0
+            ? {
+                thinking: {
+                  type: "enabled" as const,
+                  budgetTokens: thinkingBudget,
+                },
+              }
+            : {}
+          : isReasoningModel
+            ? { thinking: { type: "disabled" as const } }
+            : {}),
+        ...payload.providerOptions?.anthropic,
+      },
+      openaiCompatible: {
+        ...(reasoningEffort ? { reasoningEffort } : {}),
+        ...payload.providerOptions?.openaiCompatible,
+      },
     };
 
     const result = streamText({
@@ -482,6 +568,7 @@ export async function POST(req: NextRequest) {
       temperature: payload.modelConfig?.temperature,
       topP: payload.modelConfig?.top_p,
       maxOutputTokens: payload.modelConfig?.max_tokens,
+      ...(reasoningOption ? { reasoning: reasoningOption } : {}),
       providerOptions,
       abortSignal: req.signal,
     });
@@ -490,7 +577,7 @@ export async function POST(req: NextRequest) {
     return createUIMessageStreamResponse({
       stream: toUIMessageStream({
         stream: result.stream,
-        sendReasoning: true,
+        sendReasoning: includeThinking,
         onError: (err) => formatErrorMessage(err, secretKey),
       }),
     });

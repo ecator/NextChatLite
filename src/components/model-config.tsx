@@ -168,51 +168,70 @@ export function ModelConfigList(props: {
         ></input>
       </ListItem>
 
-      {currentModelMeta?.hasReasoning &&
-        (currentModelMeta.reasoningType === "budget" ? (
+      {currentModelMeta?.hasReasoning && (
+        <>
           <ListItem
-            title="Thinking Budget"
-            subTitle="Max token budget allocated for reasoning (0 = default/auto)"
+            title={Locale.Settings.IncludeThinking.Title}
+            subTitle={Locale.Settings.IncludeThinking.SubTitle}
           >
             <input
-              aria-label="Thinking Budget"
-              type="number"
-              min={0}
-              max={65536}
-              value={props.modelConfig.thinkingBudget ?? 0}
-              onChange={(e) => {
-                const val = e.currentTarget.valueAsNumber;
-                props.updateConfig((config) => {
-                  config.thinkingBudget =
-                    isNaN(val) || val <= 0 ? undefined : Math.min(val, 65536);
-                });
-              }}
-            />
+              aria-label={Locale.Settings.IncludeThinking.Title}
+              type="checkbox"
+              checked={props.modelConfig.includeThinking ?? true}
+              onChange={(e) =>
+                props.updateConfig(
+                  (config) =>
+                    (config.includeThinking = e.currentTarget.checked),
+                )
+              }
+            ></input>
           </ListItem>
-        ) : (
-          <ListItem
-            title="Thinking Level"
-            subTitle="Reasoning intensity level for thinking-capable models"
-          >
-            <Select
-              aria-label="Thinking Level"
-              value={props.modelConfig.thinkingLevel ?? "default"}
-              onChange={(e) => {
-                const val = e.currentTarget.value;
-                props.updateConfig((config) => {
-                  config.thinkingLevel =
-                    val === "default" ? undefined : (val as any);
-                });
-              }}
+          {currentModelMeta.reasoningType === "budget" ? (
+            <ListItem
+              title="Thinking Budget"
+              subTitle="Max token budget allocated for reasoning (0 = default/auto)"
             >
-              <option value="default">Default / Auto</option>
-              <option value="minimal">Minimal</option>
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-            </Select>
-          </ListItem>
-        ))}
+              <input
+                aria-label="Thinking Budget"
+                type="number"
+                min={0}
+                max={65536}
+                value={props.modelConfig.thinkingBudget ?? 0}
+                onChange={(e) => {
+                  const val = e.currentTarget.valueAsNumber;
+                  props.updateConfig((config) => {
+                    config.thinkingBudget =
+                      isNaN(val) || val <= 0 ? undefined : Math.min(val, 65536);
+                  });
+                }}
+              />
+            </ListItem>
+          ) : (
+            <ListItem
+              title="Thinking Level"
+              subTitle="Reasoning intensity level for thinking-capable models"
+            >
+              <Select
+                aria-label="Thinking Level"
+                value={props.modelConfig.thinkingLevel ?? "default"}
+                onChange={(e) => {
+                  const val = e.currentTarget.value;
+                  props.updateConfig((config) => {
+                    config.thinkingLevel =
+                      val === "default" ? undefined : (val as any);
+                  });
+                }}
+              >
+                <option value="default">Default / Auto</option>
+                <option value="minimal">Minimal</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </Select>
+            </ListItem>
+          )}
+        </>
+      )}
 
       {props.modelConfig?.providerName == ServiceProvider.Google ? null : (
         <>

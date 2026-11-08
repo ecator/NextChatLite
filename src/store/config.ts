@@ -117,6 +117,7 @@ export const DEFAULT_CONFIG = {
     thinkingLevel: undefined as
       "minimal" | "low" | "medium" | "high" | undefined,
     thinkingBudget: undefined as number | undefined,
+    includeThinking: true,
   },
 };
 
@@ -192,7 +193,7 @@ export const useAppConfig = createPersistStore(
   }),
   {
     name: StoreKey.Config,
-    version: 4.3,
+    version: 4.4,
 
     merge(persistedState: any, currentState: any) {
       const state = persistedState as ChatConfig | undefined;
@@ -262,6 +263,12 @@ export const useAppConfig = createPersistStore(
 
       if (version < 4.3) {
         state.modelConfig.sendMemory = false;
+      }
+
+      if (version < 4.4) {
+        if (state.modelConfig.includeThinking === undefined) {
+          state.modelConfig.includeThinking = true;
+        }
       }
 
       if (!isModelInModelsJson(state.modelConfig?.model)) {

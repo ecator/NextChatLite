@@ -33,16 +33,25 @@ describe("Custom models.json Catalog and Backend Integration", () => {
     expect(geminiFlash.modalities?.input).toContain("image");
     expect(geminiFlash.modalities?.input).toContain("pdf");
 
-    // OpenAI Compatible Provider Models
+    // OpenAI Provider Models
     const gpt5Mini = catalog["openai/gpt-5-mini"] || catalog["gpt-5-mini"];
     expect(gpt5Mini).toBeDefined();
     expect(gpt5Mini.provider).toBe("openai");
-    expect(gpt5Mini.npm).toBe("@ai-sdk/openai-compatible");
-    expect(gpt5Mini.api).toBe("http://127.0.0.1:11434/v1");
+    expect(gpt5Mini.npm).toBe("@ai-sdk/openai");
     expect(gpt5Mini.env).toContain("OPENAI_API_KEY");
     expect(gpt5Mini.tool_call).toBe(true);
     expect(gpt5Mini.hasTools).toBe(true);
     expect(gpt5Mini.hasVision).toBe(true);
+
+    // Ollama OpenAI-Compatible Provider Models
+    const gemma4 = catalog["ollama/gemma4:12b"] || catalog["gemma4:12b"];
+    expect(gemma4).toBeDefined();
+    expect(gemma4.provider).toBe("ollama");
+    expect(gemma4.npm).toBe("@ai-sdk/openai-compatible");
+    expect(gemma4.api).toBe("http://127.0.0.1:11434/v1");
+    expect(gemma4.tool_call).toBe(true);
+    expect(gemma4.hasTools).toBe(true);
+    expect(gemma4.hasVision).toBe(true);
   });
 
   it("judges tool calling and attachment capabilities from tool_call and modalities", () => {

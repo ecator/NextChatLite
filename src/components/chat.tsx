@@ -663,7 +663,6 @@ export function ChatActions(props: {
               chatStore.updateTargetSession(session, (session) => {
                 session.mask.modelConfig.model = modelId as ModelType;
                 session.mask.modelConfig.providerName = targetProvider;
-                session.mask.syncGlobalConfig = false;
                 if (
                   modelMeta?.outputLimit &&
                   session.mask.modelConfig.max_tokens > modelMeta.outputLimit

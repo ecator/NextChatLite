@@ -81,8 +81,7 @@
   {
     "id": "openai",
     "env": ["OPENAI_API_KEY"],
-    "npm": "@ai-sdk/openai-compatible",
-    "api": "http://127.0.0.1:11434/v1",
+    "npm": "@ai-sdk/openai",
     "name": "OpenAI",
     "doc": "https://platform.openai.com/docs/models",
     "models": {
@@ -211,14 +210,30 @@
           "output": 10,
           "cache_read": 0.125
         }
-      },
+      }
+    }
+  },
+  {
+    "id": "ollama",
+    "env": [],
+    "npm": "@ai-sdk/openai-compatible",
+    "api": "http://127.0.0.1:11434/v1",
+    "name": "Ollama",
+    "doc": "https://docs.ollama.com/api",
+    "models": {
       "gemma4:12b": {
         "id": "gemma4:12b",
         "name": "Gemma 4 12B",
         "description": "Google Gemma open weight model for efficient chat and multimodal understanding",
         "family": "gemma",
         "attachment": true,
-        "reasoning": false,
+        "reasoning": true,
+        "reasoning_options": [
+          {
+            "type": "effort",
+            "values": ["none", "low", "medium", "high"]
+          }
+        ],
         "tool_call": true,
         "structured_output": true,
         "temperature": true,
