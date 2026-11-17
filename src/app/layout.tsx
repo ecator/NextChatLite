@@ -1,9 +1,16 @@
 import "@/styles/globals.scss";
 import "@/styles/markdown.scss";
 import "@/styles/highlight.scss";
+import { Noto_Sans } from "next/font/google";
 import { getClientConfig } from "@/config/client";
 import type { Metadata, Viewport } from "next";
 import { getServerSideConfig } from "@/config/server";
+
+const notoSans = Noto_Sans({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-noto-sans",
+});
 
 export const dynamic = "force-dynamic";
 
@@ -50,7 +57,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={notoSans.variable}>
       <head>
         <meta name="config" content={JSON.stringify(getClientConfig())} />
         <meta
