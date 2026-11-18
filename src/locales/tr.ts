@@ -90,7 +90,6 @@ const tr: PartialLocaleType = {
     Title: "Sohbet kayıtlarını paylaş",
     Copy: "Hepsini kopyala",
     Download: "Dosyayı indir",
-    Share: "ShareGPT'ye paylaş",
     MessageFromYou: "Kullanıcı",
     MessageFromChatGPT: "ChatGPT",
     Format: {

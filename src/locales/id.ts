@@ -90,7 +90,6 @@ const id: PartialLocaleType = {
     Title: "Bagikan Riwayat Obrolan",
     Copy: "Salin Semua",
     Download: "Unduh File",
-    Share: "Bagikan ke ShareGPT",
     MessageFromYou: "Pengguna",
     MessageFromChatGPT: "ChatGPT",
     Format: {
