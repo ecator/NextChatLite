@@ -1,9 +1,16 @@
 import "@testing-library/jest-dom";
 import React from "react";
-import { render, screen } from "@testing-library/react";
-import { PreviewActions } from "@/components/exporter";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  canCopyImageToClipboard,
+  ImagePreviewer,
+  PreviewActions,
+} from "@/components/exporter";
 import { ClientApi } from "@/client/api";
 import Locale from "@/locales";
+import { toBlob } from "html-to-image";
+
+const mockShowToast = jest.fn();
 
 jest.mock("next/dynamic", () => () => {
   const MockDynamic = () => <div />;
@@ -41,6 +48,35 @@ jest.mock("../../src/icons/three-dots.svg", () => {
   return LoadingIcon;
 });
 
+jest.mock("html-to-image", () => ({
+  toBlob: jest.fn(),
+  toPng: jest.fn(),
+}));
+
+jest.mock("../../src/components/ui-lib", () => {
+  const actual = jest.requireActual("../../src/components/ui-lib");
+  return {
+    ...actual,
+    showToast: (...args: unknown[]) => mockShowToast(...args),
+  };
+});
+
+jest.mock("../../src/components/emoji", () => ({
+  Avatar: () => <span data-testid="avatar" />,
+}));
+
+jest.mock("../../src/components/mask", () => ({
+  MaskAvatar: () => <span data-testid="mask-avatar" />,
+}));
+
+jest.mock("../../src/utils", () => {
+  const actual = jest.requireActual("../../src/utils");
+  return {
+    ...actual,
+    useMobileScreen: () => false,
+  };
+});
+
 describe("Exporter PreviewActions", () => {
   test("renders copy and download buttons without ShareGPT share button when showCopy is true", () => {
     render(
@@ -67,5 +103,123 @@ describe("Exporter PreviewActions", () => {
   test("ClientApi does not expose share method", () => {
     const api = new ClientApi();
     expect("share" in api).toBe(false);
+  });
+});
+
+describe("ImagePreviewer clipboard availability", () => {
+  const originalClipboard = navigator.clipboard;
+  const originalClipboardItem = (globalThis as { ClipboardItem?: unknown })
+    .ClipboardItem;
+
+  beforeEach(() => {
+    mockShowToast.mockClear();
+    (toBlob as jest.Mock).mockReset();
+  });
+
+  afterEach(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      value: originalClipboard,
+      configurable: true,
+    });
+    Object.defineProperty(globalThis, "ClipboardItem", {
+      value: originalClipboardItem,
+      configurable: true,
+      writable: true,
+    });
+  });
+
+  test("hides Copy All button when navigator.clipboard is undefined", () => {
+    Object.defineProperty(navigator, "clipboard", {
+      value: undefined,
+      configurable: true,
+    });
+
+    expect(canCopyImageToClipboard()).toBe(false);
+
+    render(<ImagePreviewer messages={[]} topic="Test Topic" />);
+
+    expect(screen.queryByText(Locale.Export.Copy)).toBeNull();
+    expect(screen.getByText(Locale.Export.Download)).toBeInTheDocument();
+  });
+
+  test("hides Copy All button when ClipboardItem is unavailable", () => {
+    Object.defineProperty(navigator, "clipboard", {
+      value: { write: jest.fn() },
+      configurable: true,
+    });
+    Object.defineProperty(globalThis, "ClipboardItem", {
+      value: undefined,
+      configurable: true,
+      writable: true,
+    });
+
+    expect(canCopyImageToClipboard()).toBe(false);
+
+    render(<ImagePreviewer messages={[]} topic="Test Topic" />);
+
+    expect(screen.queryByText(Locale.Export.Copy)).toBeNull();
+    expect(screen.getByText(Locale.Export.Download)).toBeInTheDocument();
+  });
+
+  test("shows Copy All button and copies PNG blob when navigator.clipboard.write is available", async () => {
+    const mockWrite = jest.fn().mockResolvedValue(undefined);
+    const mockBlob = new Blob(["png"], { type: "image/png" });
+    (toBlob as jest.Mock).mockResolvedValue(mockBlob);
+
+    Object.defineProperty(navigator, "clipboard", {
+      value: { write: mockWrite },
+      configurable: true,
+    });
+    Object.defineProperty(globalThis, "ClipboardItem", {
+      value: jest.fn((items) => items),
+      configurable: true,
+      writable: true,
+    });
+
+    expect(canCopyImageToClipboard()).toBe(true);
+
+    render(<ImagePreviewer messages={[]} topic="Test Topic" />);
+
+    const copyButton = screen.getByText(Locale.Export.Copy);
+    expect(copyButton).toBeInTheDocument();
+    expect(screen.getByText(Locale.Export.Download)).toBeInTheDocument();
+
+    fireEvent.click(copyButton);
+
+    await waitFor(() => {
+      expect(mockWrite).toHaveBeenCalledTimes(1);
+    });
+    expect(mockShowToast).toHaveBeenCalledWith(Locale.Copy.Success);
+  });
+
+  test("shows failed toast when navigator.clipboard.write rejects", async () => {
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    const mockWrite = jest
+      .fn()
+      .mockRejectedValue(new Error("Clipboard permission denied"));
+    const mockBlob = new Blob(["png"], { type: "image/png" });
+    (toBlob as jest.Mock).mockResolvedValue(mockBlob);
+
+    Object.defineProperty(navigator, "clipboard", {
+      value: { write: mockWrite },
+      configurable: true,
+    });
+    Object.defineProperty(globalThis, "ClipboardItem", {
+      value: jest.fn((items) => items),
+      configurable: true,
+      writable: true,
+    });
+
+    render(<ImagePreviewer messages={[]} topic="Test Topic" />);
+
+    fireEvent.click(screen.getByText(Locale.Export.Copy));
+
+    await waitFor(() => {
+      expect(mockShowToast).toHaveBeenCalledWith(Locale.Copy.Failed);
+    });
+
+    consoleErrorSpy.mockRestore();
   });
 });

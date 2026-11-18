@@ -23,7 +23,7 @@ import LoadingIcon from "../icons/three-dots.svg";
 import ChatGptIcon from "../icons/chatgpt.png";
 
 import DownloadIcon from "../icons/download.svg";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { MessageSelector, useMessageSelector } from "./message-selector";
 import { Avatar } from "./emoji";
 import dynamic from "next/dynamic";
@@ -38,6 +38,16 @@ import clsx from "clsx";
 const Markdown = dynamic(async () => (await import("./markdown")).Markdown, {
   loading: () => <LoadingIcon />,
 });
+
+const emptySubscribe = () => () => {};
+
+export function canCopyImageToClipboard(): boolean {
+  return (
+    typeof navigator !== "undefined" &&
+    typeof navigator.clipboard?.write === "function" &&
+    typeof ClipboardItem !== "undefined"
+  );
+}
 
 export function ExportMessageModal(props: { onClose: () => void }) {
   return (
@@ -287,31 +297,39 @@ export function ImagePreviewer(props: {
 
   const previewRef = useRef<HTMLDivElement>(null);
 
-  const copy = () => {
+  const copy = async () => {
+    if (!canCopyImageToClipboard()) {
+      showToast(Locale.Copy.Failed);
+      return;
+    }
     showToast(Locale.Export.Image.Toast);
     const dom = previewRef.current;
     if (!dom) return;
-    toBlob(dom).then((blob) => {
-      if (!blob) return;
-      try {
-        navigator.clipboard
-          .write([
-            new ClipboardItem({
-              "image/png": blob,
-            }),
-          ])
-          .then(() => {
-            showToast(Locale.Copy.Success);
-            refreshPreview();
-          });
-      } catch (e) {
-        console.error("[Copy Image] ", e);
+    try {
+      const blob = await toBlob(dom);
+      if (!blob) {
         showToast(Locale.Copy.Failed);
+        return;
       }
-    });
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          "image/png": blob,
+        }),
+      ]);
+      showToast(Locale.Copy.Success);
+      refreshPreview();
+    } catch (e) {
+      console.error("[Copy Image] ", e);
+      showToast(Locale.Copy.Failed);
+    }
   };
 
   const isMobile = useMobileScreen();
+  const canCopyImage = useSyncExternalStore(
+    emptySubscribe,
+    canCopyImageToClipboard,
+    () => false,
+  );
 
   const download = async () => {
     showToast(Locale.Export.Image.Toast);
@@ -345,7 +363,11 @@ export function ImagePreviewer(props: {
 
   return (
     <div className={styles["image-previewer"]}>
-      <PreviewActions copy={copy} download={download} showCopy={!isMobile} />
+      <PreviewActions
+        copy={copy}
+        download={download}
+        showCopy={!isMobile && canCopyImage}
+      />
       <div
         className={clsx(styles["preview-body"], styles["default-theme"])}
         ref={previewRef}
